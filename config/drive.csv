@@ -1,0 +1,6 @@
+ID,Poll Character,Enabled,Y-Axis Error,X-Axis Error,Rotation Error,Y-Axis Bias,X-Axis Bias,Rotation Bias
+up,w1,1,0.05,0.02,0.02,0,0,0
+down,s1,1,0.05,0.02,0.02,0,0,0
+left,a1,1,0.02,0.05,0.02,0,0,0
+right,d1,1,0.02,0.05,0.02,0,0,0
+rot,r1,1,0.003,0.003,0.02,0,0,0

@@ -18,8 +18,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 # Imports
+import time
+import pygame
 from maze import Maze
 from config import Config
+import control
 
 ### Initialization
 print('SimMeR Loading...')
@@ -128,10 +131,47 @@ CONFIG = Config()
 # Load maze walls and floor pattern
 MAZE = Maze()
 MAZE.import_walls(CONFIG.foldername + '/' + CONFIG.maze_filename)
+SCREEN_WIDTH = MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels
+SCREEN_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels
 # maze_dim = [min(maze(:,1)), max(maze(:,1)), min(maze(:,2)), max(maze(:,2))];
 # checker = import_checker;
 
+# Initialize graphics
+pygame.init()
+screen = pygame.display.set_mode([
+    MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels,
+    MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels
+    ])
+
+RUNNING = True
+while RUNNING:
+
+    game_events = pygame.event.get()
+    RUNNING = control.check_input(game_events)
+    KEYPRESS = control.input_circle(game_events)
+
+    # Fill the background with white
+    screen.fill((255, 255, 255))
+
+    # Draw a solid blue circle in the center
+    if KEYPRESS:
+        surf = pygame.Surface((3 * CONFIG.ppi, 3 * CONFIG.ppi))
+        surf.fill((0,0,0))
+        rect = surf.get_rect()
+
+        pygame.draw.circle(screen, (0, 0, 255),
+            (SCREEN_WIDTH/2, SCREEN_HEIGHT/2), 75)
+
+        screen.blit(surf, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+
+    # Flip the display (update the screen)
+    pygame.display.flip()
+    time.sleep(0.25)
+
+# Done! Time to quit.
+pygame.quit()
+
 ## Main Loop
-while 1:
-    print(MAZE.wall_squares)
-    break
+# while 1:
+#     print(MAZE.wall_squares)
+#     break

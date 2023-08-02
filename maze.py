@@ -24,6 +24,10 @@ class Maze:
     def __init__(self):
         self.walls = np.empty((1, 1))
         self.floor = np.array((1, 1))
+
+        self.size_y = 0
+        self.size_x = 0
+
         self.wall_squares = []
         self.floor_squares = []
 
@@ -33,6 +37,9 @@ class Maze:
         wall_map = np.loadtxt(maze_filename, delimiter=',', dtype=int)
         dim_y = np.size(wall_map, 0)
         dim_x = np.size(wall_map, 1)
+
+        self.size_y = dim_y * 12
+        self.size_x = dim_x * 12
 
         # Outer maze dimensions
         self.wall_squares.append(np.array([[0, 0], [dim_x, 0], [dim_x, dim_y], [0, dim_y], [0, 0]]))

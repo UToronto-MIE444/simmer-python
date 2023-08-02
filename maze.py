@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import numpy as np
+import pygame
 
 class Maze:
     '''This class represents the maze/environment'''
@@ -42,17 +43,33 @@ class Maze:
         self.size_x = dim_x * 12
 
         # Outer maze dimensions
-        self.wall_squares.append(np.array([[0, 0], [dim_x, 0], [dim_x, dim_y], [0, dim_y], [0, 0]]))
+        self.wall_squares.append([
+            [[0, 0], [dim_x, 0]],
+            [[dim_x, 0], [dim_x, dim_y]],
+            [[dim_x, dim_y], [0, dim_y]],
+            [[0, dim_y], [0, 0]]
+            ])
 
         for ct_x in range(0, dim_x):
             for ct_y in range(0, dim_y):
                 if wall_map[ct_y, ct_x] != 0:
-                    self.wall_squares.append(np.array([
-                        [ct_x, ct_y],
-                        [ct_x+1, ct_y],
-                        [ct_x+1, ct_y+1],
-                        [ct_x, ct_y+1],
-                        [ct_x, ct_y]
-                        ]) * 12)    # convert from feet to inches
+                    self.wall_squares.append([
+                        [[ct_x, ct_y], [ct_x+1, ct_y]],
+                        [[ct_x+1, ct_y], [ct_x+1, ct_y+1]],
+                        [[ct_x+1, ct_y+1], [ct_x, ct_y+1]],
+                        [[ct_x, ct_y+1], [ct_x, ct_y]]
+                        ])
 
-        # Generate a plot of the maze walls if specified in the config
+        # Convert to inches
+        self.wall_squares = [[[[scalar * 12 for scalar in point] for point in line] for line in square] for square in self.wall_squares]
+
+        # Generate a plot of the maze walls if specified in the config (not yet implemented)
+
+    def draw_walls(self, config, canvas):
+        '''Draws the maze walls onto the screen'''
+
+        for wall in self.wall_squares:
+            for line in wall:
+                start = [scalar * config.ppi + config.border_pixels for scalar in line[0]]
+                end = [scalar * config.ppi + config.border_pixels for scalar in line[1]]
+                pygame.draw.line(canvas, (0,0,0), start, end)

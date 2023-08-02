@@ -131,17 +131,14 @@ CONFIG = Config()
 # Load maze walls and floor pattern
 MAZE = Maze()
 MAZE.import_walls(CONFIG.foldername + '/' + CONFIG.maze_filename)
-SCREEN_WIDTH = MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels
-SCREEN_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels
+CANVAS_WIDTH = MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels * 2
+CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
 # maze_dim = [min(maze(:,1)), max(maze(:,1)), min(maze(:,2)), max(maze(:,2))];
 # checker = import_checker;
 
 # Initialize graphics
 pygame.init()
-screen = pygame.display.set_mode([
-    MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels,
-    MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels
-    ])
+canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
 
 RUNNING = True
 while RUNNING:
@@ -151,20 +148,28 @@ while RUNNING:
     KEYPRESS = control.input_circle(game_events)
 
     # Fill the background with white
-    screen.fill((255, 255, 255))
+    canvas.fill((255, 255, 255))
+
+    # Draw the maze walls
+    MAZE.draw_walls(CONFIG, canvas)
+
+    # Draw the maze checkerboard pattern
+    pass
 
     # Draw a solid blue circle in the center
+    '''
     if KEYPRESS:
         surf = pygame.Surface((3 * CONFIG.ppi, 3 * CONFIG.ppi))
         surf.fill((0,0,0))
         rect = surf.get_rect()
 
-        pygame.draw.circle(screen, (0, 0, 255),
-            (SCREEN_WIDTH/2, SCREEN_HEIGHT/2), 75)
+        pygame.draw.circle(canvas, (0, 0, 255),
+            (CANVAS_WIDTH/2, CANVAS_HEIGHT/2), 75)
 
-        screen.blit(surf, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+        canvas.blit(surf, (CANVAS_WIDTH/2, CANVAS_HEIGHT/2))
+    '''
 
-    # Flip the display (update the screen)
+    # Flip the display (update the canvas)
     pygame.display.flip()
     time.sleep(0.25)
 

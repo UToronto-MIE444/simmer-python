@@ -1,4 +1,4 @@
-''' 
+'''
 This file is part of SimMeR, an educational mechatronics robotics simulator.
 Initial development funded by the University of Toronto MIE Department.
 Copyright (C) 2023  Ian G. Bennett
@@ -24,8 +24,7 @@ from config import Config
 ### Initialization
 print('SimMeR Loading...')
 
-'''
-Everything from here on needs work
+# Everything from here on needs work
 # Global Plotting Variables
 global ray_plot
 global rayend_plot
@@ -33,33 +32,11 @@ global ir_pts
 global ir_pts_in
 global ir_circle
 
+'''
 ## User-editable variables and flags
-# Constants
-bot_center = [9.5,42];  # Robot starting location
-bot_rot = 0;            # Robot starting rotation
-block_center = [25,41]; # Block starting location
-blocksize = 3;          # Block side length in inches
-num_segments = 10;      # Number of movement segments
-strength = [0.05, 1];	# How intense the random drive bias is, if enabled
-step_time = 0;          # Pause time between the algorithm executing commands
-
-# Control Flags and Setup
-randerror = 1;          # Use either a random error generator (1) or consistent error generation (0)
-randbias = 1;           # Use a randomized, normally distributed set of drive biases
-sim = 1;                # Use the simulator (1) or connect to robot via blueteooth (0)
-plot_robot = 1;         # Plot the robot as it works its way through the maze
-plot_sense = 1;         # Plot sensor interactions with maze, if relevant
-
-# Bluetooth Serial Connection Constants
-comport_num = 6;        # Bluetooth serial comport number to connect to 
-comport_baud = 9600;    # Bluetooth serial baudrate
 
 ## Data Import
 # Data Import
-
-maze = import_maze()
-maze_dim = [min(maze(:,1)), max(maze(:,1)), min(maze(:,2)), max(maze(:,2))];
-checker = import_checker;
 
 # Build Block
 block = build_block(blocksize, block_center);
@@ -119,11 +96,11 @@ if plot_robot
     plot(maze(:,1),maze(:,2), 'k', 'LineWidth', 2)
     xticks(0:12:96)
     yticks(0:12:48)
-    
+
     # Block
     block_plot = patch(block(:,1),block(:,2), 'y');
     set(block_plot,'facealpha',.5)
-    
+
 end
 
 ## Initialize tcp server to read and respond to algorithm commands
@@ -139,15 +116,22 @@ disp('Client connected!')
 
 ### Simulator Main Loop
 # Loop Variable Initialization
-collision = 0
-bot_trail = []
+collision = 0   # move this to robot class
+bot_trail = []  # move this to the robot class
 firstrun = 1       # Flag indicating if this is the first time through the loop
 firstULTRA = 1     # Flag indicating if an ultrasonic sensor has been used yet
 firstIR = 1        # Flag indicating if an IR sensor has been used yet
 
+# Load configuration from file
 CONFIG = Config()
+
+# Load maze walls and floor pattern
+MAZE = Maze()
+MAZE.import_walls(CONFIG.foldername + '/' + CONFIG.maze_filename)
+# maze_dim = [min(maze(:,1)), max(maze(:,1)), min(maze(:,2)), max(maze(:,2))];
+# checker = import_checker;
 
 ## Main Loop
 while 1:
-    print(CONFIG.foldername + '/' + CONFIG.drive_filename)
+    print(MAZE.wall_squares)
     break

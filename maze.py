@@ -1,4 +1,4 @@
-''' 
+'''
 This file is part of SimMeR, an educational mechatronics robotics simulator.
 Initial development funded by the University of Toronto MIE Department.
 Copyright (C) 2023  Ian G. Bennett
@@ -22,9 +22,30 @@ import numpy as np
 class Maze:
     '''This class represents the maze/environment'''
     def __init__(self):
-        self.walls = 0
-        self.floor = 0
+        self.walls = np.empty((1, 1))
+        self.floor = np.array((1, 1))
+        self.wall_squares = []
+        self.floor_squares = []
 
     def import_walls(self, maze_filename):
         '''Imports the walls from a csv file and sets up lines representing them'''
-        self.walls = np.loadtext(maze_filename, delimiter=',', dtype=str)
+
+        wall_map = np.loadtxt(maze_filename, delimiter=',', dtype=int)
+        dim_y = np.size(wall_map, 0)
+        dim_x = np.size(wall_map, 1)
+
+        # Outer maze dimensions
+        self.wall_squares.append(np.array([[0, 0], [dim_x, 0], [dim_x, dim_y], [0, dim_y], [0, 0]]))
+
+        for ct_x in range(0, dim_x):
+            for ct_y in range(0, dim_y):
+                if wall_map[ct_y, ct_x] != 0:
+                    self.wall_squares.append(np.array([
+                        [ct_x, ct_y],
+                        [ct_x+1, ct_y],
+                        [ct_x+1, ct_y+1],
+                        [ct_x, ct_y+1],
+                        [ct_x, ct_y]
+                        ]) * 12)    # convert from feet to inches
+
+        # Generate a plot of the maze walls if specified in the config

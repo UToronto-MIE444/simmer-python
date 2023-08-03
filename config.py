@@ -60,6 +60,8 @@ class Config:
         # Graphics information
         self.ppi = 12                   # Number of on-screen pixels per inch on display
         self.border_pixels = self.floor_segment_length * self.ppi   # Size of the border surrounding the maze area
+        self.wall_thickness = 0.25      # Thickness to draw wall segments, in inches
+        self.wall_color = (255, 0, 0)   # Tuple with wall color in (R,G,B) format
 
     def set_border(self, pixels):
         '''Sets the display border around the maze'''

@@ -56,7 +56,7 @@ class Maze:
 
         for ct_x in range(0, dim_x):
             for ct_y in range(0, dim_y):
-                if wall_map[ct_y, ct_x] != 0:
+                if wall_map[ct_y, ct_x] == 0:
                     self.wall_squares.append([
                         [[ct_x, ct_y], [ct_x+1, ct_y]],
                         [[ct_x+1, ct_y], [ct_x+1, ct_y+1]],
@@ -70,11 +70,15 @@ class Maze:
     def draw_walls(self, config, canvas):
         '''Draws the maze walls onto the screen'''
 
+        # Graphics
+        THICKNESS = int(config.wall_thickness * config.ppi)
+        COLOR = config.wall_color
+
         for wall in self.wall_squares:
             for line in wall:
                 start = [scalar * config.ppi + config.border_pixels for scalar in line[0]]
                 end = [scalar * config.ppi + config.border_pixels for scalar in line[1]]
-                pygame.draw.line(canvas, (255,0,0), start, end)
+                pygame.draw.line(canvas, COLOR, start, end, THICKNESS)
 
     def generate_floor(self, config):
         '''Generates the floor of the maze'''

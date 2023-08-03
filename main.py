@@ -174,12 +174,14 @@ while RUNNING:
         canvas.blit(surf, (CANVAS_WIDTH/2, CANVAS_HEIGHT/2))
     '''
 
-    # Flip the display (update the canvas)
+    # Update the indicator that shows that the loop is advancing
     indicator = pygame.Rect(CONFIG.border_pixels/4, CONFIG.border_pixels/4, CONFIG.border_pixels/2, CONFIG.border_pixels/2)
     indicator_color -= 1
     if indicator_color == -1:
         indicator_color = 255
     pygame.draw.rect(canvas, (indicator_color, indicator_color, indicator_color), indicator)
+
+    # Flip the display (update the canvas)
     pygame.display.flip()
 
 # Done! Time to quit.

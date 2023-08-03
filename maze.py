@@ -17,6 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import random
+import sys
 import numpy as np
 import pygame
 
@@ -30,17 +32,19 @@ class Maze:
         self.size_x = 0
 
         self.wall_squares = []
-        self.floor_squares = []
+        self.floor_tiles = []
+        self.floor_tile_colors = []
 
-    def import_walls(self, maze_filename):
+    def import_walls(self, config):
         '''Imports the walls from a csv file and sets up lines representing them'''
 
+        maze_filename = config.foldername + '/' + config.maze_filename
         wall_map = np.loadtxt(maze_filename, delimiter=',', dtype=int)
         dim_y = np.size(wall_map, 0)
         dim_x = np.size(wall_map, 1)
 
-        self.size_y = dim_y * 12
-        self.size_x = dim_x * 12
+        self.size_y = dim_y * config.wall_segment_length
+        self.size_x = dim_x * config.wall_segment_length
 
         # Outer maze dimensions
         self.wall_squares.append([
@@ -60,10 +64,8 @@ class Maze:
                         [[ct_x, ct_y+1], [ct_x, ct_y]]
                         ])
 
-        # Convert to inches
-        self.wall_squares = [[[[scalar * 12 for scalar in point] for point in line] for line in square] for square in self.wall_squares]
-
-        # Generate a plot of the maze walls if specified in the config (not yet implemented)
+        # Convert to length
+        self.wall_squares = [[[[scalar * config.wall_segment_length for scalar in point] for point in line] for line in square] for square in self.wall_squares]
 
     def draw_walls(self, config, canvas):
         '''Draws the maze walls onto the screen'''
@@ -72,4 +74,35 @@ class Maze:
             for line in wall:
                 start = [scalar * config.ppi + config.border_pixels for scalar in line[0]]
                 end = [scalar * config.ppi + config.border_pixels for scalar in line[1]]
-                pygame.draw.line(canvas, (0,0,0), start, end)
+                pygame.draw.line(canvas, (255,0,0), start, end)
+
+    def generate_floor(self, config):
+        '''Generates the floor of the maze'''
+
+        if not self.wall_squares:
+            sys.exit("Walls must be imported before a floor pattern is generated.")
+
+        # Get the number of floor checker points
+        dim_x = int(self.size_x / config.floor_segment_length)
+        dim_y = int(self.size_y / config.floor_segment_length)
+
+        # Create the floor tiles
+        for ct_x in range(0, dim_x):
+            for ct_y in range(0, dim_y):
+                self.floor_tiles.append([
+                    [ct_x, ct_y], [ct_x+1, ct_y], [ct_x+1, ct_y+1], [ct_x, ct_y+1]
+                    ])
+                self.floor_tile_colors.append(random.randint(0,1)*255)
+
+        # Convert to length
+        self.floor_tiles = [[[scalar * config.floor_segment_length for scalar in point] for point in tile] for tile in self.floor_tiles]
+
+    def draw_floor(self, config, canvas):
+        '''Draws the maze floor'''
+        width = config.floor_segment_length * config.ppi
+
+        for (tile, color) in zip(self.floor_tiles, self.floor_tile_colors):
+            left = tile[0][0] * config.ppi + config.border_pixels
+            top = tile[0][1] * config.ppi + config.border_pixels
+            tile_rect = pygame.Rect(left, top, width, width)
+            pygame.draw.rect(canvas, (color, color, color), tile_rect)

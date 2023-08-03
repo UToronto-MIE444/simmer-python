@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Imports
 import time
+import random
 import pygame
 from maze import Maze
 from config import Config
@@ -28,6 +29,7 @@ import control
 print('SimMeR Loading...')
 
 # Everything from here on needs work
+'''
 # Global Plotting Variables
 global ray_plot
 global rayend_plot
@@ -35,7 +37,6 @@ global ir_pts
 global ir_pts_in
 global ir_circle
 
-'''
 ## User-editable variables and flags
 
 ## Data Import
@@ -121,24 +122,28 @@ disp('Client connected!')
 # Loop Variable Initialization
 collision = 0   # move this to robot class
 bot_trail = []  # move this to the robot class
-firstrun = 1       # Flag indicating if this is the first time through the loop
-firstULTRA = 1     # Flag indicating if an ultrasonic sensor has been used yet
-firstIR = 1        # Flag indicating if an IR sensor has been used yet
+firstrun = 1    # Flag indicating if this is the first time through the loop
+firstULTRA = 1  # Flag indicating if an ultrasonic sensor has been used yet
+firstIR = 1     # Flag indicating if an IR sensor has been used yet
 
 # Load configuration from file
 CONFIG = Config()
 
+# Set random error seed
+if ~CONFIG.rand_error:
+    random.seed(CONFIG.error_seed)
+
 # Load maze walls and floor pattern
 MAZE = Maze()
-MAZE.import_walls(CONFIG.foldername + '/' + CONFIG.maze_filename)
+MAZE.import_walls(CONFIG)
+MAZE.generate_floor(CONFIG)
 CANVAS_WIDTH = MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels * 2
 CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
-# maze_dim = [min(maze(:,1)), max(maze(:,1)), min(maze(:,2)), max(maze(:,2))];
-# checker = import_checker;
 
 # Initialize graphics
 pygame.init()
 canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
+indicator_color = 255
 
 RUNNING = True
 while RUNNING:
@@ -150,11 +155,11 @@ while RUNNING:
     # Fill the background with white
     canvas.fill((255, 255, 255))
 
+    # Draw the maze checkerboard pattern
+    MAZE.draw_floor(CONFIG, canvas)
+
     # Draw the maze walls
     MAZE.draw_walls(CONFIG, canvas)
-
-    # Draw the maze checkerboard pattern
-    pass
 
     # Draw a solid blue circle in the center
     '''
@@ -170,8 +175,12 @@ while RUNNING:
     '''
 
     # Flip the display (update the canvas)
+    indicator = pygame.Rect(CONFIG.border_pixels/4, CONFIG.border_pixels/4, CONFIG.border_pixels/2, CONFIG.border_pixels/2)
+    indicator_color -= 1
+    if indicator_color == -1:
+        indicator_color = 255
+    pygame.draw.rect(canvas, (indicator_color, indicator_color, indicator_color), indicator)
     pygame.display.flip()
-    time.sleep(0.25)
 
 # Done! Time to quit.
 pygame.quit()

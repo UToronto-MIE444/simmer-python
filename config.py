@@ -19,6 +19,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import numpy as np
+
 foldername = 'config'
 drive_filename = 'drive.csv'
 maze_filename = 'maze.csv'
@@ -26,38 +28,44 @@ robot_filename = 'robot.csv'
 sensors_filename = 'sensors.csv'
 
 # Simulation control information
-sim = True                 # Use the simulator (True) or connect to robot via blueteooth (False)
-step_time = 0              # Pause time between the algorithm executing commands
+sim = True                  # Use the simulator (True) or connect to robot via blueteooth (False)
+step_time = 0               # Pause time between the algorithm executing commands
 
 # Bluetooth Serial Connection Constants
-comport_num = 6            # Bluetooth serial comport number to connect to
-comport_baud = 9600        # Bluetooth serial baudrate
+comport_num = 6             # Bluetooth serial comport number to connect to
+comport_baud = 9600         # Bluetooth serial baudrate
 
 # Robot and block information
-start_position = [9.5, 42] # Robot starting location
-start_rotation = 0         # Robot starting rotation
-block_position = [25, 41]  # Block starting location
-block_size = 3             # Block side length in inches
+start_position = [8, 40]    # Robot starting location
+start_rotation = np.pi / 6  # Robot starting rotation
+robot_width = 6             # Robot width in inches
+robot_height = 6            # Robot height in inches
+block_position = [25, 41]   # Block starting location
+block_size = 3              # Block side length in inches
 
 # Drive information
-num_segments = 10          # Number of movement segments
+num_segments = 10           # Number of movement segments
 strength = [0.05, 1]	    # How intense the random drive bias is, if enabled
 
 # Control Flags and Setup
-rand_error = True          # Use either true random error generator (True) or repeatable error generation (False)
-error_seed = 5489          # Seed for random error (used if rand_error is False)
-rand_bias = True           # Use a randomized, normally distributed set of drive biases
+rand_error = True           # Use either true random error generator (True) or repeatable error generation (False)
+error_seed = 5489           # Seed for random error (used if rand_error is False)
+rand_bias = True            # Use a randomized, normally distributed set of drive biases
 
 # Plotting Flags
-plot_robot = True          # Plot the robot as it works its way through the maze
-plot_sense = True          # Plot sensor interactions with maze, if relevant
+plot_robot = True           # Plot the robot as it works its way through the maze
+plot_sense = True           # Plot sensor interactions with maze, if relevant
 
 # Maze size information
-wall_segment_length = 12   # Length of maze wall segments (inches)
-floor_segment_length = 3   # Size of floor pattern squares (inches)
+wall_segment_length = 12    # Length of maze wall segments (inches)
+floor_segment_length = 3    # Size of floor pattern squares (inches)
 
 # Graphics information
-ppi = 12                   # Number of on-screen pixels per inch on display
-border_pixels = floor_segment_length * ppi   # Size of the border surrounding the maze area
-wall_thickness = 0.25      # Thickness to draw wall segments, in inches
-wall_color = (255, 0, 0)   # Tuple with wall color in (R,G,B) format
+ppi = 12                    # Number of on-screen pixels per inch on display
+border_pixels = floor_segment_length * ppi  # Size of the border surrounding the maze area
+
+wall_thickness = 0.25       # Thickness to draw wall segments, in inches
+wall_color = (255, 0, 0)    # Tuple with wall color in (R,G,B) format
+
+robot_thickness = 0.25      # Thickness to draw robot perimeter, in inches
+robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format

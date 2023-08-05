@@ -22,6 +22,7 @@ import time
 import random
 import pygame
 from maze import Maze
+from robot import Robot
 import config as CONFIG
 import control
 
@@ -137,6 +138,9 @@ MAZE.generate_floor()
 CANVAS_WIDTH = MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels * 2
 CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
 
+# Load robot
+ROBOT = Robot()
+
 # Initialize graphics
 pygame.init()
 canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
@@ -149,6 +153,9 @@ while RUNNING:
     RUNNING = control.check_input(game_events)
     KEYPRESS = control.input_circle(game_events)
 
+    # Recalculate the robot position
+    ROBOT.define_perimeter()
+
     # Fill the background with white
     canvas.fill((255, 255, 255))
 
@@ -157,6 +164,9 @@ while RUNNING:
 
     # Draw the maze walls
     MAZE.draw_walls(canvas)
+
+    # Draw the robot onto the maze
+    ROBOT.draw(canvas)
 
     # Draw a solid blue circle in the center
     '''

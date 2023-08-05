@@ -22,7 +22,7 @@ import time
 import random
 import pygame
 from maze import Maze
-from config import Config
+import config as CONFIG
 import control
 
 ### Initialization
@@ -126,17 +126,14 @@ firstrun = 1    # Flag indicating if this is the first time through the loop
 firstULTRA = 1  # Flag indicating if an ultrasonic sensor has been used yet
 firstIR = 1     # Flag indicating if an IR sensor has been used yet
 
-# Load configuration from file
-CONFIG = Config()
-
 # Set random error seed
 if ~CONFIG.rand_error:
     random.seed(CONFIG.error_seed)
 
 # Load maze walls and floor pattern
 MAZE = Maze()
-MAZE.import_walls(CONFIG)
-MAZE.generate_floor(CONFIG)
+MAZE.import_walls()
+MAZE.generate_floor()
 CANVAS_WIDTH = MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels * 2
 CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
 
@@ -156,10 +153,10 @@ while RUNNING:
     canvas.fill((255, 255, 255))
 
     # Draw the maze checkerboard pattern
-    MAZE.draw_floor(CONFIG, canvas)
+    MAZE.draw_floor(canvas)
 
     # Draw the maze walls
-    MAZE.draw_walls(CONFIG, canvas)
+    MAZE.draw_walls(canvas)
 
     # Draw a solid blue circle in the center
     '''

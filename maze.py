@@ -21,6 +21,7 @@ import random
 import sys
 import numpy as np
 import pygame
+import config as CONFIG
 
 class Maze:
     '''This class represents the maze/environment'''
@@ -35,16 +36,16 @@ class Maze:
         self.floor_tiles = []
         self.floor_tile_colors = []
 
-    def import_walls(self, config):
+    def import_walls(self):
         '''Imports the walls from a csv file and sets up lines representing them'''
 
-        maze_filename = config.foldername + '/' + config.maze_filename
+        maze_filename = CONFIG.foldername + '/' + CONFIG.maze_filename
         wall_map = np.loadtxt(maze_filename, delimiter=',', dtype=int)
         dim_y = np.size(wall_map, 0)
         dim_x = np.size(wall_map, 1)
 
-        self.size_y = dim_y * config.wall_segment_length
-        self.size_x = dim_x * config.wall_segment_length
+        self.size_y = dim_y * CONFIG.wall_segment_length
+        self.size_x = dim_x * CONFIG.wall_segment_length
 
         # Outer maze dimensions
         self.wall_squares.append([
@@ -65,30 +66,33 @@ class Maze:
                         ])
 
         # Convert to length
-        self.wall_squares = [[[[scalar * config.wall_segment_length for scalar in point] for point in line] for line in square] for square in self.wall_squares]
+        self.wall_squares = [[[[scalar * CONFIG.wall_segment_length for scalar in point]
+                               for point in line]
+                              for line in square]
+                             for square in self.wall_squares]
 
-    def draw_walls(self, config, canvas):
+    def draw_walls(self, canvas):
         '''Draws the maze walls onto the screen'''
 
         # Graphics
-        THICKNESS = int(config.wall_thickness * config.ppi)
-        COLOR = config.wall_color
+        THICKNESS = int(CONFIG.wall_thickness * CONFIG.ppi)
+        COLOR = CONFIG.wall_color
 
         for wall in self.wall_squares:
             for line in wall:
-                start = [scalar * config.ppi + config.border_pixels for scalar in line[0]]
-                end = [scalar * config.ppi + config.border_pixels for scalar in line[1]]
+                start = [scalar * CONFIG.ppi + CONFIG.border_pixels for scalar in line[0]]
+                end = [scalar * CONFIG.ppi + CONFIG.border_pixels for scalar in line[1]]
                 pygame.draw.line(canvas, COLOR, start, end, THICKNESS)
 
-    def generate_floor(self, config):
+    def generate_floor(self):
         '''Generates the floor of the maze'''
 
         if not self.wall_squares:
             sys.exit("Walls must be imported before a floor pattern is generated.")
 
         # Get the number of floor checker points
-        dim_x = int(self.size_x / config.floor_segment_length)
-        dim_y = int(self.size_y / config.floor_segment_length)
+        dim_x = int(self.size_x / CONFIG.floor_segment_length)
+        dim_y = int(self.size_y / CONFIG.floor_segment_length)
 
         # Create the floor tiles
         for ct_x in range(0, dim_x):
@@ -99,14 +103,16 @@ class Maze:
                 self.floor_tile_colors.append(random.randint(0,1)*255)
 
         # Convert to length
-        self.floor_tiles = [[[scalar * config.floor_segment_length for scalar in point] for point in tile] for tile in self.floor_tiles]
+        self.floor_tiles = [[[scalar * CONFIG.floor_segment_length for scalar in point]
+                             for point in tile]
+                            for tile in self.floor_tiles]
 
-    def draw_floor(self, config, canvas):
+    def draw_floor(self, canvas):
         '''Draws the maze floor'''
-        width = config.floor_segment_length * config.ppi
+        width = CONFIG.floor_segment_length * CONFIG.ppi
 
         for (tile, color) in zip(self.floor_tiles, self.floor_tile_colors):
-            left = tile[0][0] * config.ppi + config.border_pixels
-            top = tile[0][1] * config.ppi + config.border_pixels
+            left = tile[0][0] * CONFIG.ppi + CONFIG.border_pixels
+            top = tile[0][1] * CONFIG.ppi + CONFIG.border_pixels
             tile_rect = pygame.Rect(left, top, width, width)
             pygame.draw.rect(canvas, (color, color, color), tile_rect)

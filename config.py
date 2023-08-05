@@ -1,4 +1,6 @@
 '''
+This class stores the configuration information for the simulator.
+
 This file is part of SimMeR, an educational mechatronics robotics simulator.
 Initial development funded by the University of Toronto MIE Department.
 Copyright (C) 2023  Ian G. Bennett
@@ -17,52 +19,45 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-class Config:
-    '''This class stores the configuration information for the simulator'''
-    def __init__(self):
-        self.foldername = 'config'
-        self.drive_filename = 'drive.csv'
-        self.maze_filename = 'maze.csv'
-        self.robot_filename = 'robot.csv'
-        self.sensors_filename = 'sensors.csv'
+foldername = 'config'
+drive_filename = 'drive.csv'
+maze_filename = 'maze.csv'
+robot_filename = 'robot.csv'
+sensors_filename = 'sensors.csv'
 
-        # Simulation control information
-        self.sim = True                 # Use the simulator (True) or connect to robot via blueteooth (False)
-        self.step_time = 0              # Pause time between the algorithm executing commands
+# Simulation control information
+sim = True                 # Use the simulator (True) or connect to robot via blueteooth (False)
+step_time = 0              # Pause time between the algorithm executing commands
 
-        # Bluetooth Serial Connection Constants
-        self.comport_num = 6            # Bluetooth serial comport number to connect to
-        self.comport_baud = 9600        # Bluetooth serial baudrate
+# Bluetooth Serial Connection Constants
+comport_num = 6            # Bluetooth serial comport number to connect to
+comport_baud = 9600        # Bluetooth serial baudrate
 
-        # Robot and block information
-        self.start_position = [9.5, 42] # Robot starting location
-        self.start_rotation = 0         # Robot starting rotation
-        self.block_position = [25, 41]  # Block starting location
-        self.block_size = 3             # Block side length in inches
+# Robot and block information
+start_position = [9.5, 42] # Robot starting location
+start_rotation = 0         # Robot starting rotation
+block_position = [25, 41]  # Block starting location
+block_size = 3             # Block side length in inches
 
-        # Drive information
-        self.num_segments = 10          # Number of movement segments
-        self.strength = [0.05, 1]	    # How intense the random drive bias is, if enabled
+# Drive information
+num_segments = 10          # Number of movement segments
+strength = [0.05, 1]	    # How intense the random drive bias is, if enabled
 
-        # Control Flags and Setup
-        self.rand_error = True          # Use either true random error generator (True) or repeatable error generation (False)
-        self.error_seed = 5489          # Seed for random error (used if rand_error is False)
-        self.rand_bias = True           # Use a randomized, normally distributed set of drive biases
+# Control Flags and Setup
+rand_error = True          # Use either true random error generator (True) or repeatable error generation (False)
+error_seed = 5489          # Seed for random error (used if rand_error is False)
+rand_bias = True           # Use a randomized, normally distributed set of drive biases
 
-        # Plotting Flags
-        self.plot_robot = True          # Plot the robot as it works its way through the maze
-        self.plot_sense = True          # Plot sensor interactions with maze, if relevant
+# Plotting Flags
+plot_robot = True          # Plot the robot as it works its way through the maze
+plot_sense = True          # Plot sensor interactions with maze, if relevant
 
-        # Maze size information
-        self.wall_segment_length = 12   # Length of maze wall segments (inches)
-        self.floor_segment_length = 3   # Size of floor pattern squares (inches)
+# Maze size information
+wall_segment_length = 12   # Length of maze wall segments (inches)
+floor_segment_length = 3   # Size of floor pattern squares (inches)
 
-        # Graphics information
-        self.ppi = 12                   # Number of on-screen pixels per inch on display
-        self.border_pixels = self.floor_segment_length * self.ppi   # Size of the border surrounding the maze area
-        self.wall_thickness = 0.25      # Thickness to draw wall segments, in inches
-        self.wall_color = (255, 0, 0)   # Tuple with wall color in (R,G,B) format
-
-    def set_border(self, pixels):
-        '''Sets the display border around the maze'''
-        self.border_pixels = pixels
+# Graphics information
+ppi = 12                   # Number of on-screen pixels per inch on display
+border_pixels = floor_segment_length * ppi   # Size of the border surrounding the maze area
+wall_thickness = 0.25      # Thickness to draw wall segments, in inches
+wall_color = (255, 0, 0)   # Tuple with wall color in (R,G,B) format

@@ -18,16 +18,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import numpy as np
+import config as CONFIG
 
 class Robot:
     '''This class represents the robot'''
 
-    def __init__(self, config):
+    def __init__(self):
         '''Initialize the robot class'''
 
         # position information
-        self.position = config.start_position * config.ppi + config.border_pixels
-        self.rotation = config.start_rotation
+        self.position = CONFIG.start_position * CONFIG.ppi + CONFIG.border_pixels
+        self.rotation = CONFIG.start_rotation
 
     def define_perimeter(self):
         '''Define the perimeter points of the robot'''

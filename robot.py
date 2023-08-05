@@ -17,7 +17,25 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import numpy as np
+
 class Robot:
     '''This class represents the robot'''
-    def __init__(self):
-        pass
+
+    def __init__(self, config):
+        '''Initialize the robot class'''
+
+        # position information
+        self.position = config.start_position * config.ppi + config.border_pixels
+        self.rotation = config.start_rotation
+
+    def define_perimeter(self):
+        '''Define the perimeter points of the robot'''
+
+
+
+    def check_collision(self):
+        '''Check whether there is a collision between the robot and a wall'''
+
+    def parse_commands(self):
+        '''Parse text string of commands and act on them'''

@@ -23,6 +23,7 @@ import random
 import pygame
 from maze import Maze
 from robot import Robot
+from hud import Hud
 import config as CONFIG
 import control
 
@@ -141,6 +142,9 @@ CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
 # Load robot
 ROBOT = Robot()
 
+# Load the Heads Up Display
+HUD = Hud()
+
 # Initialize graphics
 pygame.init()
 canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
@@ -168,25 +172,8 @@ while RUNNING:
     # Draw the robot onto the maze
     ROBOT.draw(canvas)
 
-    # Draw a solid blue circle in the center
-    '''
-    if KEYPRESS:
-        surf = pygame.Surface((3 * CONFIG.ppi, 3 * CONFIG.ppi))
-        surf.fill((0,0,0))
-        rect = surf.get_rect()
-
-        pygame.draw.circle(canvas, (0, 0, 255),
-            (CANVAS_WIDTH/2, CANVAS_HEIGHT/2), 75)
-
-        canvas.blit(surf, (CANVAS_WIDTH/2, CANVAS_HEIGHT/2))
-    '''
-
     # Update the indicator that shows that the loop is advancing
-    indicator = pygame.Rect(CONFIG.border_pixels/4, CONFIG.border_pixels/4, CONFIG.border_pixels/2, CONFIG.border_pixels/2)
-    indicator_color -= 1
-    if indicator_color == -1:
-        indicator_color = 255
-    pygame.draw.rect(canvas, (indicator_color, indicator_color, indicator_color), indicator)
+    HUD.draw_frame_indicator(canvas)
 
     # Flip the display (update the canvas)
     pygame.display.flip()

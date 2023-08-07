@@ -18,10 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 from pygame.locals import (
-    K_UP,
-    K_DOWN,
-    K_LEFT,
-    K_RIGHT,
     K_ESCAPE,
     KEYDOWN,
     QUIT,
@@ -42,15 +38,3 @@ def check_input(events):
             return False
 
     return True
-
-def input_circle(events):
-    '''Check for keyboard inputs'''
-    # Look at every event in the queue
-    for event in events:
-        # Did the user hit a key?
-        if event.type == KEYDOWN:
-            # Was it an arrow key? If so, return true.
-            if event.key == K_UP or K_DOWN or K_LEFT or K_RIGHT:
-                return True
-
-    return False

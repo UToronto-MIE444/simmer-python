@@ -148,14 +148,14 @@ HUD = Hud()
 # Initialize graphics
 pygame.init()
 canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
-indicator_color = 255
 
 RUNNING = True
 while RUNNING:
 
+    # Check for and act on keyboard input
     game_events = pygame.event.get()
     RUNNING = control.check_input(game_events)
-    KEYPRESS = control.input_circle(game_events)
+    keypress = pygame.key.get_pressed()
 
     # Recalculate the robot position
     ROBOT.define_perimeter()
@@ -172,16 +172,12 @@ while RUNNING:
     # Draw the robot onto the maze
     ROBOT.draw(canvas)
 
-    # Update the indicator that shows that the loop is advancing
+    # Update the various HUD elements
     HUD.draw_frame_indicator(canvas)
+    HUD.draw_keys(canvas, keypress)
 
     # Flip the display (update the canvas)
     pygame.display.flip()
 
 # Done! Time to quit.
 pygame.quit()
-
-## Main Loop
-# while 1:
-#     print(MAZE.wall_squares)
-#     break

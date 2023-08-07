@@ -42,7 +42,8 @@ class Robot:
             pygame.math.Vector2(-self.width/2, -self.height/2),
             pygame.math.Vector2(-self.width/2,  self.height/2),
             pygame.math.Vector2( self.width/2,  self.height/2),
-            pygame.math.Vector2( self.width/2, -self.height/2)]
+            pygame.math.Vector2( self.width/2, -self.height/2)
+            ]
 
         # Rotate the outline
         outline = [point.rotate_rad(self.rotation) for point in outline]

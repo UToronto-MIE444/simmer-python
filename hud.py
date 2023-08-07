@@ -17,6 +17,14 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 import pygame
+from pygame.locals import (
+    K_w,
+    K_a,
+    K_s,
+    K_d,
+    K_q,
+    K_e
+)
 import config as CONFIG
 
 class Hud:
@@ -24,13 +32,48 @@ class Hud:
 
     def __init__(self):
         '''Initialize the robot class'''
+
+        # Indicator color (initial shade of gray)
         self.indicator_color = 255
+
+        # Create the indicator rectangle
+        self.ind_pos = CONFIG.border_pixels/4
+        self.ind_size = CONFIG.border_pixels/2
+        self.indicator = pygame.Rect(self.ind_pos, self.ind_pos, self.ind_size, self.ind_size)
+
+        # Position of pressed key indicators
+        self.key_ind_pos = {
+            K_w: 1 * (self.ind_size + 2 * self.ind_pos) + self.ind_pos,
+            K_a: 2 * (self.ind_size + 2 * self.ind_pos) + self.ind_pos,
+            K_s: 3 * (self.ind_size + 2 * self.ind_pos) + self.ind_pos,
+            K_d: 4 * (self.ind_size + 2 * self.ind_pos) + self.ind_pos,
+            K_q: 5 * (self.ind_size + 2 * self.ind_pos) + self.ind_pos,
+            K_e: 6 * (self.ind_size + 2 * self.ind_pos) + self.ind_pos,
+        }
+
+        # Color of pressed key indicators
+        self.key_ind_colors = {
+            K_w: (255, 0, 0),
+            K_a: (0, 255, 0),
+            K_s: (0, 0, 255),
+            K_d: (255, 255, 0),
+            K_q: (0, 255, 255),
+            K_e: (255, 0, 255),
+            "none": (0, 0, 0,)
+        }
+
+        # Define pressed key indicator rectangles
+        self.key_ind = {
+            K_w: pygame.Rect(self.ind_pos, self.key_ind_pos[K_w], self.ind_size, self.ind_size),
+            K_a: pygame.Rect(self.ind_pos, self.key_ind_pos[K_a], self.ind_size, self.ind_size),
+            K_s: pygame.Rect(self.ind_pos, self.key_ind_pos[K_s], self.ind_size, self.ind_size),
+            K_d: pygame.Rect(self.ind_pos, self.key_ind_pos[K_d], self.ind_size, self.ind_size),
+            K_q: pygame.Rect(self.ind_pos, self.key_ind_pos[K_q], self.ind_size, self.ind_size),
+            K_e: pygame.Rect(self.ind_pos, self.key_ind_pos[K_e], self.ind_size, self.ind_size)
+        }
 
     def draw_frame_indicator(self, canvas):
         '''Draws the HUD frame indicator.'''
-
-        # Create the indicator rectangle
-        indicator = pygame.Rect(CONFIG.border_pixels/4, CONFIG.border_pixels/4, CONFIG.border_pixels/2, CONFIG.border_pixels/2)
 
         # Update the color value
         self.indicator_color -= 1
@@ -41,4 +84,13 @@ class Hud:
         color_tuple = (self.indicator_color, self.indicator_color, self.indicator_color)
 
         # Draw the indicator on the canvas
-        pygame.draw.rect(canvas, color_tuple, indicator)
+        pygame.draw.rect(canvas, color_tuple, self.indicator)
+
+    def draw_keys(self, canvas, keypress):
+        '''Draws indicators showing the currently pressed wasd-qe keys'''
+
+        for [key, value] in self.key_ind.items():
+            if keypress[key]:
+                pygame.draw.rect(canvas, self.key_ind_colors[key], self.key_ind[key])
+            else:
+                pygame.draw.rect(canvas, self.key_ind_colors['none'], self.key_ind[key])

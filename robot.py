@@ -34,6 +34,25 @@ class Robot:
         self.height = float(CONFIG.robot_height)
         self.outline = self.define_perimeter()
 
+        # Is the robot currently colliding with a maze wall?
+        self.collision = False
+
+        # A trail of points where the robot has moved
+        self.trail = [{
+            "position": self.position,
+            "rotation": self.rotation,
+            "collision": self.collision
+        }]
+
+    def append_trail(self):
+        '''Appends current position information to the robot's trail'''
+
+        self.trail.append({
+            "position": self.position,
+            "rotation": self.rotation,
+            "collision": self.collision
+        })
+
     def define_perimeter(self):
         '''Define the perimeter points of the robot'''
 

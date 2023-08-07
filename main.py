@@ -120,14 +120,6 @@ clc
 disp('Client connected!')
 '''
 
-### Simulator Main Loop
-# Loop Variable Initialization
-collision = 0   # move this to robot class
-bot_trail = []  # move this to the robot class
-firstrun = 1    # Flag indicating if this is the first time through the loop
-firstULTRA = 1  # Flag indicating if an ultrasonic sensor has been used yet
-firstIR = 1     # Flag indicating if an IR sensor has been used yet
-
 # Set random error seed
 if ~CONFIG.rand_error:
     random.seed(CONFIG.error_seed)

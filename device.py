@@ -41,8 +41,6 @@ class Device():
         self.position_a = [0, 0]
         self.rotation_a = 0
         self.pos_update(CONFIG.start_position, CONFIG.start_rotation)
-        print(self.position_a)
-        print(self.rotation_a)
 
         ### temp, to be moved into specific device subclass ###
         # Device type (i.e. "motor" or "sensor")

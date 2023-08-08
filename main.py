@@ -22,7 +22,9 @@ import time
 import random
 import pygame
 from maze import Maze
-from config import Config
+from robot import Robot
+from hud import Hud
+import config as CONFIG
 import control
 
 ### Initialization
@@ -118,76 +120,56 @@ clc
 disp('Client connected!')
 '''
 
-### Simulator Main Loop
-# Loop Variable Initialization
-collision = 0   # move this to robot class
-bot_trail = []  # move this to the robot class
-firstrun = 1    # Flag indicating if this is the first time through the loop
-firstULTRA = 1  # Flag indicating if an ultrasonic sensor has been used yet
-firstIR = 1     # Flag indicating if an IR sensor has been used yet
-
-# Load configuration from file
-CONFIG = Config()
-
 # Set random error seed
 if ~CONFIG.rand_error:
     random.seed(CONFIG.error_seed)
 
 # Load maze walls and floor pattern
 MAZE = Maze()
-MAZE.import_walls(CONFIG)
-MAZE.generate_floor(CONFIG)
+MAZE.import_walls()
+MAZE.generate_floor()
 CANVAS_WIDTH = MAZE.size_x * CONFIG.ppi + CONFIG.border_pixels * 2
 CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
+
+# Load robot
+ROBOT = Robot()
+
+# Load the Heads Up Display
+HUD = Hud()
 
 # Initialize graphics
 pygame.init()
 canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
-indicator_color = 255
 
 RUNNING = True
 while RUNNING:
 
+    # Check for and act on keyboard input
     game_events = pygame.event.get()
     RUNNING = control.check_input(game_events)
-    KEYPRESS = control.input_circle(game_events)
+    keypress = pygame.key.get_pressed()
+
+    # Recalculate the robot position
+    ROBOT.define_perimeter()
 
     # Fill the background with white
     canvas.fill((255, 255, 255))
 
     # Draw the maze checkerboard pattern
-    MAZE.draw_floor(CONFIG, canvas)
+    MAZE.draw_floor(canvas)
 
     # Draw the maze walls
-    MAZE.draw_walls(CONFIG, canvas)
+    MAZE.draw_walls(canvas)
 
-    # Draw a solid blue circle in the center
-    '''
-    if KEYPRESS:
-        surf = pygame.Surface((3 * CONFIG.ppi, 3 * CONFIG.ppi))
-        surf.fill((0,0,0))
-        rect = surf.get_rect()
+    # Draw the robot onto the maze
+    ROBOT.draw(canvas)
 
-        pygame.draw.circle(canvas, (0, 0, 255),
-            (CANVAS_WIDTH/2, CANVAS_HEIGHT/2), 75)
-
-        canvas.blit(surf, (CANVAS_WIDTH/2, CANVAS_HEIGHT/2))
-    '''
-
-    # Update the indicator that shows that the loop is advancing
-    indicator = pygame.Rect(CONFIG.border_pixels/4, CONFIG.border_pixels/4, CONFIG.border_pixels/2, CONFIG.border_pixels/2)
-    indicator_color -= 1
-    if indicator_color == -1:
-        indicator_color = 255
-    pygame.draw.rect(canvas, (indicator_color, indicator_color, indicator_color), indicator)
+    # Update the various HUD elements
+    HUD.draw_frame_indicator(canvas)
+    HUD.draw_keys(canvas, keypress)
 
     # Flip the display (update the canvas)
     pygame.display.flip()
 
 # Done! Time to quit.
 pygame.quit()
-
-## Main Loop
-# while 1:
-#     print(MAZE.wall_squares)
-#     break

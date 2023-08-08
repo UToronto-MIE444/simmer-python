@@ -1,4 +1,6 @@
 '''
+Defines the SimMeR Robot class.
+
 This file is part of SimMeR, an educational mechatronics robotics simulator.
 Initial development funded by the University of Toronto MIE Department.
 Copyright (C) 2023  Ian G. Bennett
@@ -17,7 +19,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-import numpy as np
 import pygame
 import config as CONFIG
 
@@ -32,7 +33,17 @@ class Robot:
         self.rotation = CONFIG.start_rotation
         self.width = float(CONFIG.robot_width)
         self.height = float(CONFIG.robot_height)
-        self.outline = self.define_perimeter()
+
+        # Define the outline of the robot as a polygon
+        self.outline = [
+            pygame.math.Vector2(-self.width/2, -self.height/2),
+            pygame.math.Vector2(-self.width/2,  self.height/2),
+            pygame.math.Vector2( self.width/2,  self.height/2),
+            pygame.math.Vector2( self.width/2, -self.height/2)
+            ]
+
+        self.outline_a = []
+        self.define_perimeter()
 
         # Is the robot currently colliding with a maze wall?
         self.collision = False
@@ -44,6 +55,9 @@ class Robot:
             "collision": self.collision
         }]
 
+        # Import the list of devices from the config file
+        self.devices = CONFIG.devices
+
     def append_trail(self):
         '''Appends current position information to the robot's trail'''
 
@@ -54,23 +68,14 @@ class Robot:
         })
 
     def define_perimeter(self):
-        '''Define the perimeter points of the robot'''
-
-        # Define the outline of the robot as a polygon
-        outline = [
-            pygame.math.Vector2(-self.width/2, -self.height/2),
-            pygame.math.Vector2(-self.width/2,  self.height/2),
-            pygame.math.Vector2( self.width/2,  self.height/2),
-            pygame.math.Vector2( self.width/2, -self.height/2)
-            ]
+        '''Define the perimeter points of the robot, in inches, relative
+        to the center point of the robot.'''
 
         # Rotate the outline
-        outline = [point.rotate_rad(self.rotation) for point in outline]
+        outline_a = [point.rotate_rad(self.rotation) for point in self.outline]
 
         # Place the outline in the right location
-        outline = [point + self.position for point in outline]
-
-        return outline
+        self.outline_a = [point + self.position for point in outline_a]
 
     def draw(self, canvas):
         '''Draws the robot outline on the canvas'''
@@ -80,7 +85,7 @@ class Robot:
         COLOR = CONFIG.robot_color
 
         outline = [point * CONFIG.ppi + [CONFIG.border_pixels, CONFIG.border_pixels]
-                   for point in self.outline]
+                   for point in self.outline_a]
 
         # Draw the polygon
         pygame.draw.polygon(canvas, COLOR, outline, THICKNESS)
@@ -91,3 +96,15 @@ class Robot:
 
     def parse_commands(self):
         '''Parse text string of commands and act on them'''
+
+    def device_positions(self):
+        '''Updates all the absolute positions of all the devices'''
+
+        for device in self.devices.values():
+            device.pos_update(self.position, self.rotation)
+
+    def draw_devices(self, canvas):
+        '''Draws all devices on the robot onto the canvas'''
+
+        for device in self.devices.values():
+            device.draw_device(canvas)

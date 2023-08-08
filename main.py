@@ -151,6 +151,7 @@ while RUNNING:
 
     # Recalculate the robot position
     ROBOT.define_perimeter()
+    ROBOT.device_positions()
 
     # Fill the background with white
     canvas.fill((255, 255, 255))
@@ -163,6 +164,7 @@ while RUNNING:
 
     # Draw the robot onto the maze
     ROBOT.draw(canvas)
+    ROBOT.draw_devices(canvas)
 
     # Update the various HUD elements
     HUD.draw_frame_indicator(canvas)
@@ -170,6 +172,9 @@ while RUNNING:
 
     # Flip the display (update the canvas)
     pygame.display.flip()
+
+    # Slow framerate down for debug
+    time.sleep(0.25)
 
 # Done! Time to quit.
 pygame.quit()

@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import numpy as np
+from device import Device
 
 foldername = 'config'
 drive_filename = 'drive.csv'
@@ -69,3 +70,7 @@ wall_color = (255, 0, 0)    # Tuple with wall color in (R,G,B) format
 
 robot_thickness = 0.25      # Thickness to draw robot perimeter, in inches
 robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
+
+devices = {
+    "m0": Device("m0", "motor", [0, 2], np.pi/6)
+}

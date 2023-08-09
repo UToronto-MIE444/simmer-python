@@ -38,20 +38,16 @@ class Device():
             self.height = position[2]
         self.rotation = rotation
 
+        # Absolute position, rotation, and outline points
         self.position_a = [0, 0]
         self.rotation_a = 0
         self.pos_update(CONFIG.start_position, CONFIG.start_rotation)
-
-        ### temp, to be moved into specific device subclass ###
-        # Device type (i.e. "motor" or "sensor")
-        self.d_type = d_type
-        self.outline = [
-            pygame.math.Vector2(-0.5, -0.5),
-            pygame.math.Vector2(0, 1),
-            pygame.math.Vector2(0.5, -0.5)
-        ]
         self.outline_a = []
-        self.color = (255, 127, 0)
+
+        # Default display properties
+        self.color = (0, 0, 0)
+        self.outline_thickness = 0.2
+        self.active_color = (255, 0, 0)
 
 
     def pos_update(self, bot_pos: pygame.math.Vector2, bot_rot: float):
@@ -59,6 +55,7 @@ class Device():
         relative position and the position of the robot'''
         self.position_a = bot_pos + pygame.math.Vector2.rotate_rad(self.position, bot_rot)
         self.rotation_a = bot_rot + self.rotation
+
 
     def define_perimeter(self):
         '''Define the perimeter points of the device, in inches, relative
@@ -73,7 +70,7 @@ class Device():
 
     def draw(self, canvas: object):
         '''Draws the device on the canvas'''
-        THICKNESS = int(CONFIG.robot_thickness * CONFIG.ppi)
+        THICKNESS = int(self.outline_thickness * CONFIG.ppi)
 
         outline_a = [point * CONFIG.ppi + [CONFIG.border_pixels, CONFIG.border_pixels]
                    for point in self.outline_a]

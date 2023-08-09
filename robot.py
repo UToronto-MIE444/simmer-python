@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import pygame
 import config as CONFIG
 
-class Robot:
+class Robot():
     '''This class represents the robot'''
 
     def __init__(self):

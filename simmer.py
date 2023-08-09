@@ -30,7 +30,7 @@ import interface.control as control
 ### Initialization
 print('SimMeR Loading...')
 
-# Everything from here on needs work
+# Everything in comments needs to be replaced/replicated
 '''
 # Global Plotting Variables
 global ray_plot

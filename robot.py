@@ -84,6 +84,7 @@ class Robot():
         THICKNESS = int(CONFIG.robot_thickness * CONFIG.ppi)
         COLOR = CONFIG.robot_color
 
+        # Convert the outline from inches to pixels
         outline = [point * CONFIG.ppi + [CONFIG.border_pixels, CONFIG.border_pixels]
                    for point in self.outline_a]
 
@@ -94,8 +95,11 @@ class Robot():
     def check_collision(self):
         '''Check whether there is a collision between the robot and a wall'''
 
-    def parse_commands(self):
+    def parse_command(self):
         '''Parse text string of commands and act on them'''
+
+    def build_response(self):
+        '''Builds a string response to send information back to the control algorithm'''
 
     def device_positions(self):
         '''Updates all the absolute positions of all the devices and their

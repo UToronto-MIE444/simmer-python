@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import pygame
-import config as CONFIG
+import config.config as CONFIG
 
 class Robot():
     '''This class represents the robot'''

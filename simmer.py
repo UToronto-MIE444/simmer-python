@@ -23,9 +23,9 @@ import random
 import pygame
 from maze import Maze
 from robot import Robot
-from hud import Hud
-import config as CONFIG
-import control
+from interface.hud import Hud
+import config.config as CONFIG
+import interface.control as control
 
 ### Initialization
 print('SimMeR Loading...')

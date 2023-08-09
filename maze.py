@@ -21,7 +21,7 @@ import random
 import sys
 import numpy as np
 import pygame
-import config as CONFIG
+import config.config as CONFIG
 
 class Maze:
     '''This class represents the maze/environment'''

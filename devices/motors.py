@@ -20,7 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import pygame
-from device import Device
+from devices.device import Device
 
 class MotorSimple(Device):
     '''Defines a basic motor & wheel'''

@@ -25,7 +25,7 @@ from pygame.locals import (
     K_q,
     K_e
 )
-import config as CONFIG
+import config.config as CONFIG
 
 class Hud:
     '''Represents the heads up display elements on the canvs.'''

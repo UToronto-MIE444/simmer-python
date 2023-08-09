@@ -20,17 +20,37 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import pygame
-from device import Device
+from devices.device import Device
 
-class Simple_motor(Device):
+class MotorSimple(Device):
     '''Defines a basic motor & wheel'''
 
-    def __init__(self, d_id: str, d_type: str, position: list, rotation: float):
+    def __init__(self, d_id: str, position: list, rotation: float):
+        '''Initialization'''
+
+        # Call super initialization
+        super().__init__(self, d_id, position, rotation)
+
         # Device type (i.e. "motor" or "sensor")
-        self.d_type = d_type
+        self.d_type = "motor"
+
+        # Device outline position
         self.outline = [
             pygame.math.Vector2(-0.5, -0.5),
             pygame.math.Vector2(0, 1),
             pygame.math.Vector2(0.5, -0.5)
         ]
-        self.color = (255, 127, 0)
+
+        # Display color
+        self.color = (0, 255, 0)
+
+        # Display thickness
+        self.outline_thickness = 0.25
+
+    def parse_message(self, cmd: int, query: bool, data: str):
+        '''
+        Parses a command string issued to it by the robot's message parser.
+        "cmd" indicates which of the device's methods to run.
+        "query" indicates whether the message is a query (True) or response (False).
+        The "data" string includes specific instructions for the method being run.
+        '''

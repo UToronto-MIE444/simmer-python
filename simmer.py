@@ -23,14 +23,14 @@ import random
 import pygame
 from maze import Maze
 from robot import Robot
-from hud import Hud
-import config as CONFIG
-import control
+from interface.hud import Hud
+import config.config as CONFIG
+import interface.control as control
 
 ### Initialization
 print('SimMeR Loading...')
 
-# Everything from here on needs work
+# Everything in comments needs to be replaced/replicated
 '''
 # Global Plotting Variables
 global ray_plot
@@ -46,11 +46,6 @@ global ir_circle
 
 # Build Block
 block = build_block(blocksize, block_center);
-
-# Build Robot
-bot_perim = import_bot;
-bot_pos = pos_update(bot_center, bot_rot, bot_perim);
-bot_front = [0.75*max(bot_perim(:,1)),0];
 
 # Import Sensor Loadout and Positions
 sensor = import_sensor;
@@ -76,12 +71,7 @@ odom = [odom_num', sensor.err(odom_num'), zeros(size(odom_num))'];
 
 
 ## Act on initialization flags
-# Shuffle random number generator seed or set it statically
-if randerror
-    rng('shuffle') # Use shuffled pseudorandom error generation
-else
-    rng(0) # Use consistent pseudorandom error generation
-end
+
 
 # Randomize drive biases to verify algorithm robustness
 if randbias
@@ -90,18 +80,6 @@ end
 
 # Create the plot
 if plot_robot
-    fig = figure(1);
-    axis equal
-    hold on
-    xlim(maze_dim(1:2))
-    ylim(maze_dim(3:4))
-
-    # Maze
-    checker_plot = plot_checker(checker);
-    maze_plot = plot_checker(maze(7:end,:), 'k', 1);
-    plot(maze(:,1),maze(:,2), 'k', 'LineWidth', 2)
-    xticks(0:12:96)
-    yticks(0:12:48)
 
     # Block
     block_plot = patch(block(:,1),block(:,2), 'y');

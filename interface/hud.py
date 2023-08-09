@@ -23,7 +23,10 @@ from pygame.locals import (
     K_s,
     K_d,
     K_q,
-    K_e
+    K_e,
+    K_ESCAPE,
+    KEYDOWN,
+    QUIT,
 )
 import config.config as CONFIG
 
@@ -71,6 +74,23 @@ class Hud:
             K_q: pygame.Rect(self.ind_pos, self.key_ind_pos[K_q], self.ind_size, self.ind_size),
             K_e: pygame.Rect(self.ind_pos, self.key_ind_pos[K_e], self.ind_size, self.ind_size)
         }
+
+    def check_input(self, events):
+        '''Check for keyboard inputs'''
+
+        # Look at every event in the queue
+        for event in events:
+            # Did the user hit a key?
+            if event.type == KEYDOWN:
+                # Was it the Escape key? If so, stop the loop.
+                if event.key == K_ESCAPE:
+                    return False
+
+            # Did the user click the window close button? If so, stop the loop.
+            elif event.type == QUIT:
+                return False
+
+        return True
 
     def draw_frame_indicator(self, canvas):
         '''Draws the HUD frame indicator.'''

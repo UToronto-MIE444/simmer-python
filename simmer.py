@@ -18,7 +18,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 # Imports
-import time
 import random
 import pygame
 from maze import Maze
@@ -124,7 +123,7 @@ while RUNNING:
 
     # Check for and act on keyboard input
     game_events = pygame.event.get()
-    RUNNING = control.check_input(game_events)
+    RUNNING = HUD.check_input(game_events)
     keypress = pygame.key.get_pressed()
 
     # Recalculate the robot position

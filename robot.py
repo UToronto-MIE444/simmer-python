@@ -114,3 +114,6 @@ class Robot():
 
         for device in self.devices.values():
             device.draw(canvas)
+
+    def move_manual(self):
+        pass

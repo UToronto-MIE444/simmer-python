@@ -174,7 +174,7 @@ while RUNNING:
     pygame.display.flip()
 
     # Slow framerate down for debug
-    time.sleep(0.25)
+    # time.sleep(0.25)
 
 # Done! Time to quit.
 pygame.quit()

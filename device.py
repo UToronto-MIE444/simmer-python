@@ -51,7 +51,6 @@ class Device():
             pygame.math.Vector2(0.5, -0.5)
         ]
         self.outline_a = []
-        self.define_perimeter()
         self.color = (255, 127, 0)
 
 
@@ -65,12 +64,14 @@ class Device():
         '''Define the perimeter points of the device, in inches, relative
         to the center point of the robot.'''
 
+        # Rotate the outline
         outline_a = [point.rotate_rad(self.rotation_a) for point in self.outline]
 
+        # Place the outline in the correct
         self.outline_a = [point + self.position_a for point in outline_a]
 
 
-    def draw_device(self, canvas: object):
+    def draw(self, canvas: object):
         '''Draws the device on the canvas'''
         THICKNESS = int(CONFIG.robot_thickness * CONFIG.ppi)
 

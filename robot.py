@@ -98,13 +98,15 @@ class Robot:
         '''Parse text string of commands and act on them'''
 
     def device_positions(self):
-        '''Updates all the absolute positions of all the devices'''
+        '''Updates all the absolute positions of all the devices and their
+        perimeters.'''
 
         for device in self.devices.values():
             device.pos_update(self.position, self.rotation)
+            device.define_perimeter()
 
     def draw_devices(self, canvas):
         '''Draws all devices on the robot onto the canvas'''
 
         for device in self.devices.values():
-            device.draw_device(canvas)
+            device.draw(canvas)

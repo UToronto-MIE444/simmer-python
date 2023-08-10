@@ -31,6 +31,8 @@ class Robot():
         # Position information (stored in inches)
         self.position = CONFIG.start_position
         self.rotation = CONFIG.start_rotation
+
+        # Robot size (rectangular)
         self.width = float(CONFIG.robot_width)
         self.height = float(CONFIG.robot_height)
 

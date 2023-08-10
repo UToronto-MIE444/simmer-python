@@ -24,7 +24,6 @@ from maze import Maze
 from robot import Robot
 from interface.hud import Hud
 import config.config as CONFIG
-import interface.control as control
 
 ### Initialization
 print('SimMeR Loading...')
@@ -147,11 +146,11 @@ while RUNNING:
     HUD.draw_frame_indicator(canvas)
     HUD.draw_keys(canvas, keypress)
 
+    # Limit the framerate
+    HUD.clock.tick(CONFIG.frame_rate)
+
     # Flip the display (update the canvas)
     pygame.display.flip()
-
-    # Slow framerate down for debug
-    # time.sleep(0.25)
 
 # Done! Time to quit.
 pygame.quit()

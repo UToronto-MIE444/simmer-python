@@ -16,4 +16,5 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # simmer-python
-Mechatronics robot simulator written in python
+Mechatronics robot simulator written in python.
+This simulator requires Python 3.11 or above, pygame 2.5 or above, and numpy to be installed

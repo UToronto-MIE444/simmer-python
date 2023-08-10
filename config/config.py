@@ -38,7 +38,7 @@ comport_baud = 9600         # Bluetooth serial baudrate
 
 # Robot and block information
 start_position = [8, 40]    # Robot starting location
-start_rotation = np.pi / 6  # Robot starting rotation
+start_rotation = np.pi * 0  # Robot starting rotation
 robot_width = 6             # Robot width in inches
 robot_height = 6            # Robot height in inches
 block_position = [25, 41]   # Block starting location
@@ -73,5 +73,6 @@ robot_thickness = 0.25      # Thickness to draw robot perimeter, in inches
 robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
 
 devices = {
-    "m0": MotorSimple("m0", [0, 2], np.pi/6)
+    "m0": MotorSimple("m0", [2, 0], 0),
+    "m1": MotorSimple("m1", [-2, 0], 0)
 }

@@ -26,8 +26,6 @@ import config.config as CONFIG
 class Maze:
     '''This class represents the maze/environment'''
     def __init__(self):
-        self.walls = np.empty((1, 1))
-        self.floor = np.array((1, 1))
 
         self.size_y = 0
         self.size_x = 0

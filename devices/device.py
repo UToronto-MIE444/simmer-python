@@ -38,6 +38,9 @@ class Device():
             self.height = position[2]
         self.rotation = rotation
 
+        # Robot perimeter outline placeholder
+        self.outline = []
+
         # Absolute position, rotation, and outline points
         self.position_a = [0, 0]
         self.rotation_a = 0

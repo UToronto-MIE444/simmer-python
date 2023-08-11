@@ -161,3 +161,6 @@ cython_debug/
 
 # VS Code
 *.code-workspace
+
+# test scripts
+test.py

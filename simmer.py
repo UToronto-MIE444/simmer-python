@@ -24,7 +24,6 @@ from maze import Maze
 from robot import Robot
 from interface.hud import Hud
 import config.config as CONFIG
-import interface.control as control
 
 ### Initialization
 print('SimMeR Loading...')
@@ -118,6 +117,7 @@ HUD = Hud()
 pygame.init()
 canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
 
+### Main Loop ###
 RUNNING = True
 while RUNNING:
 
@@ -125,6 +125,9 @@ while RUNNING:
     game_events = pygame.event.get()
     RUNNING = HUD.check_input(game_events)
     keypress = pygame.key.get_pressed()
+
+    # Move the robot manually
+    ROBOT.move_manual(keypress, MAZE.wall_squares)
 
     # Recalculate the robot position
     ROBOT.define_perimeter()
@@ -147,11 +150,11 @@ while RUNNING:
     HUD.draw_frame_indicator(canvas)
     HUD.draw_keys(canvas, keypress)
 
+    # Limit the framerate
+    HUD.clock.tick(CONFIG.frame_rate)
+
     # Flip the display (update the canvas)
     pygame.display.flip()
-
-    # Slow framerate down for debug
-    # time.sleep(0.25)
 
 # Done! Time to quit.
 pygame.quit()

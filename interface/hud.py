@@ -75,6 +75,9 @@ class Hud:
             K_e: pygame.Rect(self.ind_pos, self.key_ind_pos[K_e], self.ind_size, self.ind_size)
         }
 
+        # Clock for managing game framerate
+        self.clock = pygame.time.Clock()
+
     def check_input(self, events):
         '''Check for keyboard inputs'''
 
@@ -114,3 +117,7 @@ class Hud:
                 pygame.draw.rect(canvas, self.key_ind_colors[key], self.key_ind[key])
             else:
                 pygame.draw.rect(canvas, self.key_ind_colors['none'], self.key_ind[key])
+
+    def get_exec_time(self):
+        '''Gets the frame calculation time'''
+        return self.clock.get_rawtime()

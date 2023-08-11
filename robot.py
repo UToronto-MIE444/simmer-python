@@ -19,8 +19,18 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import numpy as np
 import pygame
+from pygame.locals import (
+    K_w,
+    K_a,
+    K_s,
+    K_d,
+    K_q,
+    K_e
+)
 import config.config as CONFIG
+import utilities
 
 class Robot():
     '''This class represents the robot'''
@@ -29,7 +39,7 @@ class Robot():
         '''Initialize the robot class'''
 
         # Position information (stored in inches)
-        self.position = CONFIG.start_position
+        self.position = pygame.math.Vector2(CONFIG.start_position[0], CONFIG.start_position[1])
         self.rotation = CONFIG.start_rotation
 
         # Robot size (rectangular)
@@ -45,6 +55,7 @@ class Robot():
             ]
 
         self.outline_a = []
+        self.outline_a_segments = []
         self.define_perimeter()
 
         # Is the robot currently colliding with a maze wall?
@@ -79,6 +90,13 @@ class Robot():
         # Place the outline in the right location
         self.outline_a = [point + self.position for point in outline_a]
 
+        # Convert the outline points to line segments
+        segments = []
+        for ct in range(-1, len(self.outline_a) - 1):
+            segments.append((self.outline_a[ct], self.outline_a[ct+1]))
+
+        self.outline_a_segments = segments
+
     def draw(self, canvas):
         '''Draws the robot outline on the canvas'''
 
@@ -92,16 +110,6 @@ class Robot():
 
         # Draw the polygon
         pygame.draw.polygon(canvas, COLOR, outline, THICKNESS)
-
-
-    def check_collision(self):
-        '''Check whether there is a collision between the robot and a wall'''
-
-    def parse_command(self):
-        '''Parse text string of commands and act on them'''
-
-    def build_response(self):
-        '''Builds a string response to send information back to the control algorithm'''
 
     def device_positions(self):
         '''Updates all the absolute positions of all the devices and their
@@ -117,5 +125,44 @@ class Robot():
         for device in self.devices.values():
             device.draw(canvas)
 
-    def move_manual(self):
-        pass
+    def move_manual(self, keypress, walls):
+        '''Move the robot manually with the keyboard'''
+
+        velocity = pygame.math.Vector2(0, 0)
+        rotation = 0
+
+        # Forward/backward movement
+        if keypress[K_w]:
+            velocity += [0, 1/CONFIG.ppi]
+        if keypress[K_s]:
+            velocity += [0, -1/CONFIG.ppi]
+
+        # Left/right movement
+        if keypress[K_q]:
+            velocity += [1/CONFIG.ppi, 0]
+        if keypress[K_e]:
+            velocity += [-1/CONFIG.ppi, 0]
+
+        # Rotation
+        if keypress[K_d]:
+            rotation += np.pi/60
+        if keypress[K_a]:
+            rotation += -np.pi/60
+
+        # Update robot position
+        self.position += pygame.math.Vector2.rotate_rad(velocity, self.rotation)
+        self.rotation += rotation
+        self.define_perimeter()
+
+        # Reset the position if a collision is detected
+        collisions = utilities.check_collision_walls(self.outline_a_segments, walls)
+        if collisions:
+            self.position -= pygame.math.Vector2.rotate_rad(velocity, self.rotation)
+            self.rotation -= rotation
+            self.define_perimeter()
+
+    def parse_command(self):
+        '''Parse text string of commands and act on them'''
+
+    def build_response(self):
+        '''Builds a string response to send information back to the control algorithm'''

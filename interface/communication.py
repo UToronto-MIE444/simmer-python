@@ -20,22 +20,44 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import socket
-import threading
+from threading import Thread
 import config.config as CONFIG
 
 class TCPServer:
     '''A TCP Server to listen for command strings from a control algorithm.'''
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
-        listener.bind((CONFIG.host, CONFIG.port))
-        listener.listen()
-        while True:
-            conn, addr = listener.accept()
-            with conn:
-                print(f"The listener has been connected to by address: {addr}")
-                while True:
-                    data = conn.recv(1024).decode(CONFIG.str_encoding)
-                    print(f"The following data was received: {data!r}")
-                    print(type(data))
-                    conn.sendall(data.encode(CONFIG.str_encoding))
-                    break
+    def __init__(self):
+        '''Instantiation'''
+
+        self.buffer_rx = ''
+        self.rx_ready = ''
+
+        self.buffer_tx = ''
+        self.tx_ready = ''
+
+        self.listen_thread = Thread(target=self.cmd_listener)
+        self.listen_thread.daemon = True
+
+    def start(self):
+        '''Starts running the tcp listener thread.'''
+        self.listen_thread.start()
+
+    def stop(self):
+        '''Not implemented yet. Stops the tcp listener thread from running'''
+
+    def cmd_listener(self):
+        '''The main tcp receive loop'''
+
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as robot_socket:
+            robot_socket.bind((CONFIG.host, CONFIG.port))
+            robot_socket.listen()
+            while True:
+                conn, addr = robot_socket.accept()
+                with conn:
+                    print(f"The robot's socket has been connected to by address: {addr}")
+                    while True:
+                        data = conn.recv(1024).decode(CONFIG.str_encoding)
+                        print(f"The following data was received: {data!r}")
+                        print(type(data))
+                        conn.sendall(data.encode(CONFIG.str_encoding))
+                        break

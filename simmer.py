@@ -23,6 +23,7 @@ import pygame
 from maze import Maze
 from robot import Robot
 from interface.hud import Hud
+from interface.communication import TCPServer
 import config.config as CONFIG
 
 ### Initialization
@@ -112,6 +113,10 @@ ROBOT = Robot()
 
 # Load the Heads Up Display
 HUD = Hud()
+
+# Load TCP Communication
+COMM = TCPServer()
+COMM.start()
 
 # Initialize graphics
 pygame.init()

@@ -23,6 +23,7 @@ import pygame
 from maze import Maze
 from robot import Robot
 from interface.hud import Hud
+from interface.communication import TCPServer
 import config.config as CONFIG
 
 ### Initialization
@@ -30,17 +31,6 @@ print('SimMeR Loading...')
 
 # Everything in comments needs to be replaced/replicated
 '''
-# Global Plotting Variables
-global ray_plot
-global rayend_plot
-global ir_pts
-global ir_pts_in
-global ir_circle
-
-## User-editable variables and flags
-
-## Data Import
-# Data Import
 
 # Build Block
 block = build_block(blocksize, block_center);
@@ -84,16 +74,6 @@ if plot_robot
     set(block_plot,'facealpha',.5)
 
 end
-
-## Initialize tcp server to read and respond to algorithm commands
-clc  # Clear loading message
-disp('Simulator initialized... waiting for connection from client')
-[s_cmd, s_rply] = tcp_setup('server', 9000, 9001);
-fopen(s_cmd);
-# fopen(s_rply);
-
-clc
-disp('Client connected!')
 '''
 
 # Set random error seed
@@ -112,6 +92,10 @@ ROBOT = Robot()
 
 # Load the Heads Up Display
 HUD = Hud()
+
+# Load TCP Communication
+COMM = TCPServer()
+COMM.start()
 
 # Initialize graphics
 pygame.init()

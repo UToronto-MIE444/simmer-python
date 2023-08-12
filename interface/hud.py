@@ -37,7 +37,7 @@ class Hud:
         '''Initialize the robot class'''
 
         # Indicator color (initial shade of gray)
-        self.indicator_color = 255
+        self.indicator_color = 240
 
         # Create the indicator rectangle
         self.ind_pos = CONFIG.border_pixels/4
@@ -99,9 +99,9 @@ class Hud:
         '''Draws the HUD frame indicator.'''
 
         # Update the color value
-        self.indicator_color -= 1
-        if self.indicator_color == -1:
-            self.indicator_color = 255
+        self.indicator_color -= 4
+        if self.indicator_color == 0:
+            self.indicator_color = 240
 
         # Create an RGB color tuple
         color_tuple = (self.indicator_color, self.indicator_color, self.indicator_color)

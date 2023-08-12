@@ -36,7 +36,12 @@ step_time = 0               # Pause time between the algorithm executing command
 comport_num = 6             # Bluetooth serial comport number to connect to
 comport_baud = 9600         # Bluetooth serial baudrate
 
-# Robot and block information
+# Network configuration
+host = "127.0.0.1"
+port = 65432
+str_encoding = 'utf-8'
+
+# Robot and Block information
 start_position = [8, 40]    # Robot starting location
 start_rotation = np.pi * 0  # Robot starting rotation
 robot_width = 6             # Robot width in inches

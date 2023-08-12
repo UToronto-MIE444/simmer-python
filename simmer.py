@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Imports
 import random
+import time
 import pygame
 from maze import Maze
 from robot import Robot
@@ -109,6 +110,11 @@ while RUNNING:
     game_events = pygame.event.get()
     RUNNING = HUD.check_input(game_events)
     keypress = pygame.key.get_pressed()
+
+    # Get the command information from the tcp buffer
+    cmd = COMM.get_buffer_rx()
+    if cmd:
+        ROBOT.command(cmd)
 
     # Move the robot manually
     ROBOT.move_manual(keypress, MAZE.wall_squares)

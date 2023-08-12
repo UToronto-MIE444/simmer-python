@@ -161,7 +161,7 @@ class Robot():
             self.rotation -= rotation
             self.define_perimeter()
 
-    def parse_command(self):
+    def command(self, cmd: list):
         '''Parse text string of commands and act on them'''
 
     def build_response(self):

@@ -57,7 +57,37 @@ class TCPServer:
                     print(f"The robot's socket has been connected to by address: {addr}")
                     while True:
                         data = conn.recv(1024).decode(CONFIG.str_encoding)
-                        print(f"The following data was received: {data!r}")
-                        print(type(data))
-                        conn.sendall(data.encode(CONFIG.str_encoding))
+                        if not self.buffer_rx:
+                            self.buffer_rx = data
+                            print(f"The following data was received: {data!r}")
+                            conn.sendall(data.encode(CONFIG.str_encoding))
+                        else:
+                            print(f"The following data was received: {data!r}, but the receive buffer is full.")
+                            conn.sendall("Receive Data Buffer is full, please retry in a moment.".encode(CONFIG.str_encoding))
                         break
+
+    def get_buffer_rx(self):
+        '''Get and clear the receive buffer.'''
+        if self.buffer_rx:
+            data = self.buffer_rx
+            self.buffer_rx = ''
+            return self.parse_commands(data)
+        return []
+
+    def get_buffer_tx(self):
+        '''
+        Get and clear the transmit buffer.
+        This may end up being unnecessary.
+        '''
+        data = self.buffer_tx
+        self.buffer_tx = ''
+        return data
+
+    def parse_commands(self, data: str):
+        '''Parses a command string into a list of commands for the robot to act on.'''
+
+        cmd_id = data[0:2]
+        cmd_data = data[2:-1]
+        cmd = [cmd_id, cmd_data]
+
+        return cmd

@@ -31,83 +31,75 @@ class TCPServer:
         '''Instantiation'''
 
         self.buffer_rx = ''
-        self.rx_ready = ''
-
         self.buffer_tx = ''
-        self.tx_ready = ''
-
         self.loopback = False
 
+        # Socket definition
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind((CONFIG.host, CONFIG.port_rx))
+        self.sock.listen(5)
+        self.sock2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock2.bind((CONFIG.host, CONFIG.port_tx))
+        self.sock2.listen(5)
+
+        # Threads
         self.listen_thread = Thread(target=self.cmd_listener)
         self.listen_thread.daemon = True
-
         self.talk_thread = Thread(target=self.response_transmitter)
         self.talk_thread.daemon = True
+
 
     def start(self):
         '''Starts running the tcp threads.'''
         self.listen_thread.start()
         self.talk_thread.start()
 
-    def stop(self):
-        '''Not implemented yet. Stops the tcp listener thread from running'''
-
     def cmd_listener(self):
         '''The main tcp receive loop'''
 
-        # Create the socket
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_rx:
-            socket_rx.bind((CONFIG.host, CONFIG.port_rx))
-            socket_rx.listen()
+        # Listen for commands from the command algorithm
+        while True:
+            # Have the socket accept data
+            client_socket, addr = self.sock.accept()
+            client_socket.settimeout(CONFIG.timeout)
+            with client_socket:
+                try:
+                    print(f"The robot's socket has been connected to by address: {addr}")
 
-            # Listen for commands from the command algorithm
-            while True:
-                # Have the socket accept data
-                conn, addr = socket_rx.accept()
-                with conn:
-                    conn.settimeout(CONFIG.timeout)
-                    try:
-                        print(f"The robot's socket has been connected to by address: {addr}")
+                    # Store the incoming data as a string
+                    data = client_socket.recv(1024).decode(CONFIG.str_encoding)
 
-                        # Store the incoming data as a string
-                        data = conn.recv(1024).decode(CONFIG.str_encoding)
-
-                        # If the receive buffer is empty, act on it. Else dump the data.
-                        if not self.buffer_rx:
-                            self.buffer_rx = data
-                            print(f"The following data was received: {data!r}")
-
-                            # If loopback enabled, respond with a copy of the data
-                            if self.loopback:
-                                if not self.buffer_tx:
-                                    self.buffer_tx = data
-                                # conn.sendall(data.encode(CONFIG.str_encoding))
-
-                        else:
-                            print(f"The following data was received: {data!r}, but the receive buffer is full.")
+                    # If the receive buffer is empty, act on it. Else dump the data.
+                    if not self.buffer_rx:
+                        self.buffer_rx = data
+                        print(f"The following data was received: {data!r}")
+                        # If loopback enabled, respond with a copy of the data
+                        if self.loopback:
                             if not self.buffer_tx:
-                                self.buffer_tx = "Receive Data Buffer is full, please retry in a moment."
+                                self.buffer_tx = data
+                            # client_socket.sendall(data.encode(CONFIG.str_encoding))
+                    else:
+                        print(f"The following data was received: {data!r}, but the receive buffer is full.")
+                        if not self.buffer_tx:
+                            self.buffer_tx = "Receive Data Buffer is full, please retry in a moment."
+                    client_socket.close()
 
-                    except TimeoutError:
-                        print('Timeout.')
+                except TimeoutError:
+                    print('Timeout.')
 
     def response_transmitter(self):
         '''The main tcp transmit loop'''
 
-        # Create the socket
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socket_tx:
-            socket_tx.bind((CONFIG.host, CONFIG.port_tx))
-
-            # Loop through, listening for commands from the command algorithm
-            while True:
-                # Send the response over the socket
-                if self.buffer_tx:
-                    try:
-                        socket_tx.sendall(self.buffer_tx.encode(CONFIG.str_encoding))
-                        self.buffer_tx = ''
-                    except OSError:
-                        pass
-                time.sleep(1/CONFIG.frame_rate)
+        while True:
+            # Send the response over the socket
+            client_socket, addr = self.sock2.accept()
+            if self.buffer_tx:
+                try:
+                    client_socket.send(self.buffer_tx.encode(CONFIG.str_encoding))
+                    self.buffer_tx = ''
+                except OSError:
+                    pass
+            time.sleep(1/CONFIG.frame_rate)
 
     def get_buffer_rx(self):
         '''Get and clear the receive buffer.'''

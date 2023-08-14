@@ -99,6 +99,7 @@ class TCPServer:
                     self.buffer_tx = ''
                 except OSError:
                     pass
+            client_socket.close()
             time.sleep(1/CONFIG.frame_rate)
 
     def get_buffer_rx(self):

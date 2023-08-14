@@ -23,15 +23,32 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import socket
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
-PORT = 65432  # The port used by the server
+PORT_TX = 61200     # The port used by the *CLIENT* to receive
+PORT_RX = 61201     # The port used by the *CLIENT* to send data
 
 while True:
 
-    send_string = input("Type in a string to send: ")
-
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((HOST, PORT))
-        s.sendall(send_string.encode('utf-8'))
-        response = s.recv(1024).decode('utf-8')
+        send_string = input("Type in a string to send: ")
+        try:
+            s.connect((HOST, PORT_TX))
+            s.sendall(send_string.encode('utf-8'))
+        except ConnectionRefusedError:
+            print('Tx Connection was refused.')
+        except TimeoutError:
+            print('Response not received from robot.')
 
-    print(f"Received {response!r}")
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sr:
+        # try:
+        sr.connect((HOST, PORT_RX))
+        sr.listen()
+        conn, addr = sr.accept()
+        with conn:
+            conn.settimeout(180)
+            try:
+                response = sr.recv(1024).decode('utf-8')
+                print(f"Received {response!r}")
+            except TimeoutError:
+                print('Response not received from robot.')
+        # except ConnectionRefusedError:
+        #     print('Rx Connection was refused.')

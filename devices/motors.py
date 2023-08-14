@@ -47,10 +47,8 @@ class MotorSimple(Device):
         # Display thickness
         self.outline_thickness = 0.25
 
-    def parse_message(self, cmd: int, query: bool, data: str):
-        '''
-        Parses a command string issued to it by the robot's message parser.
-        "cmd" indicates which of the device's methods to run.
-        "query" indicates whether the message is a query (True) or response (False).
-        The "data" string includes specific instructions for the method being run.
-        '''
+    def simulate(self, value: float):
+        if value:
+            return str(value) + "_response"
+        else:
+            return value

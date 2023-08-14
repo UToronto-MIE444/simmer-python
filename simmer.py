@@ -114,7 +114,8 @@ while RUNNING:
     # Get the command information from the tcp buffer
     cmd = COMM.get_buffer_rx()
     if cmd:
-        ROBOT.command(cmd)
+        response = ROBOT.command(cmd)
+        COMM.set_buffer_tx(response)
 
     # Move the robot manually
     ROBOT.move_manual(keypress, MAZE.wall_squares)

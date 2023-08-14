@@ -38,7 +38,9 @@ comport_baud = 9600         # Bluetooth serial baudrate
 
 # Network configuration
 host = "127.0.0.1"
-port = 65432
+port_rx = 61200
+port_tx = 61201
+timeout = 180
 str_encoding = 'utf-8'
 
 # Robot and Block information

@@ -113,10 +113,10 @@ try:
         keypress = pygame.key.get_pressed()
 
         # Get the command information from the tcp buffer
-        cmd = COMM.get_buffer_rx()
-        if cmd:
-            response = ROBOT.command(cmd)
-            COMM.set_buffer_tx(response)
+        cmds = COMM.get_buffer_rx()
+        if cmds:
+            responses = ROBOT.command(cmds)
+            COMM.set_buffer_tx(responses)
 
         # Move the robot manually
         ROBOT.move_manual(keypress, MAZE.wall_squares)

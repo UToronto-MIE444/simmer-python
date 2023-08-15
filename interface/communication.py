@@ -31,7 +31,7 @@ class TCPServer:
         '''Instantiation'''
 
         self.buffer_rx = ''
-        self.buffer_tx = ''
+        self.buffer_tx = []
         self.loopback = False
 
         # Socket definition
@@ -96,7 +96,7 @@ class TCPServer:
             if self.buffer_tx:
                 try:
                     client_socket.send(self.buffer_tx.encode(CONFIG.str_encoding))
-                    self.buffer_tx = ''
+                    self.buffer_tx = []
                 except OSError:
                     pass
             client_socket.close()
@@ -110,14 +110,6 @@ class TCPServer:
             return self.parse_commands(data)
         return []
 
-    def set_buffer_tx(self, data: str):
-        '''
-        Get and clear the transmit buffer.
-        This may end up being unnecessary.
-        '''
-        if not self.buffer_tx:
-            self.buffer_tx = data
-
     def parse_commands(self, data: str):
         '''
         Parses a command string into a command for the robot to act on.
@@ -128,6 +120,24 @@ class TCPServer:
 
         cmd_id = data[0:2]
         cmd_data = data[3:len(data)]
-        cmd = [cmd_id, cmd_data]
 
-        return cmd
+        # This is in a nested list to later facilitate
+        # the ability to run multiple commands at a time
+        cmds = [[cmd_id, cmd_data]]
+
+        return cmds
+
+    def set_buffer_tx(self, responses: str):
+        '''
+        Get and clear the transmit buffer.
+        This may end up being unnecessary.
+        '''
+
+        response_str = ''
+
+        if not self.buffer_tx:
+            for response in responses:
+                if response_str:
+                    response_str += '|'
+                response_str += response
+            self.buffer_tx = response_str

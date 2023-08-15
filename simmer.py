@@ -112,7 +112,7 @@ try:
         RUNNING = HUD.check_input(game_events)
         keypress = pygame.key.get_pressed()
 
-        # Get the command information from the tcp buffer
+        # Get the command information from the tcp buffer, act, and respond
         cmds = COMM.get_buffer_rx()
         if cmds:
             responses = ROBOT.command(cmds)

@@ -56,7 +56,8 @@ class Ultrasonic(Device):
         self.num_rays = 11              # Number of rays to test
         self.max_range = 433            # Maximum range in inches
 
-        self.rays = self._define_rays() # Define the rays
+        self.rays = self._define_rays() # Define the initial rays, without detecting collisions
+        self.ray_lengths = [self.max_range for item in self.rays]   # The length of the rays
 
     def _define_rays(self):
         '''Define the rays used to get the ultrasonic distance.'''
@@ -78,9 +79,6 @@ class Ultrasonic(Device):
 
     def draw_measurement(self, canvas):
         '''Draw ultrasonic sensor rays on the canvas'''
-
-        # Update positions. Might need to be moved later to reduce cpu cycles
-        # self.rays = self._define_rays()
 
         # Graphics options
         thickness = int(CONFIG.ppi*0.125)
@@ -104,6 +102,7 @@ class Ultrasonic(Device):
         BLOCK = objects.get("BLOCK", False)
 
         rays = self._define_rays()
+        ray_lengths = [self.max_range for item in rays]
 
         for ct, ray in enumerate(rays):
             for square in MAZE.wall_squares:
@@ -112,6 +111,8 @@ class Ultrasonic(Device):
                     if not collision_points:
                         pass
                     else:
-                        rays[ct][1] = utilities.closest(self.position_a, collision_points)
+                        rays[ct][1], ray_lengths[ct] = utilities.closest(self.position_a, collision_points)
 
+        # Update stored variables
         self.rays = rays
+        self.ray_lengths = ray_lengths

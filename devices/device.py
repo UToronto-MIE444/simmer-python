@@ -62,9 +62,10 @@ class Device():
         self.rotation_a = bot_rot + self.rotation
 
 
-    def define_perimeter(self):
-        '''Define the perimeter points of the device, in inches, relative
-        to the center point of the robot.'''
+    def update_outline(self):
+        '''
+        Define the outline of the device, in inches, in the global reference frame.
+        '''
 
         # Rotate the outline
         outline_a = [point.rotate_rad(self.rotation_a) for point in self.outline]

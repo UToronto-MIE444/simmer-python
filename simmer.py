@@ -116,8 +116,8 @@ try:
         ROBOT.move_manual(keypress, MAZE.wall_squares)
 
         # Recalculate the robot and device positions
-        ROBOT.define_perimeter()
-        ROBOT.device_positions()
+        ROBOT.update_outline()
+        ROBOT.update_device_positions()
 
         # Manually simulate a specific sensor
         objects = {"ROBOT": ROBOT, "MAZE": MAZE}

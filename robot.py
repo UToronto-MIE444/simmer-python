@@ -56,7 +56,7 @@ class Robot():
 
         self.outline_a = []
         self.outline_a_segments = []
-        self.define_perimeter()
+        self.update_outline()
 
         # Is the robot currently colliding with a maze wall?
         self.collision = False
@@ -80,9 +80,9 @@ class Robot():
             "collision": self.collision
         })
 
-    def define_perimeter(self):
+    def update_outline(self):
         '''
-        Define the perimeter points of the robot, in inches, relative
+        Define the absolute outline points of the robot, in inches, relative
         to the center point of the robot.
         '''
 
@@ -113,15 +113,14 @@ class Robot():
         # Draw the polygon
         pygame.draw.polygon(canvas, COLOR, outline, THICKNESS)
 
-    def device_positions(self):
+    def update_device_positions(self):
         '''
-        Updates all the absolute positions of all the devices and their
-        perimeters.
+        Updates the global positions and outlines of all the robot's devices.
         '''
 
         for (d_id, device) in self.devices.items():
             device.pos_update(self.position, self.rotation)
-            device.define_perimeter()
+            device.update_outline()
 
     def draw_devices(self, canvas):
         '''
@@ -161,14 +160,14 @@ class Robot():
         # Update robot position
         self.position += pygame.math.Vector2.rotate_rad(velocity, self.rotation)
         self.rotation += rotation
-        self.define_perimeter()
+        self.update_outline()
 
         # Reset the position if a collision is detected
         collisions = self.check_collision_walls(walls)
         if collisions:
             self.position -= pygame.math.Vector2.rotate_rad(velocity, self.rotation)
             self.rotation -= rotation
-            self.define_perimeter()
+            self.update_outline()
 
     def check_collision_walls(self, walls: list):
         '''

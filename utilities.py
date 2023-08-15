@@ -122,23 +122,24 @@ def collision(segment1: list, segment2: list):
     return collisions
 
 def closest(start: list, test_pts: list):
-    '''Returns the closest point in the test_pts list to the point start.'''
+    '''
+    Returns the closest point in the test_pts list to the point start, and
+    the Euclidean distance between them.
+    '''
 
-    # If the list is empty, return the empty list
+    # If the list is empty, return the empty list and a nan for length
     if not test_pts:
-        return test_pts
-
-    # If there's only one point to test, it must be the closest. Return it.
-    elif len(test_pts) == 1:
-        return test_pts[0]
+        return test_pts, math.nan
 
     # Otherwise calculate the closest point to the "start" point
     else:
         distance_minimum = math.inf
-        for point in test_pts:
-            vector = pygame.math.Vector2(point[0]-start[0], point[1]-start[0])
+        closest_pt = []
+        for test_pt in test_pts:
+            vector = pygame.math.Vector2(test_pt[0]-start[0], test_pt[1]-start[1])
             distance = pygame.math.Vector2.magnitude(vector)
             if distance < distance_minimum:
                 distance_minimum = distance
+                closest_pt = test_pt
 
-    return distance_minimum
+    return closest_pt, distance_minimum

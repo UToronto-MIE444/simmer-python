@@ -32,7 +32,7 @@ class MotorSimple(Device):
         super().__init__(self, d_id, position, rotation, visible)
 
         # Device type (i.e. "motor" or "sensor")
-        self.d_type = "motor"
+        self.d_type = 'motor'
 
         # Device outline position
         self.outline = [
@@ -49,6 +49,6 @@ class MotorSimple(Device):
 
     def simulate(self, value: float):
         if value:
-            return str(value) + "_response"
+            return str(value) + '_response'
         else:
             return value

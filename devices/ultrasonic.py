@@ -19,7 +19,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-import numpy as np
+import math
+import statistics
 import pygame
 from devices.device import Device
 import config.config as CONFIG
@@ -35,7 +36,7 @@ class Ultrasonic(Device):
         super().__init__(self, d_id, position, rotation, visible)
 
         # Device type (i.e. "motor" or "sensor")
-        self.d_type = "sensor"
+        self.d_type = 'sensor'
 
         # Device outline position
         self.outline = [
@@ -52,7 +53,7 @@ class Ultrasonic(Device):
         self.outline_thickness = 0.25
 
         # Simulation parameters
-        self.beamwidth = 15*np.pi/180   # Beamwidth of the ultrasonic sensor
+        self.beamwidth = 15*math.pi/180   # Beamwidth of the ultrasonic sensor
         self.num_rays = 11              # Number of rays to test
         self.max_range = 433            # Maximum range in inches
 
@@ -90,16 +91,16 @@ class Ultrasonic(Device):
             end = [point*CONFIG.ppi + CONFIG.border_pixels for point in ray[1]]
             pygame.draw.line(canvas, color, start, end, thickness)
 
-    def simulate(self, value: float, objects: dict):
+    def simulate(self, value: float, environment: dict):
         '''
         Simulates the performance of an ultrasonic sensor.
 
         Response data format
         [0:7] - Eight byte double
         '''
-        ROBOT = objects.get("ROBOT", False)
-        MAZE = objects.get("MAZE", False)
-        BLOCK = objects.get("BLOCK", False)
+        ROBOT = environment.get('ROBOT', False)
+        MAZE = environment.get('MAZE', False)
+        BLOCK = environment.get('BLOCK', False)
 
         rays = self._define_rays()
         ray_lengths = [self.max_range for item in rays]
@@ -116,3 +117,8 @@ class Ultrasonic(Device):
         # Update stored variables
         self.rays = rays
         self.ray_lengths = ray_lengths
+
+        # Build the value to return
+        output = statistics.median(self.ray_lengths)
+
+        return output

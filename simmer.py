@@ -119,14 +119,16 @@ try:
         ROBOT.update_outline()
         ROBOT.update_device_positions()
 
+        # Create a copy of the environment to pass to simulation functions
+        environment = {'ROBOT': ROBOT, 'MAZE': MAZE}
+
         # Manually simulate a specific sensor or sensors
-        objects = {"ROBOT": ROBOT, "MAZE": MAZE}
-        ROBOT.devices["u0"].simulate(0, objects)
+        ROBOT.devices['u0'].simulate(0, environment)
 
         # Get the command information from the tcp buffer, act, and respond
         cmds = COMM.get_buffer_rx()
         if cmds:
-            responses = ROBOT.command(cmds)
+            responses = ROBOT.command(cmds, environment)
             COMM.set_buffer_tx(responses)
 
         # Fill the background with white
@@ -155,5 +157,5 @@ except KeyboardInterrupt:
     pass
 
 # Done! Time to quit.
-print("Execution finished. Closing SimMeR.")
+print('Execution finished. Closing SimMeR.')
 pygame.quit()

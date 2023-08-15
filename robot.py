@@ -19,7 +19,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-import numpy as np
+import math
 import pygame
 from pygame.locals import (
     K_w,
@@ -63,9 +63,9 @@ class Robot():
 
         # A trail of points where the robot has moved
         self.trail = [{
-            "position": self.position,
-            "rotation": self.rotation,
-            "collision": self.collision
+            'position': self.position,
+            'rotation': self.rotation,
+            'collision': self.collision
         }]
 
         # Import the list of devices from the config file
@@ -75,9 +75,9 @@ class Robot():
         '''Appends current position information to the robot's trail'''
 
         self.trail.append({
-            "position": self.position,
-            "rotation": self.rotation,
-            "collision": self.collision
+            'position': self.position,
+            'rotation': self.rotation,
+            'collision': self.collision
         })
 
     def update_outline(self):
@@ -130,7 +130,7 @@ class Robot():
         for device in self.devices.values():
             if device.visible:
                 device.draw(canvas)
-                if device.d_type == "sensor":
+                if device.d_type == 'sensor':
                     device.draw_measurement(canvas)
 
     def move_manual(self, keypress, walls):
@@ -153,9 +153,9 @@ class Robot():
 
         # Rotation
         if keypress[K_d]:
-            rotation += np.pi/60
+            rotation += math.pi/60
         if keypress[K_a]:
-            rotation += -np.pi/60
+            rotation += -math.pi/60
 
         # Update robot position
         self.position += pygame.math.Vector2.rotate_rad(velocity, self.rotation)
@@ -175,21 +175,15 @@ class Robot():
         and a set of wall line segments.
         '''
 
-        # Initialize collisions list
-        # collisions = []
-
         # Loop through all the robot outline line segments, checking for collisions
         for segment_bot in self.outline_global_segments:
             for square in walls:
                 for segment_wall in square:
                     collision_points = utilities.collision(segment_bot, segment_wall)
                     if collision_points:
-                        # collisions.append(collision_points)
                         return collision_points
 
-        # return collisions
-
-    def command(self, cmds: list):
+    def command(self, cmds: list, environment: dict):
         '''
         Parse text string of commands and act on them, sending them to the appropriate
         device.
@@ -203,10 +197,12 @@ class Robot():
             if target_device:
                 try:
                     value = float(cmd[1])
-                    responses.append(target_device.simulate(value))
                 except ValueError:
-                    responses.append("Command data (" + cmd[1] + ") not in valid float format.")
+                    print('Command data (' + cmd[1] + ') not in valid float format. Trying with 0.')
+                value = 0
+                responses.append(target_device.simulate(value, environment))
             else:
-                responses.append("Target device " + cmd[0] + " not found.")
+                print('Target device ' + cmd[0] + ' not found.')
+                responses.append(math.nan)
 
         return responses

@@ -81,8 +81,10 @@ class Robot():
         })
 
     def define_perimeter(self):
-        '''Define the perimeter points of the robot, in inches, relative
-        to the center point of the robot.'''
+        '''
+        Define the perimeter points of the robot, in inches, relative
+        to the center point of the robot.
+        '''
 
         # Rotate the outline
         outline_a = [point.rotate_rad(self.rotation) for point in self.outline]
@@ -112,15 +114,19 @@ class Robot():
         pygame.draw.polygon(canvas, COLOR, outline, THICKNESS)
 
     def device_positions(self):
-        '''Updates all the absolute positions of all the devices and their
-        perimeters.'''
+        '''
+        Updates all the absolute positions of all the devices and their
+        perimeters.
+        '''
 
         for (d_id, device) in self.devices.items():
             device.pos_update(self.position, self.rotation)
             device.define_perimeter()
 
     def draw_devices(self, canvas):
-        '''Draws all devices on the robot onto the canvas'''
+        '''
+        Draws all devices on the robot onto the canvas unless marked otherwise.
+        '''
 
         for device in self.devices.values():
             if device.visible:
@@ -158,11 +164,31 @@ class Robot():
         self.define_perimeter()
 
         # Reset the position if a collision is detected
-        collisions = utilities.check_collision_walls(self.outline_a_segments, walls)
+        collisions = self.check_collision_walls(walls)
         if collisions:
             self.position -= pygame.math.Vector2.rotate_rad(velocity, self.rotation)
             self.rotation -= rotation
             self.define_perimeter()
+
+    def check_collision_walls(self, walls: list):
+        '''
+        Checks for a collision between the robot's perimeter segments
+        and a set of wall line segments.
+        '''
+
+        # Initialize collisions list
+        # collisions = []
+
+        # Loop through all the robot outline line segments, checking for collisions
+        for segment_bot in self.outline_a_segments:
+            for square in walls:
+                for segment_wall in square:
+                    collision_points = utilities.collision(segment_bot, segment_wall)
+                    if collision_points:
+                        # collisions.append(collision_points)
+                        return collision_points
+
+        # return collisions
 
     def command(self, cmds: list):
         '''

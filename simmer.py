@@ -112,18 +112,22 @@ try:
         RUNNING = HUD.check_input(game_events)
         keypress = pygame.key.get_pressed()
 
-        # Get the command information from the tcp buffer, act, and respond
-        cmds = COMM.get_buffer_rx()
-        if cmds:
-            responses = ROBOT.command(cmds)
-            COMM.set_buffer_tx(responses)
-
         # Move the robot manually
         ROBOT.move_manual(keypress, MAZE.wall_squares)
 
         # Recalculate the robot and device positions
         ROBOT.define_perimeter()
         ROBOT.device_positions()
+
+        # Manually simulate a specific sensor
+        objects = {"ROBOT": ROBOT, "MAZE": MAZE}
+        ROBOT.devices.get("u0").simulate(0, objects)
+
+        # Get the command information from the tcp buffer, act, and respond
+        cmds = COMM.get_buffer_rx()
+        if cmds:
+            responses = ROBOT.command(cmds)
+            COMM.set_buffer_tx(responses)
 
         # Fill the background with white
         canvas.fill((255, 255, 255))

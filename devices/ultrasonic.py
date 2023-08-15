@@ -23,7 +23,7 @@ import numpy as np
 import pygame
 from devices.device import Device
 import config.config as CONFIG
-from utilities import check_collision_walls as collision
+import utilities
 
 class Ultrasonic(Device):
     '''Defines an ultrasonic sensor.'''
@@ -56,7 +56,7 @@ class Ultrasonic(Device):
         self.num_rays = 11              # Number of rays to test
         self.max_range = 433            # Maximum range in inches
 
-        self._define_rays()
+        self.rays = self._define_rays() # Define the rays
 
     def _define_rays(self):
         '''Define the rays used to get the ultrasonic distance.'''
@@ -76,23 +76,11 @@ class Ultrasonic(Device):
 
         return rays
 
-
-    def simulate(self, value: float):
-        '''
-        Simulates the performance of an ultrasonic sensor.
-
-        Response data format
-        [0:7] - Eight byte double
-        '''
-
-        rays = self._define_rays()
-
-
     def draw_measurement(self, canvas):
         '''Draw ultrasonic sensor rays on the canvas'''
 
         # Update positions. Might need to be moved later to reduce cpu cycles
-        self.rays = self._define_rays()
+        # self.rays = self._define_rays()
 
         # Graphics options
         thickness = int(CONFIG.ppi*0.125)
@@ -103,3 +91,27 @@ class Ultrasonic(Device):
             start = [point*CONFIG.ppi + CONFIG.border_pixels for point in ray[0]]
             end = [point*CONFIG.ppi + CONFIG.border_pixels for point in ray[1]]
             pygame.draw.line(canvas, color, start, end, thickness)
+
+    def simulate(self, value: float, objects: dict):
+        '''
+        Simulates the performance of an ultrasonic sensor.
+
+        Response data format
+        [0:7] - Eight byte double
+        '''
+        ROBOT = objects.get("ROBOT", False)
+        MAZE = objects.get("MAZE", False)
+        BLOCK = objects.get("BLOCK", False)
+
+        rays = self._define_rays()
+
+        for ct, ray in enumerate(rays):
+            for square in MAZE.wall_squares:
+                for segment_wall in square:
+                    collision_points = utilities.collision(ray, segment_wall)
+                    if not collision_points:
+                        pass
+                    else:
+                        rays[ct][1] = utilities.closest(self.position_a, collision_points)
+
+        self.rays = rays

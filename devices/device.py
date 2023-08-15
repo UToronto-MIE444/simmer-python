@@ -43,10 +43,10 @@ class Device():
         self.outline = []
 
         # Absolute position, rotation, and outline points
-        self.position_a = [0, 0]
-        self.rotation_a = 0
+        self.position_global = [0, 0]
+        self.rotation_global = 0
         self.pos_update(CONFIG.start_position, CONFIG.start_rotation)
-        self.outline_a = []
+        self.outline_global = []
 
         # Default display properties
         self.color = (0, 0, 0)
@@ -58,8 +58,8 @@ class Device():
     def pos_update(self, bot_pos: pygame.math.Vector2, bot_rot: float):
         '''Updates the absolute position of the device based on its
         relative position and the position of the robot'''
-        self.position_a = bot_pos + pygame.math.Vector2.rotate_rad(self.position, bot_rot)
-        self.rotation_a = bot_rot + self.rotation
+        self.position_global = bot_pos + pygame.math.Vector2.rotate_rad(self.position, bot_rot)
+        self.rotation_global = bot_rot + self.rotation
 
 
     def update_outline(self):
@@ -68,18 +68,18 @@ class Device():
         '''
 
         # Rotate the outline
-        outline_a = [point.rotate_rad(self.rotation_a) for point in self.outline]
+        outline_global = [point.rotate_rad(self.rotation_global) for point in self.outline]
 
         # Place the outline in the correct
-        self.outline_a = [point + self.position_a for point in outline_a]
+        self.outline_global = [point + self.position_global for point in outline_global]
 
 
     def draw(self, canvas: object):
         '''Draws the device on the canvas'''
         THICKNESS = int(self.outline_thickness * CONFIG.ppi)
 
-        outline_a = [point * CONFIG.ppi + [CONFIG.border_pixels, CONFIG.border_pixels]
-                   for point in self.outline_a]
+        outline_global = [point * CONFIG.ppi + [CONFIG.border_pixels, CONFIG.border_pixels]
+                   for point in self.outline_global]
 
         # Draw the polygon
-        pygame.draw.polygon(canvas, self.color, outline_a, THICKNESS)
+        pygame.draw.polygon(canvas, self.color, outline_global, THICKNESS)

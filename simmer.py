@@ -119,9 +119,9 @@ try:
         ROBOT.update_outline()
         ROBOT.update_device_positions()
 
-        # Manually simulate a specific sensor
+        # Manually simulate a specific sensor or sensors
         objects = {"ROBOT": ROBOT, "MAZE": MAZE}
-        ROBOT.devices.get("u0").simulate(0, objects)
+        ROBOT.devices["u0"].simulate(0, objects)
 
         # Get the command information from the tcp buffer, act, and respond
         cmds = COMM.get_buffer_rx()

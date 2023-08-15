@@ -54,8 +54,8 @@ class Robot():
             pygame.math.Vector2( self.width/2, -self.height/2)
             ]
 
-        self.outline_a = []
-        self.outline_a_segments = []
+        self.outline_global = []
+        self.outline_global_segments = []
         self.update_outline()
 
         # Is the robot currently colliding with a maze wall?
@@ -87,17 +87,17 @@ class Robot():
         '''
 
         # Rotate the outline
-        outline_a = [point.rotate_rad(self.rotation) for point in self.outline]
+        outline_global = [point.rotate_rad(self.rotation) for point in self.outline]
 
         # Place the outline in the right location
-        self.outline_a = [point + self.position for point in outline_a]
+        self.outline_global = [point + self.position for point in outline_global]
 
         # Convert the outline points to line segments
         segments = []
-        for ct in range(-1, len(self.outline_a) - 1):
-            segments.append((self.outline_a[ct], self.outline_a[ct+1]))
+        for ct in range(-1, len(self.outline_global) - 1):
+            segments.append((self.outline_global[ct], self.outline_global[ct+1]))
 
-        self.outline_a_segments = segments
+        self.outline_global_segments = segments
 
     def draw(self, canvas):
         '''Draws the robot outline on the canvas'''
@@ -108,7 +108,7 @@ class Robot():
 
         # Convert the outline from inches to pixels
         outline = [point * CONFIG.ppi + [CONFIG.border_pixels, CONFIG.border_pixels]
-                   for point in self.outline_a]
+                   for point in self.outline_global]
 
         # Draw the polygon
         pygame.draw.polygon(canvas, COLOR, outline, THICKNESS)
@@ -179,7 +179,7 @@ class Robot():
         # collisions = []
 
         # Loop through all the robot outline line segments, checking for collisions
-        for segment_bot in self.outline_a_segments:
+        for segment_bot in self.outline_global_segments:
             for square in walls:
                 for segment_wall in square:
                     collision_points = utilities.collision(segment_bot, segment_wall)

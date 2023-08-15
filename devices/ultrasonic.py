@@ -66,14 +66,14 @@ class Ultrasonic(Device):
         for ct in range(0, self.num_rays):
             # Calculate the angle of each ray
             angle_ray = ((ct - (self.num_rays-1)/2) / self.num_rays) * self.beamwidth
-            angle_ray_a = angle_ray + self.rotation_a
+            angle_ray_global = angle_ray + self.rotation_global
 
             # Calculate the start and end points of each ray
             direction = pygame.math.Vector2(0,self.max_range)
-            ray_end = pygame.math.Vector2.rotate_rad(direction, angle_ray_a) + self.position_a
+            ray_end = pygame.math.Vector2.rotate_rad(direction, angle_ray_global) + self.position_global
 
             # Append the calculated rays
-            rays.append([self.position_a, ray_end])
+            rays.append([self.position_global, ray_end])
 
         return rays
 
@@ -111,7 +111,7 @@ class Ultrasonic(Device):
                     if not collision_points:
                         pass
                     else:
-                        rays[ct][1], ray_lengths[ct] = utilities.closest(self.position_a, collision_points)
+                        rays[ct][1], ray_lengths[ct] = utilities.closest(self.position_global, collision_points)
 
         # Update stored variables
         self.rays = rays

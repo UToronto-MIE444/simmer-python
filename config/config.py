@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
 from devices.motors import MotorSimple
+from devices.ultrasonic import Ultrasonic
 
 foldername = 'config'
 drive_filename = 'drive.csv'
@@ -80,6 +81,7 @@ robot_thickness = 0.25      # Thickness to draw robot perimeter, in inches
 robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
 
 devices = {
-    "m0": MotorSimple("m0", [2, 0], 0),
-    "m1": MotorSimple("m1", [-2, 0], 0)
+    "m0": MotorSimple("m0", [2, 0], 0, True),
+    "m1": MotorSimple("m1", [-2, 0], 0, True),
+    "u0": Ultrasonic("u0", [0, 1], 0, True)
 }

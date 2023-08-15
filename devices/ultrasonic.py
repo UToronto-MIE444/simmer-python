@@ -1,5 +1,5 @@
 '''
-Defines a SimMeR device representing a motor & wheel.
+Defines a SimMeR device representing an ultrasonic sensor.
 
 This file is part of SimMeR, an educational mechatronics robotics simulator.
 Initial development funded by the University of Toronto MIE Department.
@@ -22,8 +22,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import pygame
 from devices.device import Device
 
-class MotorSimple(Device):
-    '''Defines a basic motor & wheel'''
+class Ultrasonic(Device):
+    '''Defines an ultrasonic sensor.'''
 
     def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
         '''Initialization'''
@@ -32,17 +32,18 @@ class MotorSimple(Device):
         super().__init__(self, d_id, position, rotation, visible)
 
         # Device type (i.e. "motor" or "sensor")
-        self.d_type = "motor"
+        self.d_type = "sensor"
 
         # Device outline position
         self.outline = [
-            pygame.math.Vector2(-0.5, -0.5),
-            pygame.math.Vector2(0, 1),
-            pygame.math.Vector2(0.5, -0.5)
+            pygame.math.Vector2(-1, -0.5),
+            pygame.math.Vector2(-1, 0.5),
+            pygame.math.Vector2(1, 0.5),
+            pygame.math.Vector2(1, -0.5)
         ]
 
         # Display color
-        self.color = (0, 255, 0)
+        self.color = (0, 0, 255)
 
         # Display thickness
         self.outline_thickness = 0.25

@@ -25,7 +25,7 @@ import config.config as CONFIG
 class Device():
     '''The base class of all devices that are attached to a robot'''
 
-    def __init__(self, d_id: str, d_type: str, position: list, rotation: float):
+    def __init__(self, d_id: str, d_type: str, position: list, rotation: float, visible: bool):
         '''Defines the basic information common to all devices'''
 
         # Device ID string (alphanumeric, lowercase. i.e. "m0")
@@ -51,6 +51,7 @@ class Device():
         self.color = (0, 0, 0)
         self.outline_thickness = 0.2
         self.active_color = (255, 0, 0)
+        self.visible = visible
 
 
     def pos_update(self, bot_pos: pygame.math.Vector2, bot_rot: float):

@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Imports
 import random
+import time
 import pygame
 from maze import Maze
 from robot import Robot
@@ -103,42 +104,52 @@ canvas = pygame.display.set_mode([CANVAS_WIDTH, CANVAS_HEIGHT])
 
 ### Main Loop ###
 RUNNING = True
-while RUNNING:
+try:
+    while RUNNING:
 
-    # Check for and act on keyboard input
-    game_events = pygame.event.get()
-    RUNNING = HUD.check_input(game_events)
-    keypress = pygame.key.get_pressed()
+        # Check for and act on keyboard input
+        game_events = pygame.event.get()
+        RUNNING = HUD.check_input(game_events)
+        keypress = pygame.key.get_pressed()
 
-    # Move the robot manually
-    ROBOT.move_manual(keypress, MAZE.wall_squares)
+        # Get the command information from the tcp buffer, act, and respond
+        cmds = COMM.get_buffer_rx()
+        if cmds:
+            responses = ROBOT.command(cmds)
+            COMM.set_buffer_tx(responses)
 
-    # Recalculate the robot position
-    ROBOT.define_perimeter()
-    ROBOT.device_positions()
+        # Move the robot manually
+        ROBOT.move_manual(keypress, MAZE.wall_squares)
 
-    # Fill the background with white
-    canvas.fill((255, 255, 255))
+        # Recalculate the robot position
+        ROBOT.define_perimeter()
+        ROBOT.device_positions()
 
-    # Draw the maze checkerboard pattern
-    MAZE.draw_floor(canvas)
+        # Fill the background with white
+        canvas.fill((255, 255, 255))
 
-    # Draw the maze walls
-    MAZE.draw_walls(canvas)
+        # Draw the maze checkerboard pattern
+        MAZE.draw_floor(canvas)
 
-    # Draw the robot onto the maze
-    ROBOT.draw(canvas)
-    ROBOT.draw_devices(canvas)
+        # Draw the maze walls
+        MAZE.draw_walls(canvas)
 
-    # Update the various HUD elements
-    HUD.draw_frame_indicator(canvas)
-    HUD.draw_keys(canvas, keypress)
+        # Draw the robot onto the maze
+        ROBOT.draw(canvas)
+        ROBOT.draw_devices(canvas)
 
-    # Limit the framerate
-    HUD.clock.tick(CONFIG.frame_rate)
+        # Update the various HUD elements
+        HUD.draw_frame_indicator(canvas)
+        HUD.draw_keys(canvas, keypress)
 
-    # Flip the display (update the canvas)
-    pygame.display.flip()
+        # Limit the framerate
+        HUD.clock.tick(CONFIG.frame_rate)
+
+        # Flip the display (update the canvas)
+        pygame.display.flip()
+except KeyboardInterrupt:
+    pass
 
 # Done! Time to quit.
+print("Execution finished. Closing SimMeR.")
 pygame.quit()

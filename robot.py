@@ -161,8 +161,24 @@ class Robot():
             self.rotation -= rotation
             self.define_perimeter()
 
-    def parse_command(self):
-        '''Parse text string of commands and act on them'''
+    def command(self, cmds: list):
+        '''
+        Parse text string of commands and act on them, sending them to the appropriate
+        device.
+        '''
 
-    def build_response(self):
-        '''Builds a string response to send information back to the control algorithm'''
+        responses = []
+        for cmd in cmds:
+            # Get the target device based on ID string, return False if it doesn't exist
+            target_device = self.devices.get(cmd[0], False)
+
+            if target_device:
+                try:
+                    value = float(cmd[1])
+                    responses.append(target_device.simulate(value))
+                except ValueError:
+                    responses.append("Command data (" + cmd[1] + ") not in valid float format.")
+            else:
+                responses.append("Target device " + cmd[0] + " not found.")
+
+        return responses

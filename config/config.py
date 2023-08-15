@@ -19,7 +19,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-import numpy as np
+import math
 from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
 
@@ -46,7 +46,7 @@ str_encoding = 'utf-8'
 
 # Robot and Block information
 start_position = [8, 40]    # Robot starting location
-start_rotation = np.pi * 0  # Robot starting rotation
+start_rotation = math.pi * 0    # Robot starting rotation
 robot_width = 6             # Robot width in inches
 robot_height = 6            # Robot height in inches
 block_position = [25, 41]   # Block starting location
@@ -74,6 +74,8 @@ frame_rate = 60             # Target frame rate (Hz)
 ppi = 12                    # Number of on-screen pixels per inch on display
 border_pixels = floor_segment_length * ppi  # Size of the border surrounding the maze area
 
+background_color = (43, 122, 120)
+
 wall_thickness = 0.25       # Thickness to draw wall segments, in inches
 wall_color = (255, 0, 0)    # Tuple with wall color in (R,G,B) format
 
@@ -83,5 +85,8 @@ robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
 devices = {
     'm0': MotorSimple('m0', [2, 0], 0, False),
     'm1': MotorSimple('m1', [-2, 0], 0, False),
-    'u0': Ultrasonic('u0', [0, 1], 0, True)
+    'u0': Ultrasonic('u0', [0, 2], 0, True)
+    #'u1': Ultrasonic('u1', [2, 0], -math.pi/2, True),
+    #'u2': Ultrasonic('u2', [0, -2], math.pi, True),
+    #'u3': Ultrasonic('u3', [-2, 0], math.pi/2, True)
 }

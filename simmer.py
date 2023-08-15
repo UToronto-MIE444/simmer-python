@@ -115,11 +115,11 @@ try:
         # Move the robot manually
         ROBOT.move_manual(keypress, MAZE.wall_squares)
 
-        # Recalculate the robot and device positions
+        # Recalculate global positions of the robot and its devices
         ROBOT.update_outline()
         ROBOT.update_device_positions()
 
-        # Create a copy of the environment to pass to simulation functions
+        # Create a copy of the current environment state to pass to simulation functions
         environment = {'ROBOT': ROBOT, 'MAZE': MAZE}
 
         # Manually simulate a specific sensor or sensors
@@ -131,8 +131,8 @@ try:
             responses = ROBOT.command(cmds, environment)
             COMM.set_buffer_tx(responses)
 
-        # Fill the background with white
-        canvas.fill((255, 255, 255))
+        # Fill the background with the background color
+        canvas.fill(CONFIG.background_color)
 
         # Draw the maze checkerboard pattern
         MAZE.draw_floor(canvas)

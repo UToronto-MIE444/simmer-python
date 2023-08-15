@@ -54,7 +54,7 @@ class Ultrasonic(Device):
 
         # Simulation parameters
         self.beamwidth = 15*math.pi/180   # Beamwidth of the ultrasonic sensor
-        self.num_rays = 11              # Number of rays to test
+        self.num_rays = 7               # Number of rays to test
         self.max_range = 433            # Maximum range in inches
 
         self.rays = self._define_rays() # Define the initial rays, without detecting collisions

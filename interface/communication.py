@@ -118,12 +118,11 @@ class TCPServer:
         [3:end] - The remaining characters form a data string to tell the device what to do.
         '''
 
-        cmd_id = data[0:2]
-        cmd_data = data[3:len(data)]
-
-        # This is in a nested list to later facilitate
-        # the ability to run multiple commands at a time
-        cmds = [[cmd_id, cmd_data]]
+        cmds = []
+        for cmd in data.split(','):
+            cmd_id = cmd[0:2]
+            cmd_data = cmd[3:len(cmd)]
+            cmds.append([cmd_id, cmd_data])
 
         return cmds
 

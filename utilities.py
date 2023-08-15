@@ -21,7 +21,7 @@ import pygame
 import config.config as CONFIG
 
 def check_collision_walls(segments: list, walls: list):
-    '''Checks for a collision between the line segments and the maze walls.'''
+    '''Checks for a collision between a set of line segments and a set of wall line segments.'''
     # Some code from https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 
     def on_segment(p, q, r):

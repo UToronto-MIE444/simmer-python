@@ -115,7 +115,7 @@ class Robot():
         '''Updates all the absolute positions of all the devices and their
         perimeters.'''
 
-        for device in self.devices.values():
+        for (d_id, device) in self.devices.items():
             device.pos_update(self.position, self.rotation)
             device.define_perimeter()
 
@@ -123,7 +123,10 @@ class Robot():
         '''Draws all devices on the robot onto the canvas'''
 
         for device in self.devices.values():
-            device.draw(canvas)
+            if device.visible:
+                device.draw(canvas)
+                if device.d_type == "sensor":
+                    device.draw_measurement(canvas)
 
     def move_manual(self, keypress, walls):
         '''Move the robot manually with the keyboard'''

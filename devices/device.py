@@ -30,6 +30,7 @@ class Device():
 
         # Device ID string (alphanumeric, lowercase. i.e. "m0")
         self.d_id = d_id
+        self.d_type = ''
 
         # Device position and rotation relative to the center point of the robot
         self.position = pygame.math.Vector2(position[0], position[1])

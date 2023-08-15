@@ -121,7 +121,7 @@ try:
         # Move the robot manually
         ROBOT.move_manual(keypress, MAZE.wall_squares)
 
-        # Recalculate the robot position
+        # Recalculate the robot and device positions
         ROBOT.define_perimeter()
         ROBOT.device_positions()
 

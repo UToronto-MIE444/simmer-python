@@ -19,8 +19,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import numpy as np
 import pygame
 from devices.device import Device
+import config.config as CONFIG
+from utilities import check_collision_walls as collision
 
 class Ultrasonic(Device):
     '''Defines an ultrasonic sensor.'''
@@ -48,8 +51,55 @@ class Ultrasonic(Device):
         # Display thickness
         self.outline_thickness = 0.25
 
+        # Simulation parameters
+        self.beamwidth = 15*np.pi/180   # Beamwidth of the ultrasonic sensor
+        self.num_rays = 11              # Number of rays to test
+        self.max_range = 433            # Maximum range in inches
+
+        self._define_rays()
+
+    def _define_rays(self):
+        '''Define the rays used to get the ultrasonic distance.'''
+
+        rays = []
+        for ct in range(0, self.num_rays):
+            # Calculate the angle of each ray
+            angle_ray = ((ct - (self.num_rays-1)/2) / self.num_rays) * self.beamwidth
+            angle_ray_a = angle_ray + self.rotation_a
+
+            # Calculate the start and end points of each ray
+            direction = pygame.math.Vector2(0,self.max_range)
+            ray_end = pygame.math.Vector2.rotate_rad(direction, angle_ray_a) + self.position_a
+
+            # Append the calculated rays
+            rays.append([self.position_a, ray_end])
+
+        return rays
+
+
     def simulate(self, value: float):
-        if value:
-            return str(value) + "_response"
-        else:
-            return value
+        '''
+        Simulates the performance of an ultrasonic sensor.
+
+        Response data format
+        [0:7] - Eight byte double
+        '''
+
+        rays = self._define_rays()
+
+
+    def draw_measurement(self, canvas):
+        '''Draw ultrasonic sensor rays on the canvas'''
+
+        # Update positions. Might need to be moved later to reduce cpu cycles
+        self.rays = self._define_rays()
+
+        # Graphics options
+        thickness = int(CONFIG.ppi*0.125)
+        color = (0, 0, 255)
+
+        # Draw the lines on the canvas
+        for ray in self.rays:
+            start = [point*CONFIG.ppi + CONFIG.border_pixels for point in ray[0]]
+            end = [point*CONFIG.ppi + CONFIG.border_pixels for point in ray[1]]
+            pygame.draw.line(canvas, color, start, end, thickness)

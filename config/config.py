@@ -81,7 +81,7 @@ robot_thickness = 0.25      # Thickness to draw robot perimeter, in inches
 robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
 
 devices = {
-    "m0": MotorSimple("m0", [2, 0], 0, True),
-    "m1": MotorSimple("m1", [-2, 0], 0, True),
+    "m0": MotorSimple("m0", [2, 0], 0, False),
+    "m1": MotorSimple("m1", [-2, 0], 0, False),
     "u0": Ultrasonic("u0", [0, 1], 0, True)
 }

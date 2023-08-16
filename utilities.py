@@ -18,8 +18,36 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import math
+import random
 import pygame
 import config.config as CONFIG
+
+def add_error(value: float, pct_error: float, bounds: list = []):
+    '''
+    ADD_ERROR Adds normally distributed percent error to a measurement
+    As an input, this function takes a measurement value and an error
+    percentage (from 0 to 1). It uses randn to calculate a normally
+    distributed error and add it to the value and output it.
+
+    bounds is an optional two-value vector that can be added to specify
+    limits to the returned values. For example, if bounds is [0 1], values
+    will be limited to those within the given values
+    '''
+
+    def clamp(number, bounds):
+        return max(min(bounds[1], number), bounds[0])
+
+    # Calculate the error value
+    error_value = random.gauss(0) * pct_error * value
+    # Add to the original value
+    value_noisy = value + error_value
+    # Clamp it to the specified bounds
+    if bounds:
+        return clamp(value_noisy, bounds)
+    else:
+        return value_noisy
+
+
 
 def collision(segment1: list, segment2: list):
     '''

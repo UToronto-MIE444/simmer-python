@@ -53,9 +53,12 @@ class Ultrasonic(Device):
         self.outline_thickness = 0.25
 
         # Simulation parameters
-        self.beamwidth = 15*math.pi/180   # Beamwidth of the ultrasonic sensor
-        self.num_rays = 7               # Number of rays to test
-        self.max_range = 433            # Maximum range in inches
+        self.beamwidth = 15*math.pi/180     # Beamwidth of the ultrasonic sensor
+        self.num_rays = 7                   # Number of rays to test
+        self.min_range = 0                  # Minimum range in inches
+        self.max_range = 433                # Maximum range in inches
+        self.error_pct = 0.02               # Percent error (0-1)
+        self.reading_bounds = [self.min_range, self.max_range]  # Upper and lower bounds for sensor reading
 
         self.rays = self._define_rays() # Define the initial rays, without detecting collisions
         self.ray_lengths = [self.max_range for item in self.rays]   # The length of the rays
@@ -121,4 +124,4 @@ class Ultrasonic(Device):
         # Build the value to return
         output = statistics.median(self.ray_lengths)
 
-        return output
+        return utilities.add_error(output, self.error_pct, self.reading_bounds)

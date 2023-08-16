@@ -57,7 +57,7 @@ num_segments = 10           # Number of movement segments
 strength = [0.05, 1]	    # How intense the random drive bias is, if enabled
 
 # Control Flags and Setup
-rand_error = True           # Use either true random error generator (True) or repeatable error generation (False)
+rand_error = False           # Use either true random error generator (True) or repeatable error generation (False)
 error_seed = 5489           # Seed for random error (used if rand_error is False)
 rand_bias = True            # Use a randomized, normally distributed set of drive biases
 

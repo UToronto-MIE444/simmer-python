@@ -160,6 +160,10 @@ class Robot():
         if keypress[K_a]:
             rotation += -math.pi/60
 
+        # Move the robot
+        self.move(velocity, rotation, walls)
+
+    def move(self, velocity, rotation, walls):
         # Update robot position
         self.position += pygame.math.Vector2.rotate_rad(velocity, self.rotation)
         self.rotation += rotation

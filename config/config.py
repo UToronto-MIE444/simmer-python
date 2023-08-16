@@ -72,7 +72,7 @@ floor_segment_length = 3    # Size of floor pattern squares (inches)
 
 # Graphics information
 frame_rate = 60             # Target frame rate (Hz)
-ppi = 12                    # Number of on-screen pixels per inch on display
+ppi = 16                    # Number of on-screen pixels per inch on display
 border_pixels = floor_segment_length * ppi  # Size of the border surrounding the maze area
 
 background_color = (43, 122, 120)

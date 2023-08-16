@@ -47,8 +47,6 @@ def add_error(value: float, pct_error: float, bounds: list = []):
     else:
         return value_noisy
 
-
-
 def collision(segment1: list, segment2: list):
     '''
     Checks for a collision between two line segments in format [[x1, y1], [x2, y2]],
@@ -171,3 +169,10 @@ def closest(start: list, test_pts: list):
                 closest_pt = test_pt
 
     return closest_pt, distance_minimum
+
+def simulate_sensors(ROBOT, environment, sensors):
+    '''Simulate a list of sensors'''
+
+    for d_id in sensors:
+        if d_id in ROBOT.sensors:
+            ROBOT.sensors[d_id].simulate(0, environment)

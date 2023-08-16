@@ -117,7 +117,7 @@ try:
         if True in keypress:
             ROBOT.move_manual(keypress, MAZE.wall_squares)
         else:
-            ROBOT.move_command(MAZE.wall_squares)
+            ROBOT.move_from_command(MAZE.wall_squares)
 
         # Recalculate global positions of the robot and its devices
         ROBOT.update_outline()
@@ -127,7 +127,7 @@ try:
         environment = {'ROBOT': ROBOT, 'MAZE': MAZE}
 
         # Manually simulate a specific sensor or sensors
-        ROBOT.devices['u0'].simulate(0, environment)
+        utilities.simulate_sensors(ROBOT, environment, ['u0', 'u1', 'u2', 'u3'])
 
         # Get the command information from the tcp buffer, act, and respond
         cmds = COMM.get_buffer_rx()

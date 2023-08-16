@@ -20,11 +20,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import math
-import statistics
 import pygame
 from devices.device import Device
-import config.config as CONFIG
-import utilities
+# import config.config as CONFIG
 
 class Drive(Device):
     '''
@@ -69,9 +67,8 @@ class Drive(Device):
 
         # Get all the motors
         all_motors = []
-        for device in ROBOT.devices:
-            if device.d_type == 'motor':
-                all_motors.append(device)
+        for motor in ROBOT.motors:
+            all_motors.append(motor)
 
         # Refuse the movement command if the robot is currently moving
         is_moving = False

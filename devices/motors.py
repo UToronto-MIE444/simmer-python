@@ -50,33 +50,30 @@ class MotorSimple(Device):
 
         # Simulation parameters
         self.speed = 1          # Speed in inches per second
-        self.move_buffer = 0    # A buffer to indicate how much the motor should move before stopping
-        self.odometer = 0       # Odometer movement
+        self.move_buffer = 0    # Indicates how much the motor should move before stopping
+        self.odometer = 0       # Odometer value (in inches rotated)
 
     def simulate(self, value: float, environment: dict):
         '''Returns the odometer value.'''
         return self.odometer
 
-    def move_update(self, environment: dict):
-        '''More work needed. Might need to move this to the robot instead of the motor.'''
-
-        ROBOT = environment.get('ROBOT', False)
-        MAZE = environment.get('MAZE', False)
-        BLOCK = environment.get('BLOCK', False)
+    def move_update(self):
+        '''
+        Returns the distance the motor should move based on its speed and the
+        remaining movement buffer. Also updates the odometer sensor and decrements
+        the movement buffer.
+        '''
 
         # Clamp the distance to move to smaller of the motor speed and the remaining movement buffer
         if self.move_buffer >= 0:
-            positive = True
             move_distance = min(self.move_buffer, self.speed/CONFIG.frame_rate)
         else:
-            positive = False
             move_distance = max(self.move_buffer, -self.speed/CONFIG.frame_rate)
-
-        # Here we need to call the robot's movement routine to calculate the total movement and rotation
-        '''code goes here'''
 
         # Update the odometer value
         self.odometer += move_distance
 
         # Decrement the movement buffer with the distance the motor was rotated
         self.move_buffer -= move_distance
+
+        return move_distance

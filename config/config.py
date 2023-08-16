@@ -83,15 +83,19 @@ wall_color = (255, 0, 0)    # Tuple with wall color in (R,G,B) format
 robot_thickness = 0.25      # Thickness to draw robot perimeter, in inches
 robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
 
-devices = {
+# Add all the devices to the robot
+motors = {
     'm0': MotorSimple('m0', [2, 0], 0, False),
-    'm1': MotorSimple('m1', [-2, 0], 0, False),
-    'u0': Ultrasonic('u0', [0, 2], 0, True)
-    #'u1': Ultrasonic('u1', [2, 0], -math.pi/2, True),
-    #'u2': Ultrasonic('u2', [0, -2], math.pi, True),
-    #'u3': Ultrasonic('u3', [-2, 0], math.pi/2, True)
+    'm1': MotorSimple('m1', [-2, 0], 0, False)
 }
 
 drives = {
-    'w0': Drive('w0', [devices['m0'], devices['m1']], [1, 1])
+    'w0': Drive('w0', [motors['m0'], motors['m1']], [1, 1])
+}
+
+sensors = {
+    'u0': Ultrasonic('u0', [0, 3], 0, True),
+    'u1': Ultrasonic('u1', [1.8, 0], -math.pi/2, True),
+    'u2': Ultrasonic('u2', [0, -1.8], math.pi, True),
+    'u3': Ultrasonic('u3', [-1.8, 0], math.pi/2, True)
 }

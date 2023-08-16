@@ -68,11 +68,18 @@ class Robot():
             'collision': self.collision
         }]
 
-        # Import the list of devices from the config file
-        self.devices = CONFIG.devices
+        # Import the list of motors from the config file
+        self.motors = CONFIG.motors
 
         # Import the list of drives from the config file
         self.drives = CONFIG.drives
+
+        # Import the list of sensors from the config file
+        self.sensors = CONFIG.sensors
+
+        # All devices
+        self.devices = self.motors | self.drives | self.sensors
+
 
     def append_trail(self):
         '''Appends current position information to the robot's trail'''
@@ -120,7 +127,6 @@ class Robot():
         '''
         Updates the global positions and outlines of all the robot's devices.
         '''
-
         for (d_id, device) in self.devices.items():
             device.pos_update(self.position, self.rotation)
             device.update_outline()
@@ -163,8 +169,14 @@ class Robot():
         # Move the robot
         self.move(velocity, rotation, walls)
 
-    def move_command(self):
+    def move_from_command(self, walls):
         '''Based on all the movement "stored" in the motors'''
+
+        movements = []
+        for motor in self.motors:
+            if motor.move_buffer:
+                movements.append([motor.move_update(), motor.position, motor.rotation_global])
+
 
 
     def move(self, velocity, rotation, walls):

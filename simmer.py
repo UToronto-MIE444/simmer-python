@@ -79,7 +79,7 @@ end
 '''
 
 # Set random error seed
-if ~CONFIG.rand_error:
+if not CONFIG.rand_error:
     random.seed(CONFIG.error_seed)
 
 # Load maze walls and floor pattern

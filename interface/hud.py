@@ -62,7 +62,7 @@ class Hud:
             K_d: (255, 255, 0),
             K_q: (0, 255, 255),
             K_e: (255, 0, 255),
-            "none": (0, 0, 0,)
+            'none': (0, 0, 0,)
         }
 
         # Define pressed key indicator rectangles

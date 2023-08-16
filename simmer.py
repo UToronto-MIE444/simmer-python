@@ -26,6 +26,7 @@ from robot import Robot
 from interface.hud import Hud
 from interface.communication import TCPServer
 import config.config as CONFIG
+import utilities
 
 ### Initialization
 print('SimMeR Loading...')
@@ -78,7 +79,7 @@ end
 '''
 
 # Set random error seed
-if ~CONFIG.rand_error:
+if not CONFIG.rand_error:
     random.seed(CONFIG.error_seed)
 
 # Load maze walls and floor pattern
@@ -112,21 +113,27 @@ try:
         RUNNING = HUD.check_input(game_events)
         keypress = pygame.key.get_pressed()
 
-        # Get the command information from the tcp buffer, act, and respond
-        cmds = COMM.get_buffer_rx()
-        if cmds:
-            responses = ROBOT.command(cmds)
-            COMM.set_buffer_tx(responses)
-
         # Move the robot manually
         ROBOT.move_manual(keypress, MAZE.wall_squares)
 
-        # Recalculate the robot position
-        ROBOT.define_perimeter()
-        ROBOT.device_positions()
+        # Recalculate global positions of the robot and its devices
+        ROBOT.update_outline()
+        ROBOT.update_device_positions()
 
-        # Fill the background with white
-        canvas.fill((255, 255, 255))
+        # Create a copy of the current environment state to pass to simulation functions
+        environment = {'ROBOT': ROBOT, 'MAZE': MAZE}
+
+        # Manually simulate a specific sensor or sensors
+        ROBOT.devices['u0'].simulate(0, environment)
+
+        # Get the command information from the tcp buffer, act, and respond
+        cmds = COMM.get_buffer_rx()
+        if cmds:
+            responses = ROBOT.command(cmds, environment)
+            COMM.set_buffer_tx(responses)
+
+        # Fill the background with the background color
+        canvas.fill(CONFIG.background_color)
 
         # Draw the maze checkerboard pattern
         MAZE.draw_floor(canvas)
@@ -151,5 +158,5 @@ except KeyboardInterrupt:
     pass
 
 # Done! Time to quit.
-print("Execution finished. Closing SimMeR.")
+print('Execution finished. Closing SimMeR.')
 pygame.quit()

@@ -19,7 +19,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-import numpy as np
+import math
 import pygame
 from pygame.locals import (
     K_w,
@@ -54,18 +54,18 @@ class Robot():
             pygame.math.Vector2( self.width/2, -self.height/2)
             ]
 
-        self.outline_a = []
-        self.outline_a_segments = []
-        self.define_perimeter()
+        self.outline_global = []
+        self.outline_global_segments = []
+        self.update_outline()
 
         # Is the robot currently colliding with a maze wall?
         self.collision = False
 
         # A trail of points where the robot has moved
         self.trail = [{
-            "position": self.position,
-            "rotation": self.rotation,
-            "collision": self.collision
+            'position': self.position,
+            'rotation': self.rotation,
+            'collision': self.collision
         }]
 
         # Import the list of devices from the config file
@@ -75,27 +75,29 @@ class Robot():
         '''Appends current position information to the robot's trail'''
 
         self.trail.append({
-            "position": self.position,
-            "rotation": self.rotation,
-            "collision": self.collision
+            'position': self.position,
+            'rotation': self.rotation,
+            'collision': self.collision
         })
 
-    def define_perimeter(self):
-        '''Define the perimeter points of the robot, in inches, relative
-        to the center point of the robot.'''
+    def update_outline(self):
+        '''
+        Define the absolute outline points of the robot, in inches, relative
+        to the center point of the robot.
+        '''
 
         # Rotate the outline
-        outline_a = [point.rotate_rad(self.rotation) for point in self.outline]
+        outline_global = [point.rotate_rad(self.rotation) for point in self.outline]
 
         # Place the outline in the right location
-        self.outline_a = [point + self.position for point in outline_a]
+        self.outline_global = [point + self.position for point in outline_global]
 
         # Convert the outline points to line segments
         segments = []
-        for ct in range(-1, len(self.outline_a) - 1):
-            segments.append((self.outline_a[ct], self.outline_a[ct+1]))
+        for ct in range(-1, len(self.outline_global) - 1):
+            segments.append((self.outline_global[ct], self.outline_global[ct+1]))
 
-        self.outline_a_segments = segments
+        self.outline_global_segments = segments
 
     def draw(self, canvas):
         '''Draws the robot outline on the canvas'''
@@ -106,24 +108,30 @@ class Robot():
 
         # Convert the outline from inches to pixels
         outline = [point * CONFIG.ppi + [CONFIG.border_pixels, CONFIG.border_pixels]
-                   for point in self.outline_a]
+                   for point in self.outline_global]
 
         # Draw the polygon
         pygame.draw.polygon(canvas, COLOR, outline, THICKNESS)
 
-    def device_positions(self):
-        '''Updates all the absolute positions of all the devices and their
-        perimeters.'''
+    def update_device_positions(self):
+        '''
+        Updates the global positions and outlines of all the robot's devices.
+        '''
 
-        for device in self.devices.values():
+        for (d_id, device) in self.devices.items():
             device.pos_update(self.position, self.rotation)
-            device.define_perimeter()
+            device.update_outline()
 
     def draw_devices(self, canvas):
-        '''Draws all devices on the robot onto the canvas'''
+        '''
+        Draws all devices on the robot onto the canvas unless marked otherwise.
+        '''
 
         for device in self.devices.values():
-            device.draw(canvas)
+            if device.visible:
+                device.draw(canvas)
+                if device.d_type == 'sensor':
+                    device.draw_measurement(canvas)
 
     def move_manual(self, keypress, walls):
         '''Move the robot manually with the keyboard'''
@@ -145,23 +153,37 @@ class Robot():
 
         # Rotation
         if keypress[K_d]:
-            rotation += np.pi/60
+            rotation += math.pi/60
         if keypress[K_a]:
-            rotation += -np.pi/60
+            rotation += -math.pi/60
 
         # Update robot position
         self.position += pygame.math.Vector2.rotate_rad(velocity, self.rotation)
         self.rotation += rotation
-        self.define_perimeter()
+        self.update_outline()
 
         # Reset the position if a collision is detected
-        collisions = utilities.check_collision_walls(self.outline_a_segments, walls)
+        collisions = self.check_collision_walls(walls)
         if collisions:
             self.position -= pygame.math.Vector2.rotate_rad(velocity, self.rotation)
             self.rotation -= rotation
-            self.define_perimeter()
+            self.update_outline()
 
-    def command(self, cmds: list):
+    def check_collision_walls(self, walls: list):
+        '''
+        Checks for a collision between the robot's perimeter segments
+        and a set of wall line segments.
+        '''
+
+        # Loop through all the robot outline line segments, checking for collisions
+        for segment_bot in self.outline_global_segments:
+            for square in walls:
+                for segment_wall in square:
+                    collision_points = utilities.collision(segment_bot, segment_wall)
+                    if collision_points:
+                        return collision_points
+
+    def command(self, cmds: list, environment: dict):
         '''
         Parse text string of commands and act on them, sending them to the appropriate
         device.
@@ -175,10 +197,12 @@ class Robot():
             if target_device:
                 try:
                     value = float(cmd[1])
-                    responses.append(target_device.simulate(value))
                 except ValueError:
-                    responses.append("Command data (" + cmd[1] + ") not in valid float format.")
+                    print('Command data (' + cmd[1] + ') not in valid float format. Trying with 0.')
+                value = 0
+                responses.append(target_device.simulate(value, environment))
             else:
-                responses.append("Target device " + cmd[0] + " not found.")
+                print('Target device ' + cmd[0] + ' not found.')
+                responses.append(math.nan)
 
         return responses

@@ -17,11 +17,47 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import math
+import random
 import pygame
 import config.config as CONFIG
 
-def check_collision_walls(segments: list, walls: list):
-    '''Checks for a collision between the line segments and the maze walls.'''
+def add_error(value: float, pct_error: float, bounds: list = []):
+    '''
+    ADD_ERROR Adds normally distributed percent error to a measurement
+    As an input, this function takes a measurement value and an error
+    percentage (from 0 to 1). It uses randn to calculate a normally
+    distributed error and add it to the value and output it.
+
+    bounds is an optional two-value vector that can be added to specify
+    limits to the returned values. For example, if bounds is [0 1], values
+    will be limited to those within the given values
+    '''
+
+    def clamp(number, bounds):
+        return max(min(bounds[1], number), bounds[0])
+
+    # Calculate the error value
+    error_value = random.gauss(0) * pct_error * value
+    # Add to the original value
+    value_noisy = value + error_value
+    # Clamp it to the specified bounds
+    if bounds:
+        return clamp(value_noisy, bounds)
+    else:
+        return value_noisy
+
+
+
+def collision(segment1: list, segment2: list):
+    '''
+    Checks for a collision between two line segments in format [[x1, y1], [x2, y2]],
+    returning intersect points in list or pygame.math.Vector2 format depending on
+    the formats of segment1 and segment2.
+    0 collisions - [Empty List]
+    1 collision - [[x0, y0]]
+    2 collisions - [[x0, y0], [x1, y1]]
+    '''
     # Some code from https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 
     def on_segment(p, q, r):
@@ -85,36 +121,53 @@ def check_collision_walls(segments: list, walls: list):
         # Determinant function for finding non-colinear intersection point
         return (a[0] * b[1]) - (a[1] * b[0])
 
-    # Initialize collisions list
+    # Empty collision object
     collisions = []
 
-    # Loop through all the robot outline line segments, checking for collisions
-    for segment in segments:
-        # Check each line in the maze walls
-        for square in walls:
-            for line in square:
+    # Check whether segments intersect
+    intersections = intersect(*segment1, *segment2)
 
-                # Check whether segments intersect
-                intersections = intersect(*segment, *line)
+    # If there are intersections, find the intersection points
+    if intersections[0]:
 
-                # If there are intersections, find the intersection points
-                if intersections[0]:
+        # If there are no colinear points
+        if not intersections[1]:
+            dx = (segment1[0][0] - segment1[1][0], segment2[0][0] - segment2[1][0])
+            dy = (segment1[0][1] - segment1[1][1], segment2[0][1] - segment2[1][1])
+            div = det(dx, dy)
 
-                    # If there are no colinear points
-                    if not intersections[1]:
-                        dx = (segment[0][0] - segment[1][0], line[0][0] - line[1][0])
-                        dy = (segment[0][1] - segment[1][1], line[0][1] - line[1][1])
-                        div = det(dx, dy)
+            if div != 0:
+                d = (det(*segment1), det(*segment2))
+                x = det(d, dx)/div
+                y = det(d, dy)/div
+                collisions.append((x,y))
 
-                        if div != 0:
-                            d = (det(*segment), det(*line))
-                            x = det(d, dx)/div
-                            y = det(d, dy)/div
-                            collisions.append((x,y))
-
-                    # If there are colinear points
-                    else:
-                        for point in intersections[1]:
-                            collisions.append(point)
+        # If there are colinear points
+        else:
+            for point in intersections[1]:
+                collisions.append(point)
 
     return collisions
+
+def closest(start: list, test_pts: list):
+    '''
+    Returns the closest point in the test_pts list to the point start, and
+    the Euclidean distance between them.
+    '''
+
+    # If the list is empty, return the empty list and a nan for length
+    if not test_pts:
+        return test_pts, math.nan
+
+    # Otherwise calculate the closest point to the "start" point
+    else:
+        distance_minimum = math.inf
+        closest_pt = []
+        for test_pt in test_pts:
+            vector = pygame.math.Vector2(test_pt[0]-start[0], test_pt[1]-start[1])
+            distance = pygame.math.Vector2.magnitude(vector)
+            if distance < distance_minimum:
+                distance_minimum = distance
+                closest_pt = test_pt
+
+    return closest_pt, distance_minimum

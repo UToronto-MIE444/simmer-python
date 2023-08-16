@@ -86,7 +86,7 @@ class Maze:
         '''Generates the floor of the maze'''
 
         if not self.wall_squares:
-            sys.exit("Walls must be imported before a floor pattern is generated.")
+            sys.exit('Walls must be imported before a floor pattern is generated.')
 
         # Get the number of floor checker points
         dim_x = int(self.size_x / CONFIG.floor_segment_length)

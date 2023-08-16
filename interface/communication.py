@@ -72,16 +72,16 @@ class TCPServer:
                     # If the receive buffer is empty, act on it. Else dump the data.
                     if not self.buffer_rx:
                         self.buffer_rx = data
-                        print(f"The following data was received: {data!r}")
+                        print(f'The following data was received: {data!r}')
                         # If loopback enabled, respond with a copy of the data
                         if self.loopback:
                             if not self.buffer_tx:
                                 self.buffer_tx = data
                             # client_socket.sendall(data.encode(CONFIG.str_encoding))
                     else:
-                        print(f"The following data was received: {data!r}, but the receive buffer is full.")
+                        print(f'The following data was received: {data!r}, but the receive buffer is full.')
                         if not self.buffer_tx:
-                            self.buffer_tx = "Receive Data Buffer is full, please retry in a moment."
+                            self.buffer_tx = 'Receive Data Buffer is full, please retry in a moment.'
                     client_socket.close()
 
                 except TimeoutError:
@@ -128,8 +128,7 @@ class TCPServer:
 
     def set_buffer_tx(self, responses: str):
         '''
-        Get and clear the transmit buffer.
-        This may end up being unnecessary.
+        Put data into the transmit buffer.
         '''
 
         response_str = ''
@@ -138,5 +137,5 @@ class TCPServer:
             for response in responses:
                 if response_str:
                     response_str += '|'
-                response_str += response
+                response_str += f'{response:.3f}'
             self.buffer_tx = response_str

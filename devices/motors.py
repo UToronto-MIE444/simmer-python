@@ -58,7 +58,7 @@ class MotorSimple(Device):
         return self.odometer
 
     def move_update(self, environment: dict):
-        '''More work needed'''
+        '''More work needed. Might need to move this to the robot instead of the motor.'''
 
         ROBOT = environment.get('ROBOT', False)
         MAZE = environment.get('MAZE', False)

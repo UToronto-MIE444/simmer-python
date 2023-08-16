@@ -114,7 +114,10 @@ try:
         keypress = pygame.key.get_pressed()
 
         # Move the robot manually
-        ROBOT.move_manual(keypress, MAZE.wall_squares)
+        if True in keypress:
+            ROBOT.move_manual(keypress, MAZE.wall_squares)
+        else:
+            ROBOT.move_command(MAZE.wall_squares)
 
         # Recalculate global positions of the robot and its devices
         ROBOT.update_outline()

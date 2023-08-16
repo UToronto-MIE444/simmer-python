@@ -137,7 +137,7 @@ class Robot():
                     device.draw_measurement(canvas)
 
     def move_manual(self, keypress, walls):
-        '''Move the robot manually with the keyboard'''
+        '''Determine the direction to move & rotate the robot based on keypresses.'''
 
         velocity = pygame.math.Vector2(0, 0)
         rotation = 0
@@ -163,7 +163,12 @@ class Robot():
         # Move the robot
         self.move(velocity, rotation, walls)
 
+    def move_command(self):
+        '''Based on all the movement "stored" in the motors'''
+
+
     def move(self, velocity, rotation, walls):
+        '''Moves the robot, checking for collisions.'''
         # Update robot position
         self.position += pygame.math.Vector2.rotate_rad(velocity, self.rotation)
         self.rotation += rotation

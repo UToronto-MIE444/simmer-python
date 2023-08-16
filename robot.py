@@ -170,12 +170,15 @@ class Robot():
         self.move(velocity, rotation, walls)
 
     def move_from_command(self, walls):
-        '''Based on all the movement "stored" in the motors'''
+        '''Move the robot based on all the movement "stored" in the motors'''
 
-        movements = []
-        for motor in self.motors:
+        active_motors = []
+        for (d_id, motor) in self.motors.items():
             if motor.move_buffer:
-                movements.append([motor.move_update(), motor.position, motor.rotation_global])
+                active_motors.append(motor)
+
+        if active_motors:
+            pass
 
 
 

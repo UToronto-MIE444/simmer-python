@@ -25,11 +25,13 @@ import config.config as CONFIG
 class Device():
     '''The base class of all devices that are attached to a robot'''
 
-    def __init__(self, d_id: str, d_type: str, position: list, rotation: float, visible: bool):
+    def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
         '''Defines the basic information common to all devices'''
 
         # Device ID string (alphanumeric, lowercase. i.e. "m0")
         self.d_id = d_id
+
+        # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = ''
 
         # Device position and rotation relative to the center point of the robot

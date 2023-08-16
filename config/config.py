@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import math
 from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
+from devices.drive import Drive
 
 foldername = 'config'
 drive_filename = 'drive.csv'
@@ -89,4 +90,8 @@ devices = {
     #'u1': Ultrasonic('u1', [2, 0], -math.pi/2, True),
     #'u2': Ultrasonic('u2', [0, -2], math.pi, True),
     #'u3': Ultrasonic('u3', [-2, 0], math.pi/2, True)
+}
+
+drives = {
+    'w0': Drive('w0', [devices['m0'], devices['m1']], [1, 1])
 }

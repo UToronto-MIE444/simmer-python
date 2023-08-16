@@ -71,6 +71,9 @@ class Robot():
         # Import the list of devices from the config file
         self.devices = CONFIG.devices
 
+        # Import the list of drives from the config file
+        self.drives = CONFIG.drives
+
     def append_trail(self):
         '''Appends current position information to the robot's trail'''
 

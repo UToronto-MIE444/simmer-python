@@ -33,9 +33,9 @@ class Ultrasonic(Device):
         '''Initialization'''
 
         # Call super initialization
-        super().__init__(self, d_id, position, rotation, visible)
+        super().__init__(d_id, position, rotation, visible)
 
-        # Device type (i.e. "motor" or "sensor")
+        # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = 'sensor'
 
         # Device outline position

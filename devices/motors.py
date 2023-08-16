@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import pygame
 from devices.device import Device
+import config.config as CONFIG
 
 class MotorSimple(Device):
     '''Defines a basic motor & wheel'''
@@ -29,9 +30,9 @@ class MotorSimple(Device):
         '''Initialization'''
 
         # Call super initialization
-        super().__init__(self, d_id, position, rotation, visible)
+        super().__init__(d_id, position, rotation, visible)
 
-        # Device type (i.e. "motor" or "sensor")
+        # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = 'motor'
 
         # Device outline position
@@ -47,8 +48,35 @@ class MotorSimple(Device):
         # Display thickness
         self.outline_thickness = 0.25
 
-    def simulate(self, value: float):
-        if value:
-            return str(value) + '_response'
+        # Simulation parameters
+        self.speed = 1          # Speed in inches per second
+        self.move_buffer = 0    # A buffer to indicate how much the motor should move before stopping
+        self.odometer = 0       # Odometer movement
+
+    def simulate(self, value: float, environment: dict):
+        '''Returns the odometer value.'''
+        return self.odometer
+
+    def move_update(self, environment: dict):
+        '''More work needed'''
+
+        ROBOT = environment.get('ROBOT', False)
+        MAZE = environment.get('MAZE', False)
+        BLOCK = environment.get('BLOCK', False)
+
+        # Clamp the distance to move to smaller of the motor speed and the remaining movement buffer
+        if self.move_buffer >= 0:
+            positive = True
+            move_distance = min(self.move_buffer, self.speed/CONFIG.frame_rate)
         else:
-            return value
+            positive = False
+            move_distance = max(self.move_buffer, -self.speed/CONFIG.frame_rate)
+
+        # Here we need to call the robot's movement routine to calculate the total movement and rotation
+        '''code goes here'''
+
+        # Update the odometer value
+        self.odometer += move_distance
+
+        # Decrement the movement buffer with the distance the motor was rotated
+        self.move_buffer -= move_distance

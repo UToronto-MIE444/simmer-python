@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import math
+import statistics
 import pygame
 from pygame.locals import (
     K_w,
@@ -147,24 +148,25 @@ class Robot():
 
         velocity = pygame.math.Vector2(0, 0)
         rotation = 0
+        conversion = 60/(CONFIG.ppi*CONFIG.frame_rate)
 
         # Forward/backward movement
         if keypress[K_w]:
-            velocity += [0, 1/CONFIG.ppi]
+            velocity += [0, 1 * conversion]
         if keypress[K_s]:
-            velocity += [0, -1/CONFIG.ppi]
+            velocity += [0, -1 * conversion]
 
         # Left/right movement
         if keypress[K_q]:
-            velocity += [1/CONFIG.ppi, 0]
+            velocity += [1 * conversion, 0]
         if keypress[K_e]:
-            velocity += [-1/CONFIG.ppi, 0]
+            velocity += [-1 * conversion, 0]
 
         # Rotation
         if keypress[K_d]:
-            rotation += math.pi/60
+            rotation += math.pi/CONFIG.frame_rate
         if keypress[K_a]:
-            rotation += -math.pi/60
+            rotation += -math.pi/CONFIG.frame_rate
 
         # Move the robot
         self.move(velocity, rotation, walls)
@@ -173,12 +175,31 @@ class Robot():
         '''Move the robot based on all the movement "stored" in the motors'''
 
         active_motors = []
+        passive_motors = []
         for (d_id, motor) in self.motors.items():
             if motor.move_buffer:
                 active_motors.append(motor)
+            else:
+                passive_motors.append(motor)
 
         if active_motors:
-            pass
+
+            # Calculate the point to rotate about (centroid of all inactive motors)
+            centroid = [0,0]
+            if passive_motors:
+                centroid[0] = statistics.mean([motor.position[0] for motor in passive_motors])
+                centroid[1] = statistics.mean([motor.position[1] for motor in passive_motors])
+
+            velocity = [0,0]
+            rotation = 0
+            for motor in active_motors:
+                location = motor.position
+                direction = motor.rotation_global
+                magnitude = motor.move_update
+
+        else:
+            return None
+
 
 
 

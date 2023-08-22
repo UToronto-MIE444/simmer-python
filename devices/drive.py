@@ -40,7 +40,7 @@ class Drive(Device):
         self.d_type = 'drive'
 
         # Verify that the list of motors and the number of directions provided are equal
-        if not len(motors) == len(motor_direction):
+        if len(motors) != len(motor_direction):
             raise Exception('Lists "motors" and "motor_direction" must be the same length')
 
         # Device outline - use minimal points since the device is abstract and won't be drawn
@@ -50,10 +50,16 @@ class Drive(Device):
         ]
 
         # Movement values for each direction when this drive command is executed
-        # Only one of these SHOULD be non-zero for each drive direction
+        # Only one of these two SHOULD be non-zero for each drive direction
         self.velocity = pygame.math.Vector2(drive_velocity[0] / CONFIG.frame_rate,  # inch/frame
                                             drive_velocity[1] / CONFIG.frame_rate)  # inch/frame
-        self.rotation = drive_velocity[2] / CONFIG.frame_rate                       # rad/frame
+        self.rotation_speed = drive_velocity[2] / CONFIG.frame_rate                       # rad/frame
+
+        # Get the unit vector of the velocity (the direction the robot will move)
+        if self.velocity != pygame.math.Vector2(0,0):
+            self.velocity_direction = self.velocity.normalize()
+        else:
+            self.velocity_direction = self.velocity
 
         # Movement buffer (to split a movement command into multiple frames)
         self.move_buffer = 0
@@ -65,33 +71,36 @@ class Drive(Device):
         # For linear movement, drive units are inches, for rotational movement, units are radians
         self.motor_direction = motor_direction
 
-        # Get the unit vector of the velocity (the direction the robot will move)
-        if not (self.velocity == pygame.math.Vector2(0,0)):
-            velocity_direction = self.velocity.normalize()
-        else:
-            velocity_direction = self.velocity
-
         # For each motor, calculate the amount that 1 unit of movement (linear inch or rotational radian)
         # for this drive will add to its odometer reading. Only active motors will be incremented, and motors
         # not angled in the direction of motion are assumed to slip the necessary amount to get appropriate
         # motion in the defined direction.
-        self.odometer_increment = []
+        self.odometer_multiplier = []
         for (motor, direction) in zip(motors, motor_direction):
+
             # Calculate the multiplier for linear motion
-            # Increase due to off-angle wheel slippage
-            lin_compensation = math.cos(velocity_direction.angle_to(motor.point_vector))
-            # DISTANCE_VALUE * mDir / slippage
-            linear_multiplier = direction / lin_compensation
+            if self.velocity.length():
+                # Increase due to off-angle wheel slippage
+                angle = math.radians(self.velocity_direction.angle_to(motor.point_vector))
+                slip_compensation = abs(math.cos(angle))
+                # DISTANCE_VALUE * mDir / slippage
+                multiplier = direction / slip_compensation
 
             # Calculate the multiplier for rotational motion
-            ideal_rotation_direction = motor.position.rotate_rad(math.pi/2)
-            # Increase due to off-angle wheel slippage
-            rot_compensation = math.cos(ideal_rotation_direction.angle_to(motor.point_vector))
-            # RADIAN_VALUE / (2*pi) * 2*pi*r / slippage
-            rotation_multiplier = 1 / (2*math.pi) * 2*math.pi*motor.position.length() / rot_compensation
+            elif self.rotation_speed:
+                ideal_rotation_direction = motor.position.rotate_rad(math.pi/2)
+                # Increase due to off-angle wheel slippage
+                angle = math.radians(ideal_rotation_direction.angle_to(motor.point_vector))
+                slip_compensation = abs(math.cos(angle))
+                # RADIAN_VALUE/(2*pi) * 2*pi*r * mDir / slippage
+                multiplier = 1 / (2*math.pi) * 2*math.pi*motor.position.length() * direction / slip_compensation
+
+            # If neither present, set to 0
+            else:
+                multiplier = 0
 
             # Only one of these should ever be non-zero at a time, so we can add both together and store
-            self.odometer_increment.append(linear_multiplier + rotation_multiplier)
+            self.odometer_multiplier.append(multiplier)
 
 
     def simulate(self, value: float, environment: dict):
@@ -103,7 +112,7 @@ class Drive(Device):
         BLOCK = environment.get('BLOCK', False)
 
         # Refuse the movement command if the robot is currently moving
-        for drive in ROBOT.drives:
+        for drive in ROBOT.drives.values():
             if drive.move_buffer:
                 return math.nan
 
@@ -115,37 +124,23 @@ class Drive(Device):
 
     def move_update(self):
         '''
-        Returns the distance the motor should move based on its speed and the
+        Returns the amount the drive should move based on its speed and the
         remaining movement buffer. Also updates the odometer sensor and decrements
         the movement buffer.
         '''
 
-        # Clamp the distance to move to smaller of the motor speed and the remaining movement buffer
+        # Clamp the amount to move to smaller of the motor speed and the remaining movement buffer
+        # Add rotation and velocity because one should always be zero
         if self.move_buffer >= 0:
-            move_distance = pygame.math.Vector3(min(self.move_buffer, self.velocity.x),
-                                                min(self.move_buffer, self.velocity.y))
+            move_amount = min(self.move_buffer, self.rotation_speed + self.velocity.length())
         else:
-            move_distance = pygame.math.Vector3(max(self.move_buffer, self.velocity.x),
-                                                max(self.move_buffer, self.velocity.y))
+            move_amount = max(self.move_buffer, -(self.rotation_speed + self.velocity.length()))
 
         # Update the odometer value
-        for motor in self.motors:
-            pass
+        for (motor, increment) in zip(self.motors, self.odometer_multiplier):
+            motor.odometer += move_amount * increment
 
-        # Decrement the movement buffer with the distance the motor was rotated
-        self.move_buffer -= move_distance
+        # Decrement the movement buffer with the amount the drive moved
+        self.move_buffer -= move_amount
 
-        return move_distance
-
-    def update(self):
-        '''
-        Updates the position and/or rotation of the robot.
-        '''
-
-        # Transformational (linear) Movement
-        if self.move_buffer >= 0:
-            move_distance = min(self.move_buffer, self.speed/CONFIG.frame_rate)
-        else:
-            move_distance = max(self.move_buffer, -self.speed/CONFIG.frame_rate)
-
-        # Initial position of the robot
+        return move_amount

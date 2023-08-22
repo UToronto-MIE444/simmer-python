@@ -128,7 +128,7 @@ class Robot():
         '''
         Updates the global positions and outlines of all the robot's devices.
         '''
-        for (d_id, device) in self.devices.items():
+        for device in self.devices.values():
             device.pos_update(self.position, self.rotation)
             device.update_outline()
 
@@ -146,22 +146,22 @@ class Robot():
     def move_manual(self, keypress, walls):
         '''Determine the direction to move & rotate the robot based on keypresses.'''
 
-        velocity = pygame.math.Vector2(0, 0)
+        move_vector = pygame.math.Vector2(0, 0)
         rotation = 0
         speed = 6 / CONFIG.frame_rate
         rotation_speed = 1/3 * 2*math.pi / CONFIG.frame_rate
 
         # Forward/backward movement
         if keypress[K_w]:
-            velocity += [0, speed]
+            move_vector += [0, speed]
         if keypress[K_s]:
-            velocity += [0, -speed]
+            move_vector += [0, -speed]
 
         # Left/right movement
         if keypress[K_q]:
-            velocity += [speed, 0]
+            move_vector += [speed, 0]
         if keypress[K_e]:
-            velocity += [-speed, 0]
+            move_vector += [-speed, 0]
 
         # Rotation
         if keypress[K_d]:
@@ -170,36 +170,21 @@ class Robot():
             rotation += -rotation_speed
 
         # Move the robot
-        self.move(velocity, rotation, walls)
+        self.move(move_vector, rotation, walls)
 
     def move_from_command(self, walls):
-        '''Move the robot based on all the movement "stored" in the motors'''
+        '''Move the robot based on all the movement "stored" in the drives'''
 
-        active_motors = []
-        passive_motors = []
-        for (d_id, motor) in self.motors.items():
-            if motor.move_buffer:
-                active_motors.append(motor)
-            else:
-                passive_motors.append(motor)
+        move_vector = pygame.math.Vector2(0, 0)
+        rotation = 0
+        for drive in self.drives.values():
+            # Get the movement amount from the drive, incrementing odometers
+            move_amount = drive.move_update()
+            move_vector += drive.velocity_direction * move_amount
+            rotation += drive.rotation_speed * move_amount
 
-        if active_motors:
-
-            # Calculate the point to rotate about (centroid of all inactive motors)
-            centroid = [0,0]
-            if passive_motors:
-                centroid[0] = statistics.mean([motor.position[0] for motor in passive_motors])
-                centroid[1] = statistics.mean([motor.position[1] for motor in passive_motors])
-
-            velocity = [0,0]
-            rotation = 0
-            for motor in active_motors:
-                location = motor.position
-                direction = motor.rotation_global
-                magnitude = motor.move_update
-
-        else:
-            return None
+        # Move the robot
+        self.move(move_vector, rotation, walls)
 
     def move(self, velocity, rotation, walls):
         '''Moves the robot, checking for collisions.'''
@@ -245,7 +230,7 @@ class Robot():
                     value = float(cmd[1])
                 except ValueError:
                     print('Command data (' + cmd[1] + ') not in valid float format. Trying with 0.')
-                value = 0
+                    value = 0
                 responses.append(target_device.simulate(value, environment))
             else:
                 print('Target device ' + cmd[0] + ' not found.')

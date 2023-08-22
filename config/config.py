@@ -101,7 +101,8 @@ motors = {
 }
 
 drives = {
-    'w0': Drive('w0', [0, 1, 0], [motors['m0'], motors['m1']], [1, 1])
+    'w0': Drive('w0', [0, 6, 0], [motors['m0'], motors['m1']], [1, 1]),
+    'r0': Drive('r0', [0, 0, math.pi*2/3], [motors['m0'], motors['m1']], [1, -1])
 }
 
 sensors = {

@@ -181,7 +181,7 @@ class Robot():
             move_amount = drive.move_update()
             move_vector += drive.velocity_direction * move_amount
             if drive.rotation_speed:
-                rotation += math.copysign(move_amount, drive.rotation_speed)
+                rotation += move_amount
 
         # Move the robot
         self.move(move_vector, rotation, walls)

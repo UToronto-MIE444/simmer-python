@@ -53,10 +53,10 @@ class Drive(Device):
         # Only one of these two SHOULD be non-zero for each drive direction
         self.velocity = pygame.math.Vector2(drive_velocity[0] / CONFIG.frame_rate,  # inch/frame
                                             drive_velocity[1] / CONFIG.frame_rate)  # inch/frame
-        self.rotation_speed = drive_velocity[2] / CONFIG.frame_rate                       # rad/frame
+        self.rotation_speed = drive_velocity[2] / CONFIG.frame_rate                 # deg/frame
 
         # Get the unit vector of the velocity (the direction the robot will move)
-        if self.velocity != pygame.math.Vector2(0,0):
+        if self.velocity != pygame.math.Vector2(0, 0):
             self.velocity_direction = self.velocity.normalize()
         else:
             self.velocity_direction = self.velocity
@@ -68,14 +68,21 @@ class Drive(Device):
         self.motors = motors
 
         # Amount to increment odometers (in inches) for each drive movement unit
-        # For linear movement, drive units are inches, for rotational movement, units are radians
+        # For linear movement, drive units are inches, for rotational movement, units are degrees
         self.motor_direction = motor_direction
 
-        # For each motor, calculate the amount that 1 unit of movement (linear inch or rotational radian)
-        # for this drive will add to its odometer reading. Only active motors will be incremented, and motors
-        # not angled in the direction of motion are assumed to slip the necessary amount to get appropriate
-        # motion in the defined direction.
-        self.odometer_multiplier = []
+        # Get the odometer multipliers
+        self.odometer_multiplier = self._get_odometer_multiplier(motors, motor_direction)
+
+
+    def _get_odometer_multiplier(self, motors, motor_direction):
+        '''
+        For each motor, calculate the amount that 1 unit of movement (linear inch or
+        rotational radian) for this drive will add to its odometer reading. Only active motors
+        will be incremented, and motors not angled in the direction of motion are assumed to
+        slip the necessary amount to get appropriate motion in the defined direction.
+        '''
+        odometer_multiplier = []
         for (motor, direction) in zip(motors, motor_direction):
 
             # Calculate the multiplier for linear motion
@@ -93,14 +100,16 @@ class Drive(Device):
                 angle = math.radians(ideal_rotation_direction.angle_to(motor.point_vector))
                 slip_compensation = abs(math.cos(angle))
                 # DEG_VALUE/360 * 2*pi*r * mDir / slippage
-                multiplier = 1 / 360 * 2*math.pi*motor.position.length() * direction / slip_compensation
+                multiplier = 1/360 * 2*math.pi*motor.position.length() * direction / slip_compensation
 
             # If neither present, set to 0
             else:
                 multiplier = 0
 
-            # Only one of these should ever be non-zero at a time, so we can add both together and store
-            self.odometer_multiplier.append(multiplier)
+            # Only one of these should ever be non-zero at a time, so we can add both together
+            odometer_multiplier.append(multiplier)
+
+        return odometer_multiplier
 
 
     def simulate(self, value: float, environment: dict):
@@ -108,8 +117,6 @@ class Drive(Device):
         Tells the robot to move in a direction, unless it is already moving.
         '''
         ROBOT = environment.get('ROBOT', False)
-        MAZE = environment.get('MAZE', False)
-        BLOCK = environment.get('BLOCK', False)
 
         # Refuse the movement command if the robot is currently moving
         for drive in ROBOT.drives.values():
@@ -121,6 +128,7 @@ class Drive(Device):
 
         # Return "inf" if the command is accepted and acknowledged
         return math.inf
+
 
     def move_update(self):
         '''

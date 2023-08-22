@@ -157,6 +157,7 @@ try:
 
         # Flip the display (update the canvas)
         pygame.display.flip()
+
 except KeyboardInterrupt:
     pass
 

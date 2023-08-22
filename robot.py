@@ -179,10 +179,11 @@ class Robot():
         rotation = 0
         for drive in self.drives.values():
             # Get the movement amount from the drive, incrementing odometers
+            if drive.move_buffer == 0:
+                continue
             movement = drive.move_update()
             move_vector += movement[0]
-            if drive.rotation_speed:
-                rotation += movement[1]
+            rotation += movement[1]
 
         # Move the robot
         self.move(move_vector, rotation, walls)

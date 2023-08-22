@@ -23,6 +23,7 @@ import math
 import pygame
 import pygame.math as pm
 from devices.device import Device
+import utilities
 import config.config as CONFIG
 
 class Drive(Device):
@@ -71,6 +72,17 @@ class Drive(Device):
 
         # Get the odometer multipliers
         self.odometer_multiplier = self._get_odometer_multiplier(info['motors'], info['motor_direction'])
+
+        # Error and bias
+        default = {'x':0, 'y':0, 'rotation':0}
+
+        self.error_linear =  [info.get('error', default).get('x', 0),
+                              info.get('error', default).get('y', 0)]
+        self.error_rotation = info.get('error', default).get('rotation', 0)
+
+        self.bias_linear =   [info.get('bias', default).get('x', 0),
+                              info.get('bias', default).get('y', 0)]
+        self.bias_rotation =  info.get('bias', default).get('rotation', 0)
 
         # Movement buffer (to split a movement command into multiple frames)
         self.move_buffer = 0
@@ -159,7 +171,10 @@ class Drive(Device):
             rotation = move_amount
 
         # Add bias and error to the drive (TBC)
+        move_vector_error = [utilities.add_error(move_vector[0] + move_amount * self.bias_linear[0], self.error_linear[0]),
+                             utilities.add_error(move_vector[1] + move_amount * self.bias_linear[1], self.error_linear[1])]
+        rotation_error =     utilities.add_error(rotation       + move_amount * self.bias_rotation,  self.error_rotation)
 
         # Update gyroscope measurement (TBC)
 
-        return [move_vector, rotation]
+        return [move_vector_error, rotation_error]

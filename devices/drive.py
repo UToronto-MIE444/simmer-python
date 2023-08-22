@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
 import pygame
+import pygame.math as pm
 from devices.device import Device
 import config.config as CONFIG
 
@@ -29,50 +30,50 @@ class Drive(Device):
     Defines a component of the robot's drive system. This is an abstract class that
     '''
 
-    def __init__(self, d_id: str, drive_velocity: list, motors: list, motor_direction: list):
+    def __init__(self, info: dict):
         '''Initialization'''
 
         # Call super initialization
         # Because the drive device is abstract, hardcode position and rotation as 0, never display
-        super().__init__(d_id, [0,0], 0, False)
+        super().__init__(info['id'], info.get('position', [0, 0]), info.get('rotation', 0), info.get('visible', False))
 
         # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = 'drive'
 
         # Verify that the list of motors and the number of directions provided are equal
-        if len(motors) != len(motor_direction):
+        if len(info['motors']) != len(info['motor_direction']):
             raise Exception('Lists "motors" and "motor_direction" must be the same length')
 
         # Device outline - use minimal points since the device is abstract and won't be drawn
-        self.outline = [
-            pygame.math.Vector2(0, 1),
-            pygame.math.Vector2(0, -1)
-        ]
+        self.outline = info.get('outline', [
+            pm.Vector2(0, 1),
+            pm.Vector2(0, -1)
+        ])
 
         # Movement values for each direction when this drive command is executed
-        # Only one of these two SHOULD be non-zero for each drive direction
-        self.velocity = pygame.math.Vector2(drive_velocity[0] / CONFIG.frame_rate,  # inch/frame
-                                            drive_velocity[1] / CONFIG.frame_rate)  # inch/frame
-        self.rotation_speed = drive_velocity[2] / CONFIG.frame_rate                 # deg/frame
+        # ONLY ONE OF THESE TWO should be non-zero for each drive
+        self.velocity = pm.Vector2(info['velocity'][0] / CONFIG.frame_rate, # inch/frame
+                                   info['velocity'][1] / CONFIG.frame_rate) # inch/frame
+        self.rotation_speed =      info['ang_velocity'] / CONFIG.frame_rate # deg/frame
 
         # Get the unit vector of the velocity (the direction the robot will move)
-        if self.velocity != pygame.math.Vector2(0, 0):
+        if self.velocity != pm.Vector2(0, 0):
             self.velocity_direction = self.velocity.normalize()
         else:
             self.velocity_direction = self.velocity
 
-        # Movement buffer (to split a movement command into multiple frames)
-        self.move_buffer = 0
-
-        # Motors whose odometers should be incremeneted
-        self.motors = motors
+        # Motors whose odometers should be incremented when the drive is active
+        self.motors = info['motors']
 
         # Amount to increment odometers (in inches) for each drive movement unit
         # For linear movement, drive units are inches, for rotational movement, units are degrees
-        self.motor_direction = motor_direction
+        self.motor_direction = info['motor_direction']
 
         # Get the odometer multipliers
-        self.odometer_multiplier = self._get_odometer_multiplier(motors, motor_direction)
+        self.odometer_multiplier = self._get_odometer_multiplier(info['motors'], info['motor_direction'])
+
+        # Movement buffer (to split a movement command into multiple frames)
+        self.move_buffer = 0
 
 
     def _get_odometer_multiplier(self, motors, motor_direction):

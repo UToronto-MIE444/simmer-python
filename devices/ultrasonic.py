@@ -22,6 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import math
 import statistics
 import pygame
+import pygame.math as pm
 from devices.device import Device
 import config.config as CONFIG
 import utilities
@@ -29,35 +30,36 @@ import utilities
 class Ultrasonic(Device):
     '''Defines an ultrasonic sensor.'''
 
-    def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
+    # def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
+    def __init__(self, info: dict):
         '''Initialization'''
 
         # Call super initialization
-        super().__init__(d_id, position, rotation, visible)
+        super().__init__(info['id'], info['position'], info['rotation'], info['visible'])
 
         # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = 'sensor'
 
         # Device outline position
-        self.outline = [
-            pygame.math.Vector2(-1, -0.5),
-            pygame.math.Vector2(-1, 0.5),
-            pygame.math.Vector2(1, 0.5),
-            pygame.math.Vector2(1, -0.5)
-        ]
+        self.outline = info.get('outline', [
+            pm.Vector2(-1, -0.5),
+            pm.Vector2(-1, 0.5),
+            pm.Vector2(1, 0.5),
+            pm.Vector2(1, -0.5)
+        ])
 
         # Display color
-        self.color = (0, 0, 255)
+        self.color = info.get('color', (0, 0, 255))
 
         # Display thickness
-        self.outline_thickness = 0.25
+        self.outline_thickness = info.get('outline_thickness', 0.25)
 
         # Simulation parameters
-        self.beamwidth = 15     # Beamwidth of the ultrasonic sensor
-        self.num_rays = 7       # Number of rays to test
-        self.min_range = 0      # Minimum range in inches
-        self.max_range = 433    # Maximum range in inches
-        self.error_pct = 0.02   # Percent error (0-1)
+        self.beamwidth = info.get('beamwidth', 15)  # Beamwidth of the ultrasonic sensor
+        self.num_rays = info.get('num_rays', 7)     # Number of rays to test
+        self.min_range = info.get('min_range', 0)   # Minimum range in inches
+        self.max_range = info.get('min_range', 433) # Maximum range in inches
+        self.error_pct = info.get('error', 0.02)    # Percent error (0-1)
         self.reading_bounds = [self.min_range, self.max_range]  # Upper and lower bounds for sensor reading
 
         self.rays = self._define_rays() # Define the initial rays, without detecting collisions

@@ -20,60 +20,39 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import pygame
+import pygame.math as pm
 from devices.device import Device
 import config.config as CONFIG
 
 class MotorSimple(Device):
     '''Defines a basic motor & wheel'''
 
-    def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
+    # def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
+    def __init__(self, info: dict):
         '''Initialization'''
 
         # Call super initialization
-        super().__init__(d_id, position, rotation, visible)
+        super().__init__(info['id'], info['position'], info['rotation'], info['visible'])
 
         # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = 'motor'
 
         # Device outline position
-        self.outline = [
-            pygame.math.Vector2(-0.5, -0.5),
-            pygame.math.Vector2(0, 1),
-            pygame.math.Vector2(0.5, -0.5)
-        ]
+        self.outline = info.get('outline', [
+            pm.Vector2(-0.5, -0.5),
+            pm.Vector2(0, 1),
+            pm.Vector2(0.5, -0.5)
+        ])
 
         # Display color
-        self.color = (0, 255, 0)
+        self.color = info.get('color', (0, 255, 0))
 
         # Display thickness
-        self.outline_thickness = 0.25
+        self.outline_thickness = info.get('outline_thickness', 0.25)
 
         # Simulation parameters
-        self.speed = 1          # Speed in inches per second
-        self.move_buffer = 0    # Indicates how much the motor should move before stopping
         self.odometer = 0       # Odometer value (in inches rotated)
 
     def simulate(self, value: float, environment: dict):
         '''Returns the odometer value.'''
         return self.odometer
-
-    def move_update(self):
-        '''
-        Returns the distance the motor should move based on its speed and the
-        remaining movement buffer. Also updates the odometer sensor and decrements
-        the movement buffer.
-        '''
-
-        # Clamp the distance to move to smaller of the motor speed and the remaining movement buffer
-        if self.move_buffer >= 0:
-            move_distance = min(self.move_buffer, self.speed/CONFIG.frame_rate)
-        else:
-            move_distance = max(self.move_buffer, -self.speed/CONFIG.frame_rate)
-
-        # Update the odometer value
-        self.odometer += move_distance
-
-        # Decrement the movement buffer with the distance the motor was rotated
-        self.move_buffer -= move_distance
-
-        return move_distance

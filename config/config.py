@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import math
+import pygame.math as pm
 from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
 from devices.drive import Drive
@@ -86,28 +87,77 @@ robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
 
 
 ### DEVICE CONFIGURATION ###
-m0 = {
+# Motors
+m0_info = {
     'id': 'm0',
     'position': [2, 0],
     'rotation': 0,
     'visible': False
 }
 
+m1_info = {
+    'id': 'm0',
+    'position': [-2, 0],
+    'rotation': 0,
+    'visible': False
+}
 
-# Add all the devices to the robot
 motors = {
-    'm0': MotorSimple('m0', [2, 0], 0, False),
-    'm1': MotorSimple('m1', [-2, 0], 0, False)
+    'm0': MotorSimple(m0_info),
+    'm1': MotorSimple(m1_info)
+}
+
+# Drives
+w0_info = {
+    'id': 'w0',
+    'velocity': [0, 6],
+    'ang_velocity': 0,
+    'motors': [motors['m0'], motors['m1']],
+    'motor_direction': [1, 1],
+    'bias': {'x': 0, 'y': 0, 'rotation': 0},
+    'error': {'x': 0.02, 'y': 0.05, 'rotation': 0.02}
+}
+
+d0_info = {
+    'id': 'd0',
+    'velocity': [6, 0],
+    'ang_velocity': 0,
+    'motors': [motors['m0'], motors['m1']],
+    'motor_direction': [1, 1],
+    'bias': {'x': 0, 'y': 0, 'rotation': 0},
+    'error': {'x': 0.05, 'y': 0.02, 'rotation': 0.02}
+}
+
+r0_info = {
+    'id': 'r0',
+    'velocity': [0, 0],
+    'ang_velocity': 120,
+    'motors': [motors['m0'], motors['m1']],
+    'motor_direction': [1, -1],
+    'bias': {'x': 0, 'y': 0, 'rotation': 0},
+    'error': {'x': 0.003, 'y': 0.003, 'rotation': 0.02}
 }
 
 drives = {
-    'w0': Drive('w0', [0, 6, 0], [motors['m0'], motors['m1']], [1, 1]),
-    'r0': Drive('r0', [0, 0, 120], [motors['m0'], motors['m1']], [1, -1])
+    'w0': Drive(w0_info),
+    'r0': Drive(r0_info)
+}
+
+# Sensors
+u0_info = {
+    'id': 'u0',
+    'position': [0, 3],
+    'rotation': 0,
+    'error': 0.02,
+    'outline': [
+        pm.Vector2(-1, -0.5),
+        pm.Vector2(-1, 0.5),
+        pm.Vector2(1, 0.5),
+        pm.Vector2(1, -0.5)
+    ],
+    'visible': True
 }
 
 sensors = {
-    'u0': Ultrasonic('u0', [0, 3], 0, True)
-    #'u1': Ultrasonic('u1', [1.8, 0], -90, True),
-    #'u2': Ultrasonic('u2', [0, -1.8], 90, True),
-    #'u3': Ultrasonic('u3', [-1.8, 0], 90, True)
+    'u0': Ultrasonic(u0_info)
 }

@@ -1,5 +1,5 @@
 '''
-This class stores the configuration information for the simulator.
+This file stores the configuration information for the simulator.
 
 This file is part of SimMeR, an educational mechatronics robotics simulator.
 Initial development funded by the University of Toronto MIE Department.
@@ -83,6 +83,17 @@ wall_color = (255, 0, 0)    # Tuple with wall color in (R,G,B) format
 robot_thickness = 0.25      # Thickness to draw robot perimeter, in inches
 robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
 
+
+
+### DEVICE CONFIGURATION ###
+m0 = {
+    'id': 'm0',
+    'position': [2, 0],
+    'rotation': 0,
+    'visible': False
+}
+
+
 # Add all the devices to the robot
 motors = {
     'm0': MotorSimple('m0', [2, 0], 0, False),
@@ -90,12 +101,12 @@ motors = {
 }
 
 drives = {
-    'w0': Drive('w0', [motors['m0'], motors['m1']], [1, 1])
+    'w0': Drive('w0', [0, 1, 0], [motors['m0'], motors['m1']], [1, 1])
 }
 
 sensors = {
-    'u0': Ultrasonic('u0', [0, 3], 0, True),
-    'u1': Ultrasonic('u1', [1.8, 0], -math.pi/2, True),
-    'u2': Ultrasonic('u2', [0, -1.8], math.pi, True),
-    'u3': Ultrasonic('u3', [-1.8, 0], math.pi/2, True)
+    'u0': Ultrasonic('u0', [0, 3], 0, True)
+    #'u1': Ultrasonic('u1', [1.8, 0], -math.pi/2, True),
+    #'u2': Ultrasonic('u2', [0, -1.8], math.pi, True),
+    #'u3': Ultrasonic('u3', [-1.8, 0], math.pi/2, True)
 }

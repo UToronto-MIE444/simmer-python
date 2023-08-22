@@ -40,6 +40,7 @@ class Device():
         if len(position) > 2:
             self.height = position[2]
         self.rotation = rotation
+        self.point_vector = pygame.math.Vector2(0,1).rotate_rad(rotation)
 
         # Robot perimeter outline placeholder
         self.outline = []

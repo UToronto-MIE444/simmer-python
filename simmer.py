@@ -127,7 +127,7 @@ try:
         environment = {'ROBOT': ROBOT, 'MAZE': MAZE}
 
         # Manually simulate a specific sensor or sensors
-        utilities.simulate_sensors(ROBOT, environment, ['u0', 'u1', 'u2', 'u3'])
+        utilities.simulate_sensors(ROBOT, environment, ['u0'])
 
         # Get the command information from the tcp buffer, act, and respond
         cmds = COMM.get_buffer_rx()

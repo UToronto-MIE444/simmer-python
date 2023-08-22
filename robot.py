@@ -148,25 +148,26 @@ class Robot():
 
         velocity = pygame.math.Vector2(0, 0)
         rotation = 0
-        conversion = 60/(CONFIG.ppi*CONFIG.frame_rate)
+        speed = 6 / CONFIG.frame_rate
+        rotation_speed = 1/3 * 2*math.pi / CONFIG.frame_rate
 
         # Forward/backward movement
         if keypress[K_w]:
-            velocity += [0, 1 * conversion]
+            velocity += [0, speed]
         if keypress[K_s]:
-            velocity += [0, -1 * conversion]
+            velocity += [0, -speed]
 
         # Left/right movement
         if keypress[K_q]:
-            velocity += [1 * conversion, 0]
+            velocity += [speed, 0]
         if keypress[K_e]:
-            velocity += [-1 * conversion, 0]
+            velocity += [-speed, 0]
 
         # Rotation
         if keypress[K_d]:
-            rotation += math.pi/CONFIG.frame_rate
+            rotation += rotation_speed
         if keypress[K_a]:
-            rotation += -math.pi/CONFIG.frame_rate
+            rotation += -rotation_speed
 
         # Move the robot
         self.move(velocity, rotation, walls)
@@ -199,9 +200,6 @@ class Robot():
 
         else:
             return None
-
-
-
 
     def move(self, velocity, rotation, walls):
         '''Moves the robot, checking for collisions.'''

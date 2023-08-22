@@ -20,7 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import math
-import statistics
 import pygame
 from pygame.locals import (
     K_w,
@@ -181,7 +180,8 @@ class Robot():
             # Get the movement amount from the drive, incrementing odometers
             move_amount = drive.move_update()
             move_vector += drive.velocity_direction * move_amount
-            rotation += drive.rotation_speed * move_amount
+            if drive.rotation_speed:
+                rotation += math.copysign(move_amount, drive.rotation_speed)
 
         # Move the robot
         self.move(move_vector, rotation, walls)

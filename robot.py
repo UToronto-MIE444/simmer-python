@@ -97,7 +97,7 @@ class Robot():
         '''
 
         # Rotate the outline
-        outline_global = [point.rotate_rad(self.rotation) for point in self.outline]
+        outline_global = [point.rotate(self.rotation) for point in self.outline]
 
         # Place the outline in the right location
         self.outline_global = [point + self.position for point in outline_global]
@@ -147,8 +147,8 @@ class Robot():
 
         move_vector = pygame.math.Vector2(0, 0)
         rotation = 0
-        speed = 6 / CONFIG.frame_rate
-        rotation_speed = 1/3 * 2*math.pi / CONFIG.frame_rate
+        speed = 6 / CONFIG.frame_rate               # inch/s / frame/s
+        rotation_speed = 120 / CONFIG.frame_rate    # deg/s / frame/s
 
         # Forward/backward movement
         if keypress[K_w]:
@@ -189,14 +189,14 @@ class Robot():
     def move(self, velocity, rotation, walls):
         '''Moves the robot, checking for collisions.'''
         # Update robot position
-        self.position += pygame.math.Vector2.rotate_rad(velocity, self.rotation)
+        self.position += pygame.math.Vector2.rotate(velocity, self.rotation)
         self.rotation += rotation
         self.update_outline()
 
         # Reset the position if a collision is detected
         collisions = self.check_collision_walls(walls)
         if collisions:
-            self.position -= pygame.math.Vector2.rotate_rad(velocity, self.rotation)
+            self.position -= pygame.math.Vector2.rotate(velocity, self.rotation)
             self.rotation -= rotation
             self.update_outline()
 

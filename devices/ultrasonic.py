@@ -53,11 +53,11 @@ class Ultrasonic(Device):
         self.outline_thickness = 0.25
 
         # Simulation parameters
-        self.beamwidth = 15*math.pi/180     # Beamwidth of the ultrasonic sensor
-        self.num_rays = 7                   # Number of rays to test
-        self.min_range = 0                  # Minimum range in inches
-        self.max_range = 433                # Maximum range in inches
-        self.error_pct = 0.02               # Percent error (0-1)
+        self.beamwidth = 15     # Beamwidth of the ultrasonic sensor
+        self.num_rays = 7       # Number of rays to test
+        self.min_range = 0      # Minimum range in inches
+        self.max_range = 433    # Maximum range in inches
+        self.error_pct = 0.02   # Percent error (0-1)
         self.reading_bounds = [self.min_range, self.max_range]  # Upper and lower bounds for sensor reading
 
         self.rays = self._define_rays() # Define the initial rays, without detecting collisions
@@ -74,7 +74,7 @@ class Ultrasonic(Device):
 
             # Calculate the start and end points of each ray
             direction = pygame.math.Vector2(0,self.max_range)
-            ray_end = pygame.math.Vector2.rotate_rad(direction, angle_ray_global) + self.position_global
+            ray_end = pygame.math.Vector2.rotate(direction, angle_ray_global) + self.position_global
 
             # Append the calculated rays
             rays.append([self.position_global, ray_end])

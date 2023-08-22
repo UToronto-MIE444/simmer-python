@@ -40,7 +40,7 @@ class Device():
         if len(position) > 2:
             self.height = position[2]
         self.rotation = rotation
-        self.point_vector = pygame.math.Vector2(0,1).rotate_rad(rotation)
+        self.point_vector = pygame.math.Vector2(0,1).rotate(rotation)
 
         # Robot perimeter outline placeholder
         self.outline = []
@@ -61,7 +61,7 @@ class Device():
     def pos_update(self, bot_pos: pygame.math.Vector2, bot_rot: float):
         '''Updates the absolute position of the device based on its
         relative position and the position of the robot'''
-        self.position_global = bot_pos + pygame.math.Vector2.rotate_rad(self.position, bot_rot)
+        self.position_global = bot_pos + pygame.math.Vector2.rotate(self.position, bot_rot)
         self.rotation_global = bot_rot + self.rotation
 
 
@@ -71,7 +71,7 @@ class Device():
         '''
 
         # Rotate the outline
-        outline_global = [point.rotate_rad(self.rotation_global) for point in self.outline]
+        outline_global = [point.rotate(self.rotation_global) for point in self.outline]
 
         # Place the outline in the correct
         self.outline_global = [point + self.position_global for point in outline_global]

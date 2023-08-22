@@ -88,12 +88,12 @@ class Drive(Device):
 
             # Calculate the multiplier for rotational motion
             elif self.rotation_speed:
-                ideal_rotation_direction = motor.position.rotate_rad(math.pi/2)
+                ideal_rotation_direction = motor.position.rotate(90)
                 # Increase due to off-angle wheel slippage
                 angle = math.radians(ideal_rotation_direction.angle_to(motor.point_vector))
                 slip_compensation = abs(math.cos(angle))
-                # RADIAN_VALUE/(2*pi) * 2*pi*r * mDir / slippage
-                multiplier = 1 / (2*math.pi) * 2*math.pi*motor.position.length() * direction / slip_compensation
+                # DEG_VALUE/360 * 2*pi*r * mDir / slippage
+                multiplier = 1 / 360 * 2*math.pi*motor.position.length() * direction / slip_compensation
 
             # If neither present, set to 0
             else:

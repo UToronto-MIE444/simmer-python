@@ -46,8 +46,8 @@ timeout = 180
 str_encoding = 'utf-8'
 
 # Robot and Block information
-start_position = [8, 40]    # Robot starting location
-start_rotation = math.pi * 0    # Robot starting rotation
+start_position = [8, 40]    # Robot starting location (in)
+start_rotation = 0          # Robot starting rotation (deg)
 robot_width = 6             # Robot width in inches
 robot_height = 6            # Robot height in inches
 block_position = [25, 41]   # Block starting location
@@ -102,12 +102,12 @@ motors = {
 
 drives = {
     'w0': Drive('w0', [0, 6, 0], [motors['m0'], motors['m1']], [1, 1]),
-    'r0': Drive('r0', [0, 0, math.pi*2/3], [motors['m0'], motors['m1']], [1, -1])
+    'r0': Drive('r0', [0, 0, 120], [motors['m0'], motors['m1']], [1, -1])
 }
 
 sensors = {
     'u0': Ultrasonic('u0', [0, 3], 0, True)
-    #'u1': Ultrasonic('u1', [1.8, 0], -math.pi/2, True),
-    #'u2': Ultrasonic('u2', [0, -1.8], math.pi, True),
-    #'u3': Ultrasonic('u3', [-1.8, 0], math.pi/2, True)
+    #'u1': Ultrasonic('u1', [1.8, 0], -90, True),
+    #'u2': Ultrasonic('u2', [0, -1.8], 90, True),
+    #'u3': Ultrasonic('u3', [-1.8, 0], 90, True)
 }

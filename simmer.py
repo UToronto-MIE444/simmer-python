@@ -92,6 +92,9 @@ CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
 # Load robot
 ROBOT = Robot()
 
+# Create a copy of the environment objects to pass to simulation functions
+environment = {'ROBOT': ROBOT, 'MAZE': MAZE}
+
 # Load the Heads Up Display
 HUD = Hud()
 
@@ -113,18 +116,18 @@ try:
         RUNNING = HUD.check_input(game_events)
         keypress = pygame.key.get_pressed()
 
-        # Move the robot manually
-        ROBOT.move_manual(keypress, MAZE.wall_squares)
+        # Move the robot, either from keypress commands or from the movement buffers
+        if True in keypress:
+            ROBOT.move_manual(keypress, MAZE.wall_squares)
+        else:
+            ROBOT.move_from_command(MAZE.wall_squares)
 
         # Recalculate global positions of the robot and its devices
         ROBOT.update_outline()
         ROBOT.update_device_positions()
 
-        # Create a copy of the current environment state to pass to simulation functions
-        environment = {'ROBOT': ROBOT, 'MAZE': MAZE}
-
         # Manually simulate a specific sensor or sensors
-        ROBOT.devices['u0'].simulate(0, environment)
+        utilities.simulate_sensors(ROBOT, environment, ['u0'])
 
         # Get the command information from the tcp buffer, act, and respond
         cmds = COMM.get_buffer_rx()
@@ -154,6 +157,7 @@ try:
 
         # Flip the display (update the canvas)
         pygame.display.flip()
+
 except KeyboardInterrupt:
     pass
 

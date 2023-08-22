@@ -1,5 +1,5 @@
 '''
-This class stores the configuration information for the simulator.
+This file stores the configuration information for the simulator.
 
 This file is part of SimMeR, an educational mechatronics robotics simulator.
 Initial development funded by the University of Toronto MIE Department.
@@ -20,8 +20,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import math
+import pygame.math as pm
 from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
+from devices.drive import Drive
 
 foldername = 'config'
 drive_filename = 'drive.csv'
@@ -45,8 +47,8 @@ timeout = 180
 str_encoding = 'utf-8'
 
 # Robot and Block information
-start_position = [8, 40]    # Robot starting location
-start_rotation = math.pi * 0    # Robot starting rotation
+start_position = [8, 40]    # Robot starting location (in)
+start_rotation = 0          # Robot starting rotation (deg)
 robot_width = 6             # Robot width in inches
 robot_height = 6            # Robot height in inches
 block_position = [25, 41]   # Block starting location
@@ -71,7 +73,7 @@ floor_segment_length = 3    # Size of floor pattern squares (inches)
 
 # Graphics information
 frame_rate = 60             # Target frame rate (Hz)
-ppi = 12                    # Number of on-screen pixels per inch on display
+ppi = 16                    # Number of on-screen pixels per inch on display
 border_pixels = floor_segment_length * ppi  # Size of the border surrounding the maze area
 
 background_color = (43, 122, 120)
@@ -82,11 +84,80 @@ wall_color = (255, 0, 0)    # Tuple with wall color in (R,G,B) format
 robot_thickness = 0.25      # Thickness to draw robot perimeter, in inches
 robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
 
-devices = {
-    'm0': MotorSimple('m0', [2, 0], 0, False),
-    'm1': MotorSimple('m1', [-2, 0], 0, False),
-    'u0': Ultrasonic('u0', [0, 2], 0, True)
-    #'u1': Ultrasonic('u1', [2, 0], -math.pi/2, True),
-    #'u2': Ultrasonic('u2', [0, -2], math.pi, True),
-    #'u3': Ultrasonic('u3', [-2, 0], math.pi/2, True)
+
+
+### DEVICE CONFIGURATION ###
+# Motors
+m0_info = {
+    'id': 'm0',
+    'position': [2, 0],
+    'rotation': 0,
+    'visible': False
+}
+
+m1_info = {
+    'id': 'm0',
+    'position': [-2, 0],
+    'rotation': 0,
+    'visible': False
+}
+
+motors = {
+    'm0': MotorSimple(m0_info),
+    'm1': MotorSimple(m1_info)
+}
+
+# Drives
+w0_info = {
+    'id': 'w0',
+    'velocity': [0, 6],
+    'ang_velocity': 0,
+    'motors': [motors['m0'], motors['m1']],
+    'motor_direction': [1, 1],
+    'bias': {'x': 0, 'y': 0, 'rotation': 1},
+    'error': {'x': 0.02, 'y': 0.05, 'rotation': 1}
+}
+
+d0_info = {
+    'id': 'd0',
+    'velocity': [6, 0],
+    'ang_velocity': 0,
+    'motors': [motors['m0'], motors['m1']],
+    'motor_direction': [1, 1],
+    'bias': {'x': 0, 'y': 0, 'rotation': 1},
+    'error': {'x': 0.05, 'y': 0.02, 'rotation': 1}
+}
+
+r0_info = {
+    'id': 'r0',
+    'velocity': [0, 0],
+    'ang_velocity': 120,
+    'motors': [motors['m0'], motors['m1']],
+    'motor_direction': [1, -1],
+    'bias': {'x': 0, 'y': 0, 'rotation': 0.02},
+    'error': {'x': 0.003, 'y': 0.003, 'rotation': 0.02}
+}
+
+drives = {
+    'w0': Drive(w0_info),
+    'r0': Drive(r0_info)
+}
+
+# Sensors
+u0_info = {
+    'id': 'u0',
+    'position': [0, 3],
+    'rotation': 0,
+    'error': 0.02,
+    'outline': [
+        pm.Vector2(-1, -0.5),
+        pm.Vector2(-1, 0.5),
+        pm.Vector2(1, 0.5),
+        pm.Vector2(1, -0.5)
+    ],
+    'visible': True
+}
+
+sensors = {
+    'u0': Ultrasonic(u0_info)
 }

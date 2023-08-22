@@ -25,11 +25,13 @@ import config.config as CONFIG
 class Device():
     '''The base class of all devices that are attached to a robot'''
 
-    def __init__(self, d_id: str, d_type: str, position: list, rotation: float, visible: bool):
+    def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
         '''Defines the basic information common to all devices'''
 
         # Device ID string (alphanumeric, lowercase. i.e. "m0")
         self.d_id = d_id
+
+        # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = ''
 
         # Device position and rotation relative to the center point of the robot
@@ -38,6 +40,7 @@ class Device():
         if len(position) > 2:
             self.height = position[2]
         self.rotation = rotation
+        self.point_vector = pygame.math.Vector2(0, 1).rotate(rotation)
 
         # Robot perimeter outline placeholder
         self.outline = []
@@ -56,19 +59,19 @@ class Device():
 
 
     def pos_update(self, bot_pos: pygame.math.Vector2, bot_rot: float):
-        '''Updates the absolute position of the device based on its
-        relative position and the position of the robot'''
-        self.position_global = bot_pos + pygame.math.Vector2.rotate_rad(self.position, bot_rot)
+        '''
+        Updates the absolute position of the device based on its
+        relative position and the position of the robot
+        '''
+        self.position_global = bot_pos + pygame.math.Vector2.rotate(self.position, bot_rot)
         self.rotation_global = bot_rot + self.rotation
 
 
     def update_outline(self):
-        '''
-        Define the outline of the device, in inches, in the global reference frame.
-        '''
+        '''Define the outline of the device, in inches, in the global reference frame.'''
 
         # Rotate the outline
-        outline_global = [point.rotate_rad(self.rotation_global) for point in self.outline]
+        outline_global = [point.rotate(self.rotation_global) for point in self.outline]
 
         # Place the outline in the correct
         self.outline_global = [point + self.position_global for point in outline_global]

@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
 import pygame
+import pygame.math as pm
 from pygame.locals import (
     K_w,
     K_a,
@@ -39,7 +40,7 @@ class Robot():
         '''Initialize the robot class'''
 
         # Position information (stored in inches)
-        self.position = pygame.math.Vector2(CONFIG.start_position[0], CONFIG.start_position[1])
+        self.position = pm.Vector2(CONFIG.start_position[0], CONFIG.start_position[1])
         self.rotation = CONFIG.start_rotation
 
         # Robot size (rectangular)
@@ -48,10 +49,10 @@ class Robot():
 
         # Define the outline of the robot as a polygon
         self.outline = [
-            pygame.math.Vector2(-self.width/2, -self.height/2),
-            pygame.math.Vector2(-self.width/2,  self.height/2),
-            pygame.math.Vector2( self.width/2,  self.height/2),
-            pygame.math.Vector2( self.width/2, -self.height/2)
+            pm.Vector2(-self.width/2, -self.height/2),
+            pm.Vector2(-self.width/2,  self.height/2),
+            pm.Vector2( self.width/2,  self.height/2),
+            pm.Vector2( self.width/2, -self.height/2)
             ]
 
         self.outline_global = []
@@ -68,8 +69,18 @@ class Robot():
             'collision': self.collision
         }]
 
-        # Import the list of devices from the config file
-        self.devices = CONFIG.devices
+        # Import the list of motors from the config file
+        self.motors = CONFIG.motors
+
+        # Import the list of drives from the config file
+        self.drives = CONFIG.drives
+
+        # Import the list of sensors from the config file
+        self.sensors = CONFIG.sensors
+
+        # All devices
+        self.devices = self.motors | self.drives | self.sensors
+
 
     def append_trail(self):
         '''Appends current position information to the robot's trail'''
@@ -87,7 +98,7 @@ class Robot():
         '''
 
         # Rotate the outline
-        outline_global = [point.rotate_rad(self.rotation) for point in self.outline]
+        outline_global = [point.rotate(self.rotation) for point in self.outline]
 
         # Place the outline in the right location
         self.outline_global = [point + self.position for point in outline_global]
@@ -117,8 +128,7 @@ class Robot():
         '''
         Updates the global positions and outlines of all the robot's devices.
         '''
-
-        for (d_id, device) in self.devices.items():
+        for device in self.devices.values():
             device.pos_update(self.position, self.rotation)
             device.update_outline()
 
@@ -134,38 +144,61 @@ class Robot():
                     device.draw_measurement(canvas)
 
     def move_manual(self, keypress, walls):
-        '''Move the robot manually with the keyboard'''
+        '''Determine the direction to move & rotate the robot based on keypresses.'''
 
-        velocity = pygame.math.Vector2(0, 0)
+        move_vector = pm.Vector2(0, 0)
         rotation = 0
+        speed = 6 / CONFIG.frame_rate               # inch/s / frame/s
+        rotation_speed = 120 / CONFIG.frame_rate    # deg/s / frame/s
 
         # Forward/backward movement
         if keypress[K_w]:
-            velocity += [0, 1/CONFIG.ppi]
+            move_vector += [0, speed]
         if keypress[K_s]:
-            velocity += [0, -1/CONFIG.ppi]
+            move_vector += [0, -speed]
 
         # Left/right movement
         if keypress[K_q]:
-            velocity += [1/CONFIG.ppi, 0]
+            move_vector += [speed, 0]
         if keypress[K_e]:
-            velocity += [-1/CONFIG.ppi, 0]
+            move_vector += [-speed, 0]
 
         # Rotation
         if keypress[K_d]:
-            rotation += math.pi/60
+            rotation += rotation_speed
         if keypress[K_a]:
-            rotation += -math.pi/60
+            rotation += -rotation_speed
 
+        # Move the robot
+        self.move(move_vector, rotation, walls)
+
+    def move_from_command(self, walls):
+        '''Move the robot based on all the movement "stored" in the drives'''
+
+        move_vector = pm.Vector2(0, 0)
+        rotation = 0
+        for drive in self.drives.values():
+            # Get the movement amount from the drive, incrementing odometers
+            if drive.move_buffer == 0:
+                continue
+            movement = drive.move_update()
+            move_vector += movement[0]
+            rotation += movement[1]
+
+        # Move the robot
+        self.move(move_vector, rotation, walls)
+
+    def move(self, velocity, rotation, walls):
+        '''Moves the robot, checking for collisions.'''
         # Update robot position
-        self.position += pygame.math.Vector2.rotate_rad(velocity, self.rotation)
+        self.position += pm.Vector2.rotate(velocity, self.rotation)
         self.rotation += rotation
         self.update_outline()
 
         # Reset the position if a collision is detected
         collisions = self.check_collision_walls(walls)
         if collisions:
-            self.position -= pygame.math.Vector2.rotate_rad(velocity, self.rotation)
+            self.position -= pm.Vector2.rotate(velocity, self.rotation)
             self.rotation -= rotation
             self.update_outline()
 
@@ -199,7 +232,7 @@ class Robot():
                     value = float(cmd[1])
                 except ValueError:
                     print('Command data (' + cmd[1] + ') not in valid float format. Trying with 0.')
-                value = 0
+                    value = 0
                 responses.append(target_device.simulate(value, environment))
             else:
                 print('Target device ' + cmd[0] + ' not found.')

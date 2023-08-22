@@ -20,35 +20,39 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import pygame
+import pygame.math as pm
 from devices.device import Device
+import config.config as CONFIG
 
 class MotorSimple(Device):
     '''Defines a basic motor & wheel'''
 
-    def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
+    # def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
+    def __init__(self, info: dict):
         '''Initialization'''
 
         # Call super initialization
-        super().__init__(self, d_id, position, rotation, visible)
+        super().__init__(info['id'], info['position'], info['rotation'], info['visible'])
 
-        # Device type (i.e. "motor" or "sensor")
+        # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = 'motor'
 
         # Device outline position
-        self.outline = [
-            pygame.math.Vector2(-0.5, -0.5),
-            pygame.math.Vector2(0, 1),
-            pygame.math.Vector2(0.5, -0.5)
-        ]
+        self.outline = info.get('outline', [
+            pm.Vector2(-0.5, -0.5),
+            pm.Vector2(0, 1),
+            pm.Vector2(0.5, -0.5)
+        ])
 
         # Display color
-        self.color = (0, 255, 0)
+        self.color = info.get('color', (0, 255, 0))
 
         # Display thickness
-        self.outline_thickness = 0.25
+        self.outline_thickness = info.get('outline_thickness', 0.25)
 
-    def simulate(self, value: float):
-        if value:
-            return str(value) + '_response'
-        else:
-            return value
+        # Simulation parameters
+        self.odometer = 0       # Odometer value (in inches rotated)
+
+    def simulate(self, value: float, environment: dict):
+        '''Returns the odometer value.'''
+        return self.odometer

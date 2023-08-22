@@ -152,4 +152,14 @@ class Drive(Device):
         # Decrement the movement buffer with the amount the drive moved
         self.move_buffer -= move_amount
 
-        return move_amount
+        # Calculate how much to move in each direction based on this drive
+        rotation = 0
+        move_vector = self.velocity_direction * move_amount
+        if self.rotation_speed:
+            rotation = move_amount
+
+        # Add bias and error to the drive (TBC)
+
+        # Update gyroscope measurement (TBC)
+
+        return [move_vector, rotation]

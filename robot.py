@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
 import pygame
+import pygame.math as pm
 from pygame.locals import (
     K_w,
     K_a,
@@ -39,7 +40,7 @@ class Robot():
         '''Initialize the robot class'''
 
         # Position information (stored in inches)
-        self.position = pygame.math.Vector2(CONFIG.start_position[0], CONFIG.start_position[1])
+        self.position = pm.Vector2(CONFIG.start_position[0], CONFIG.start_position[1])
         self.rotation = CONFIG.start_rotation
 
         # Robot size (rectangular)
@@ -48,10 +49,10 @@ class Robot():
 
         # Define the outline of the robot as a polygon
         self.outline = [
-            pygame.math.Vector2(-self.width/2, -self.height/2),
-            pygame.math.Vector2(-self.width/2,  self.height/2),
-            pygame.math.Vector2( self.width/2,  self.height/2),
-            pygame.math.Vector2( self.width/2, -self.height/2)
+            pm.Vector2(-self.width/2, -self.height/2),
+            pm.Vector2(-self.width/2,  self.height/2),
+            pm.Vector2( self.width/2,  self.height/2),
+            pm.Vector2( self.width/2, -self.height/2)
             ]
 
         self.outline_global = []
@@ -145,7 +146,7 @@ class Robot():
     def move_manual(self, keypress, walls):
         '''Determine the direction to move & rotate the robot based on keypresses.'''
 
-        move_vector = pygame.math.Vector2(0, 0)
+        move_vector = pm.Vector2(0, 0)
         rotation = 0
         speed = 6 / CONFIG.frame_rate               # inch/s / frame/s
         rotation_speed = 120 / CONFIG.frame_rate    # deg/s / frame/s
@@ -174,14 +175,14 @@ class Robot():
     def move_from_command(self, walls):
         '''Move the robot based on all the movement "stored" in the drives'''
 
-        move_vector = pygame.math.Vector2(0, 0)
+        move_vector = pm.Vector2(0, 0)
         rotation = 0
         for drive in self.drives.values():
             # Get the movement amount from the drive, incrementing odometers
-            move_amount = drive.move_update()
-            move_vector += drive.velocity_direction * move_amount
+            movement = drive.move_update()
+            move_vector += movement[0]
             if drive.rotation_speed:
-                rotation += move_amount
+                rotation += movement[1]
 
         # Move the robot
         self.move(move_vector, rotation, walls)
@@ -189,14 +190,14 @@ class Robot():
     def move(self, velocity, rotation, walls):
         '''Moves the robot, checking for collisions.'''
         # Update robot position
-        self.position += pygame.math.Vector2.rotate(velocity, self.rotation)
+        self.position += pm.Vector2.rotate(velocity, self.rotation)
         self.rotation += rotation
         self.update_outline()
 
         # Reset the position if a collision is detected
         collisions = self.check_collision_walls(walls)
         if collisions:
-            self.position -= pygame.math.Vector2.rotate(velocity, self.rotation)
+            self.position -= pm.Vector2.rotate(velocity, self.rotation)
             self.rotation -= rotation
             self.update_outline()
 

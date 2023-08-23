@@ -30,7 +30,6 @@ import utilities
 class Ultrasonic(Device):
     '''Defines an ultrasonic sensor.'''
 
-    # def __init__(self, d_id: str, position: list, rotation: float, visible: bool):
     def __init__(self, info: dict):
         '''Initialization'''
 
@@ -39,6 +38,7 @@ class Ultrasonic(Device):
 
         # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = 'sensor'
+        self.name = 'ultrasonic'
 
         # Device outline position
         self.outline = info.get('outline', [
@@ -54,12 +54,15 @@ class Ultrasonic(Device):
         # Display thickness
         self.outline_thickness = info.get('outline_thickness', 0.25)
 
+        # Display measurement when simulating
+        self.visible_measurement = info.get('visible_measurement', False)
+
         # Simulation parameters
-        self.beamwidth = info.get('beamwidth', 15)  # Beamwidth of the ultrasonic sensor
-        self.num_rays = info.get('num_rays', 7)     # Number of rays to test
-        self.min_range = info.get('min_range', 0)   # Minimum range in inches
-        self.max_range = info.get('min_range', 433) # Maximum range in inches
-        self.error_pct = info.get('error', 0.02)    # Percent error (0-1)
+        self.beamwidth = info.get('beamwidth', 15)              # Beamwidth of the ultrasonic sensor
+        self.num_rays = info.get('num_rays', 7)                 # Number of rays to test
+        self.min_range = info.get('min_range', 0)               # Minimum range in inches
+        self.max_range = info.get('min_range', 433)             # Maximum range in inches
+        self.error_pct = info.get('error', 0.02)                # Percent error (0-1)
         self.reading_bounds = [self.min_range, self.max_range]  # Upper and lower bounds for sensor reading
 
         self.rays = self._define_rays() # Define the initial rays, without detecting collisions

@@ -1,5 +1,5 @@
 '''
-Defines a SimMeR device representing a motor & wheel.
+Defines a SimMeR device representing a gyroscope.
 
 This file is part of SimMeR, an educational mechatronics robotics simulator.
 Initial development funded by the University of Toronto MIE Department.
@@ -19,29 +19,30 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import math
 import pygame
 import pygame.math as pm
 from devices.device import Device
 import config.config as CONFIG
+import utilities
 
-class MotorSimple(Device):
-    '''Defines a basic motor & wheel'''
+class Gyroscope(Device):
+    '''Defines a gyroscope that allows for measurement of rotation.'''
 
     def __init__(self, info: dict):
         '''Initialization'''
 
         # Call super initialization
-        super().__init__(info['id'], info['position'], info['rotation'], info['visible'])
+        super().__init__(info['id'], [0, 0], 0, info['visible'])
 
         # Device type (i.e. "drive", "motor", or "sensor")
-        self.d_type = 'motor'
-        self.name = 'motor'
+        self.d_type = 'sensor'
+        self.name = 'gyroscope'
 
         # Device outline position
         self.outline = info.get('outline', [
             pm.Vector2(-0.5, -0.5),
-            pm.Vector2(0, 1),
-            pm.Vector2(0.5, -0.5)
+            pm.Vector2(0, 1)
         ])
 
         # Display color
@@ -51,8 +52,26 @@ class MotorSimple(Device):
         self.outline_thickness = info.get('outline_thickness', 0.25)
 
         # Simulation parameters
-        self.odometer = 0       # Odometer value (in inches rotated)
+        self.gyro = 0                               # gyroscope value (in degrees)
+        self.rotation_true = ['start', 'start']   # [Previous rotation, Current rotation] (deg)
+        self.error = info.get('error', 0.2)         # Error when updating the gyroscope value
+        self.bias = info.get('bias', 0.1)           # Bias that the gyroscope drifts with (deg/s)
+
 
     def simulate(self, value: float, environment: dict):
         '''Returns the odometer value.'''
-        return self.odometer
+        return self.gyro
+
+    def update(self, environment: dict):
+        '''Updates the gyroscope value based on the movement of the robot.'''
+
+        ROBOT = environment.get("ROBOT", None)
+
+        # Update the previous and current rotations
+        self.rotation_true[0] = self.rotation_true[1]
+        self.rotation_true[1] = ROBOT.rotation
+
+        # Add Error and update the device, wrap from 0 - 360 degrees
+        if self.rotation_true[0] != 'start':
+            change = self.rotation_true[1] - self.rotation_true[0] + self.bias/CONFIG.frame_rate
+            self.gyro = (self.gyro + utilities.add_error(change, self.error)) % 360

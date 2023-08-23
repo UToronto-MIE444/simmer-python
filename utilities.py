@@ -170,9 +170,10 @@ def closest(start: list, test_pts: list):
 
     return closest_pt, distance_minimum
 
-def simulate_sensors(robot, environment, sensors):
+def simulate_sensors(environment, sensors):
     '''Simulate a list of sensors'''
 
+    ROBOT = environment.get("ROBOT", None)
     for d_id in sensors:
-        if d_id in robot.sensors:
-            robot.sensors[d_id].simulate(0, environment)
+        if d_id in ROBOT.sensors:
+            ROBOT.sensors[d_id].simulate(0, environment)

@@ -40,6 +40,7 @@ class Drive(Device):
 
         # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = 'drive'
+        self.name = 'drive'
 
         # Verify that the list of motors and the number of directions provided are equal
         if len(info['motors']) != len(info['motor_direction']):
@@ -170,11 +171,9 @@ class Drive(Device):
         if self.rotation_speed:
             rotation = move_amount
 
-        # Add bias and error to the drive (TBC)
+        # Add bias and error to the drive
         move_vector_error = [utilities.add_error(move_vector[0] + move_amount * self.bias_linear[0], self.error_linear[0]),
                              utilities.add_error(move_vector[1] + move_amount * self.bias_linear[1], self.error_linear[1])]
         rotation_error =     utilities.add_error(rotation       + move_amount * self.bias_rotation,  self.error_rotation)
-
-        # Update gyroscope measurement (TBC)
 
         return [move_vector_error, rotation_error]

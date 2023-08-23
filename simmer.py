@@ -110,7 +110,9 @@ RUNNING = True
 try:
     while RUNNING:
 
-        ### USER INTERFACE
+        ##########################
+        ##### USER INTERFACE #####
+        ##########################
         # Check for and act on keyboard input
         game_events = pygame.event.get()
         RUNNING = HUD.check_input(game_events)
@@ -119,8 +121,9 @@ try:
         # Get the command information from the tcp buffer
         cmds = COMM.get_buffer_rx()
 
-
-        ### ROBOT AND DEVICE UPDATES AND ACTIONS
+        ################################################
+        ##### ROBOT AND DEVICE UPDATES AND ACTIONS #####
+        ################################################
         # Act on commands and respond
         if cmds:
             responses = ROBOT.command(cmds, environment)
@@ -144,8 +147,9 @@ try:
             if callable(getattr(sensor, "update", None)):
                 sensor.update()
 
-
-        ### DRAWING STUFF
+        ###########################################
+        ##### DRAW RELEVANT OBJECTS ON CANVAS #####
+        ###########################################
         # Fill the background with the background color
         canvas.fill(CONFIG.background_color)
 

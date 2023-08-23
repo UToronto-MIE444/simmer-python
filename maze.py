@@ -17,10 +17,10 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-import random
 import sys
 import numpy as np
 import pygame
+import shapely as shp
 import config.config as CONFIG
 
 class Maze:
@@ -35,6 +35,7 @@ class Maze:
         self.floor_tile_colors = 0
         self.floor_rect_black = []
         self.floor_rect_white = []
+        self.floor_white_poly = 0
 
     def import_walls(self):
         '''Imports the walls from a csv file and sets up lines representing them'''
@@ -111,16 +112,23 @@ class Maze:
 
         # Create an array of rectangle objects for drawing
         width = CONFIG.floor_segment_length * CONFIG.ppi
+        floor_white_polys = []
         for (tile, color) in zip(self.floor_tiles, self.floor_tile_colors.tolist()):
             left = tile[0][0] * CONFIG.ppi + CONFIG.border_pixels
             top = tile[0][1] * CONFIG.ppi + CONFIG.border_pixels
             tile_rect = pygame.Rect(left, top, width, width)
 
-            # Append the rectangles
+            # Append the rectangles to floor objects. Create shapely polygons.
             if color:
                 self.floor_rect_white.append(tile_rect)
+                floor_white_polys.append(shp.Polygon(tile))
             else:
                 self.floor_rect_black.append(tile_rect)
+
+        # Create a multipolygon object
+        self.floor_white_poly = shp.MultiPolygon(floor_white_polys)
+
+        return True
 
     def draw_floor(self, canvas):
         '''Draws the maze floor'''

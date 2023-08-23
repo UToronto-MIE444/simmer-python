@@ -25,7 +25,7 @@ from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
 from devices.gyroscope import Gyroscope
 from devices.compass import Compass
-from devices.downward_ir import DownwardIR
+from devices.infrared import Infrared
 from devices.drive import Drive
 
 foldername = 'config'
@@ -182,18 +182,20 @@ c0_info = {
 
 i0_info = {
     'id': 'i0',
-    'position': [0, 2],
-    'height': 3,
+    'position': [0, -1],
+    'height': 1.5,
     'rotation': 0,
-    'threshold': 0.8,
-    'error': 0.02,
+    'fov': 60,
+    'threshold': 0.7,
+    'error': 0.05,
     'bias': 0.1,
-    'visible': False
+    'color': (127, 127, 127),
+    'visible': True
 }
 
 sensors = {
     'u0': Ultrasonic(u0_info),
     'g0': Gyroscope(g0_info),
     'c0': Compass(c0_info),
-    'i0': DownwardIR(i0_info)
+    'i0': Infrared(i0_info)
 }

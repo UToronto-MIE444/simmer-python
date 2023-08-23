@@ -139,7 +139,7 @@ class Robot():
         for device in self.devices.values():
             if device.visible:
                 device.draw(canvas)
-                if device.name == 'ultrasonic':
+                if (device.name == 'ultrasonic' or device.name == 'infrared'):
                     device.draw_measurement(canvas)
 
     def move_manual(self, keypress, walls):

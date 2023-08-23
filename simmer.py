@@ -143,7 +143,7 @@ try:
         # Update the sensors that need to be updated every frame
         for sensor in ROBOT.sensors.values():
             if callable(getattr(sensor, "update", None)):
-                sensor.update(environment)
+                sensor.update()
 
 
         ### DRAWING STUFF

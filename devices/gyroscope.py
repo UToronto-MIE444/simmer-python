@@ -19,8 +19,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-import math
-import pygame
 import pygame.math as pm
 from devices.device import Device
 import config.config as CONFIG
@@ -53,7 +51,7 @@ class Gyroscope(Device):
 
         # Simulation parameters
         self.gyro = 0                               # gyroscope value (in degrees)
-        self.rotation_true = ['start', 'start']   # [Previous rotation, Current rotation] (deg)
+        self.rotation_true = [self.rotation_global, self.rotation_global]   # [Previous rotation, Current rotation] (deg)
         self.error = info.get('error', 0.2)         # Error when updating the gyroscope value
         self.bias = info.get('bias', 0.1)           # Bias that the gyroscope drifts with (deg/s)
 
@@ -62,16 +60,13 @@ class Gyroscope(Device):
         '''Returns the odometer value.'''
         return self.gyro
 
-    def update(self, environment: dict):
+    def update(self):
         '''Updates the gyroscope value based on the movement of the robot.'''
-
-        ROBOT = environment.get("ROBOT", None)
 
         # Update the previous and current rotations
         self.rotation_true[0] = self.rotation_true[1]
-        self.rotation_true[1] = ROBOT.rotation
+        self.rotation_true[1] = self.rotation_global
 
         # Add Error and update the device, wrap from 0 - 360 degrees
-        if self.rotation_true[0] != 'start':
-            change = self.rotation_true[1] - self.rotation_true[0] + self.bias/CONFIG.frame_rate
-            self.gyro = (self.gyro + utilities.add_error(change, self.error)) % 360
+        change = self.rotation_true[1] - self.rotation_true[0] + self.bias/CONFIG.frame_rate
+        self.gyro = (self.gyro + utilities.add_error(change, self.error)) % 360

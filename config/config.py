@@ -95,14 +95,14 @@ m0_info = {
     'id': 'm0',
     'position': [2, 0],
     'rotation': 0,
-    'visible': False
+    'visible': True
 }
 
 m1_info = {
     'id': 'm0',
     'position': [-2, 0],
     'rotation': 0,
-    'visible': False
+    'visible': True
 }
 
 motors = {

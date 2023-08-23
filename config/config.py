@@ -24,6 +24,7 @@ import pygame.math as pm
 from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
 from devices.gyroscope import Gyroscope
+from devices.compass import Compass
 from devices.drive import Drive
 
 foldername = 'config'
@@ -162,7 +163,16 @@ u0_info = {
 
 g0_info = {
     'id': 'u0',
-    'position': [0, 3],
+    'position': [0, 0],
+    'rotation': 0,
+    'error': 0.02,
+    'bias': 0.1,
+    'visible': False
+}
+
+c0_info = {
+    'id': 'u0',
+    'position': [0, 0],
     'rotation': 0,
     'error': 0.02,
     'bias': 0.1,
@@ -171,5 +181,6 @@ g0_info = {
 
 sensors = {
     'u0': Ultrasonic(u0_info),
-    'g0': Gyroscope(g0_info)
+    'g0': Gyroscope(g0_info),
+    'c0': Compass(c0_info)
 }

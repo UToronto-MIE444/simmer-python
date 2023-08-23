@@ -1,23 +1,22 @@
 '''
 This file stores the configuration information for the simulator.
-
-This file is part of SimMeR, an educational mechatronics robotics simulator.
-Initial development funded by the University of Toronto MIE Department.
-Copyright (C) 2023  Ian G. Bennett
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
+# This file is part of SimMeR, an educational mechatronics robotics simulator.
+# Initial development funded by the University of Toronto MIE Department.
+# Copyright (C) 2023  Ian G. Bennett
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
 import numpy as np
@@ -26,6 +25,7 @@ from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
 from devices.gyroscope import Gyroscope
 from devices.compass import Compass
+from devices.infrared import Infrared
 from devices.drive import Drive
 
 foldername = 'config'
@@ -172,7 +172,7 @@ g0_info = {
 }
 
 c0_info = {
-    'id': 'u0',
+    'id': 'c0',
     'position': [0, 0],
     'rotation': 0,
     'error': 0.02,
@@ -180,8 +180,22 @@ c0_info = {
     'visible': False
 }
 
+i0_info = {
+    'id': 'i0',
+    'position': [0, -1],
+    'height': 1.5,
+    'rotation': 0,
+    'fov': 60,
+    'threshold': 0.7,
+    'error': 0.05,
+    'bias': 0.1,
+    'color': (127, 127, 127),
+    'visible': True
+}
+
 sensors = {
     'u0': Ultrasonic(u0_info),
     'g0': Gyroscope(g0_info),
-    'c0': Compass(c0_info)
+    'c0': Compass(c0_info),
+    'i0': Infrared(i0_info)
 }

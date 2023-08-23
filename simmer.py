@@ -1,21 +1,22 @@
 '''
-This file is part of SimMeR, an educational mechatronics robotics simulator.
-Initial development funded by the University of Toronto MIE Department.
-Copyright (C) 2023  Ian G. Bennett
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+This is the main file of SimMeR.
 '''
+# This file is part of SimMeR, an educational mechatronics robotics simulator.
+# Initial development funded by the University of Toronto MIE Department.
+# Copyright (C) 2023  Ian G. Bennett
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Imports
 import numpy as np
@@ -36,32 +37,7 @@ print('SimMeR Loading...')
 # Build Block
 block = build_block(blocksize, block_center);
 
-# Import Sensor Loadout and Positions
-sensor = import_sensor;
-
-# Import Drive information
-drive = import_drive;
-
-# Initialize integration-based sensor values
-gyro_num = [];
-odom_num = [];
-for ct = 1:size(sensor.id)
-    if strcmp('gyro', sensor.id{ct}(1:end-1))
-        gyro_num = [gyro_num ct];
-    end
-    if strcmp('odom', sensor.id{ct}(1:end-1))
-        odom_num = [odom_num ct];
-    end
-end
-
-# Populate the gyroscope and odometer sensor variables
-gyro = [gyro_num', sensor.err(gyro_num'), zeros(size(gyro_num))'];
-odom = [odom_num', sensor.err(odom_num'), zeros(size(odom_num))'];
-
-
 ## Act on initialization flags
-
-
 # Randomize drive biases to verify algorithm robustness
 if randbias
     drive = bias_randomize(drive, strength);
@@ -110,7 +86,9 @@ RUNNING = True
 try:
     while RUNNING:
 
-        ### USER INTERFACE
+        ##########################
+        ##### USER INTERFACE #####
+        ##########################
         # Check for and act on keyboard input
         game_events = pygame.event.get()
         RUNNING = HUD.check_input(game_events)
@@ -119,8 +97,9 @@ try:
         # Get the command information from the tcp buffer
         cmds = COMM.get_buffer_rx()
 
-
-        ### ROBOT AND DEVICE UPDATES AND ACTIONS
+        ################################################
+        ##### ROBOT AND DEVICE UPDATES AND ACTIONS #####
+        ################################################
         # Act on commands and respond
         if cmds:
             responses = ROBOT.command(cmds, environment)
@@ -137,15 +116,16 @@ try:
         ROBOT.update_device_positions()
 
         # Manually simulate a specific sensor or sensors
-        utilities.simulate_sensors(environment, ['u0'])
+        utilities.simulate_sensors(environment, ['u0', 'i0'])
 
         # Update the sensors that need to be updated every frame
         for sensor in ROBOT.sensors.values():
             if callable(getattr(sensor, "update", None)):
                 sensor.update()
 
-
-        ### DRAWING STUFF
+        ###########################################
+        ##### DRAW RELEVANT OBJECTS ON CANVAS #####
+        ###########################################
         # Fill the background with the background color
         canvas.fill(CONFIG.background_color)
 

@@ -20,6 +20,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import math
+import numpy as np
 import pygame.math as pm
 from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
@@ -61,9 +62,9 @@ num_segments = 10           # Number of movement segments
 strength = [0.05, 1]	    # How intense the random drive bias is, if enabled
 
 # Control Flags and Setup
-rand_error = False           # Use either true random error generator (True) or repeatable error generation (False)
+rand_error = False          # Use either true random error generator (True) or repeatable error generation (False)
 error_seed = 5489           # Seed for random error (used if rand_error is False)
-rand_bias = True            # Use a randomized, normally distributed set of drive biases
+rand_bias = True            # Use a randomized, normally distributed set of bias values for devices with bias
 
 # Plotting Flags
 plot_robot = True           # Plot the robot as it works its way through the maze

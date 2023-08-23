@@ -32,7 +32,9 @@ class Maze:
 
         self.wall_squares = []
         self.floor_tiles = []
-        self.floor_tile_colors = []
+        self.floor_tile_colors = 0
+        self.floor_rect_black = []
+        self.floor_rect_white = []
 
     def import_walls(self):
         '''Imports the walls from a csv file and sets up lines representing them'''
@@ -93,24 +95,36 @@ class Maze:
         dim_y = int(self.size_y / CONFIG.floor_segment_length)
 
         # Create the floor tiles
+        self.floor_tile_colors = np.floor(np.random.random(dim_y * dim_x)*2) * 255
+
+        floor_tiles = []
         for ct_x in range(0, dim_x):
             for ct_y in range(0, dim_y):
-                self.floor_tiles.append([
+                floor_tiles.append([
                     [ct_x, ct_y], [ct_x+1, ct_y], [ct_x+1, ct_y+1], [ct_x, ct_y+1]
                     ])
-                self.floor_tile_colors.append(random.randint(0,1)*255)
 
         # Convert to length
         self.floor_tiles = [[[scalar * CONFIG.floor_segment_length for scalar in point]
                              for point in tile]
-                            for tile in self.floor_tiles]
+                            for tile in floor_tiles]
 
-    def draw_floor(self, canvas):
-        '''Draws the maze floor'''
+        # Create an array of rectangle objects for drawing
         width = CONFIG.floor_segment_length * CONFIG.ppi
-
-        for (tile, color) in zip(self.floor_tiles, self.floor_tile_colors):
+        for (tile, color) in zip(self.floor_tiles, self.floor_tile_colors.tolist()):
             left = tile[0][0] * CONFIG.ppi + CONFIG.border_pixels
             top = tile[0][1] * CONFIG.ppi + CONFIG.border_pixels
             tile_rect = pygame.Rect(left, top, width, width)
-            pygame.draw.rect(canvas, (color, color, color), tile_rect)
+
+            # Append the rectangles
+            if color:
+                self.floor_rect_white.append(tile_rect)
+            else:
+                self.floor_rect_black.append(tile_rect)
+
+    def draw_floor(self, canvas):
+        '''Draws the maze floor'''
+        for white_tile in self.floor_rect_white:
+            pygame.draw.rect(canvas, (255, 255, 255), white_tile)
+        for black_tile in self.floor_rect_black:
+            pygame.draw.rect(canvas, (0, 0, 0), black_tile)

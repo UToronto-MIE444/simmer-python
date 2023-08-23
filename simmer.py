@@ -18,8 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 # Imports
-import random
-import time
+import numpy as np
 import pygame
 from maze import Maze
 from robot import Robot
@@ -80,7 +79,7 @@ end
 
 # Set random error seed
 if not CONFIG.rand_error:
-    random.seed(CONFIG.error_seed)
+    np.random.seed(CONFIG.error_seed)
 
 # Load maze walls and floor pattern
 MAZE = Maze()

@@ -23,6 +23,7 @@ import math
 import pygame.math as pm
 from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
+from devices.gyroscope import Gyroscope
 from devices.drive import Drive
 
 foldername = 'config'
@@ -155,9 +156,20 @@ u0_info = {
         pm.Vector2(1, 0.5),
         pm.Vector2(1, -0.5)
     ],
-    'visible': True
+    'visible': True,
+    'visible_measurement': True
+}
+
+g0_info = {
+    'id': 'u0',
+    'position': [0, 3],
+    'rotation': 0,
+    'error': 0.02,
+    'bias': 0.1,
+    'visible': False
 }
 
 sensors = {
-    'u0': Ultrasonic(u0_info)
+    'u0': Ultrasonic(u0_info),
+    'g0': Gyroscope(g0_info)
 }

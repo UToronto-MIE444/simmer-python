@@ -111,10 +111,21 @@ RUNNING = True
 try:
     while RUNNING:
 
+        ### USER INTERFACE
         # Check for and act on keyboard input
         game_events = pygame.event.get()
         RUNNING = HUD.check_input(game_events)
         keypress = pygame.key.get_pressed()
+
+        # Get the command information from the tcp buffer
+        cmds = COMM.get_buffer_rx()
+
+
+        ### ROBOT AND DEVICE UPDATES AND ACTIONS
+        # Act on commands and respond
+        if cmds:
+            responses = ROBOT.command(cmds, environment)
+            COMM.set_buffer_tx(responses)
 
         # Move the robot, either from keypress commands or from the movement buffers
         if True in keypress:
@@ -127,14 +138,15 @@ try:
         ROBOT.update_device_positions()
 
         # Manually simulate a specific sensor or sensors
-        utilities.simulate_sensors(ROBOT, environment, ['u0'])
+        utilities.simulate_sensors(environment, ['u0'])
 
-        # Get the command information from the tcp buffer, act, and respond
-        cmds = COMM.get_buffer_rx()
-        if cmds:
-            responses = ROBOT.command(cmds, environment)
-            COMM.set_buffer_tx(responses)
+        # Update the sensors that need to be updated every frame
+        for sensor in ROBOT.sensors.values():
+            if callable(getattr(sensor, "update", None)):
+                sensor.update(environment)
 
+
+        ### DRAWING STUFF
         # Fill the background with the background color
         canvas.fill(CONFIG.background_color)
 

@@ -40,6 +40,7 @@ class Drive(Device):
 
         # Device type (i.e. "drive", "motor", or "sensor")
         self.d_type = 'drive'
+        self.name = 'drive'
 
         # Verify that the list of motors and the number of directions provided are equal
         if len(info['motors']) != len(info['motor_direction']):
@@ -65,12 +66,6 @@ class Drive(Device):
 
         # Motors whose odometers should be incremented when the drive is active
         self.motors = info['motors']
-
-        # Gyroscopes to update when the drive system is active
-        self.odometers = []
-        for sensor in info['sensors']:
-            if sensor.d_type == 'gyroscope':
-                self.odometers.append(sensor)
 
         # Amount to increment odometers (in inches) for each drive movement unit
         # For linear movement, drive units are inches, for rotational movement, units are degrees
@@ -180,8 +175,5 @@ class Drive(Device):
         move_vector_error = [utilities.add_error(move_vector[0] + move_amount * self.bias_linear[0], self.error_linear[0]),
                              utilities.add_error(move_vector[1] + move_amount * self.bias_linear[1], self.error_linear[1])]
         rotation_error =     utilities.add_error(rotation       + move_amount * self.bias_rotation,  self.error_rotation)
-
-        # Update gyroscope measurement (TBC)
-
 
         return [move_vector_error, rotation_error]

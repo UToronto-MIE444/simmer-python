@@ -23,6 +23,7 @@ import numpy as np
 import pygame
 from maze import Maze
 from robot import Robot
+from block import Block
 from interface.hud import Hud
 from interface.communication import TCPServer
 import config.config as CONFIG
@@ -67,8 +68,11 @@ CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
 # Load robot
 ROBOT = Robot()
 
+# Create the block
+BLOCK = Block()
+
 # Create a copy of the environment objects to pass to simulation functions
-environment = {'ROBOT': ROBOT, 'MAZE': MAZE}
+environment = {'BLOCK': BLOCK, 'MAZE': MAZE, 'ROBOT': ROBOT}
 
 # Load the Heads Up Display
 HUD = Hud()
@@ -134,6 +138,9 @@ try:
 
         # Draw the maze walls
         MAZE.draw_walls(canvas)
+
+        # Draw the block
+        BLOCK.draw(canvas)
 
         # Draw the robot onto the maze
         ROBOT.draw(canvas)

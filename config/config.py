@@ -54,8 +54,9 @@ start_position = [8, 40]    # Robot starting location (in)
 start_rotation = 0          # Robot starting rotation (deg)
 robot_width = 6             # Robot width in inches
 robot_height = 6            # Robot height in inches
-block_position = [25, 41]   # Block starting location
-block_size = 3              # Block side length in inches
+block_position = [66, 5]   # Block starting location
+block_rotation = 0          # Block rotation (deg)
+block_size = 2              # Block side length in inches
 
 # Drive information
 num_segments = 10           # Number of movement segments
@@ -86,6 +87,9 @@ wall_color = (255, 0, 0)    # Tuple with wall color in (R,G,B) format
 
 robot_thickness = 0.25      # Thickness to draw robot perimeter, in inches
 robot_color = (0, 0, 255)   # Tuple with robot perimeter color in (R,G,B) format
+
+block_thickness = 0.25      # Thickness to draw robot perimeter, in inches
+block_color = (127, 127, 0) # Tuple with robot perimeter color in (R,G,B) format
 
 
 

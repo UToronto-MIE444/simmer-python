@@ -113,7 +113,7 @@ class Ultrasonic(Device):
         ray_lengths = [self.max_range for item in rays]
 
         for ct, ray in enumerate(rays):
-            for square in MAZE.wall_squares:
+            for square in [BLOCK.block_square, *MAZE.wall_squares]:
                 for segment_wall in square:
                     collision_points = utilities.collision(ray, segment_wall)
                     if not collision_points:
@@ -126,6 +126,6 @@ class Ultrasonic(Device):
         self.ray_lengths = ray_lengths
 
         # Build the value to return
-        output = statistics.median(self.ray_lengths)
+        output = min(self.ray_lengths)
 
         return utilities.add_error(output, self.error_pct, self.reading_bounds)

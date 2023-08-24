@@ -69,9 +69,19 @@ class Block():
             'collision': self.collision
         }]
 
+        self.block_square = self._block_square_update()
+
+
+    def _block_square_update(self):
+        '''Updates the line segments that form the block exterior for collision detection.'''
+        block_square = [[[self.outline_global[0][0], self.outline_global[0][1]], [self.outline_global[1][0], self.outline_global[1][1]]],
+                        [[self.outline_global[1][0], self.outline_global[1][1]], [self.outline_global[2][0], self.outline_global[2][1]]],
+                        [[self.outline_global[2][0], self.outline_global[2][1]], [self.outline_global[3][0], self.outline_global[3][1]]],
+                        [[self.outline_global[3][0], self.outline_global[3][1]], [self.outline_global[0][0], self.outline_global[0][1]]]]
+        return block_square
 
     def append_trail(self):
-        '''Appends current position information to the robot's trail'''
+        '''Appends current position information to the block's trail'''
 
         self.trail.append({
             'position': self.position,
@@ -81,8 +91,8 @@ class Block():
 
     def update_outline(self):
         '''
-        Define the absolute outline points of the robot, in inches, relative
-        to the center point of the robot.
+        Define the absolute outline points of the block, in inches, relative
+        to the center point of the block.
         '''
 
         # Rotate the outline
@@ -96,10 +106,12 @@ class Block():
         for ct in range(-1, len(self.outline_global) - 1):
             segments.append((self.outline_global[ct], self.outline_global[ct+1]))
 
+        # Update the outline vertices and collision line segments
         self.outline_global_segments = segments
+        self.block_square = self._block_square_update()
 
     def draw(self, canvas):
-        '''Draws the robot outline on the canvas'''
+        '''Draws the block outline on the canvas'''
 
         # Graphics
         THICKNESS = int(CONFIG.block_thickness * CONFIG.ppi)
@@ -113,7 +125,7 @@ class Block():
         pygame.draw.polygon(canvas, COLOR, outline, THICKNESS)
 
     def move_manual(self, keypress, walls):
-        '''Determine the direction to move & rotate the robot based on keypresses.'''
+        '''Determine the direction to move & rotate the block based on keypresses.'''
 
         move_vector = pm.Vector2(0, 0)
         rotation = 0

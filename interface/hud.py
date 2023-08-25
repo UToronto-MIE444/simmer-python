@@ -101,8 +101,8 @@ class Hud:
         '''Draws the HUD frame indicator.'''
 
         # Update the color value
-        self.indicator_color -= 4
-        if self.indicator_color == 0:
+        self.indicator_color -= int(240/CONFIG.frame_rate)
+        if self.indicator_color <= 0:
             self.indicator_color = 240
 
         # Create an RGB color tuple

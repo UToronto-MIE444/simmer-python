@@ -121,7 +121,7 @@ w0_info = {
     'ang_velocity': 0,
     'motors': [motors['m0'], motors['m1']],
     'motor_direction': [1, 1],
-    'bias': {'x': 0, 'y': 0, 'rotation': 1},
+    'bias': {'x': 0, 'y': 0, 'rotation': 0.5},
     'error': {'x': 0.02, 'y': 0.05, 'rotation': 1}
 }
 

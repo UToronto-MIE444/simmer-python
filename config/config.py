@@ -56,7 +56,7 @@ robot_width = 6             # Robot width in inches
 robot_height = 6            # Robot height in inches
 block_position = [66, 5]   # Block starting location
 block_rotation = 0          # Block rotation (deg)
-block_size = 2              # Block side length in inches
+block_size = 3              # Block side length in inches
 
 # Drive information
 num_segments = 10           # Number of movement segments
@@ -154,6 +154,23 @@ drives = {
 u0_info = {
     'id': 'u0',
     'position': [0, 3],
+    'height': 2,
+    'rotation': 0,
+    'error': 0.02,
+    'outline': [
+        pm.Vector2(-1, -0.5),
+        pm.Vector2(-1, 0.5),
+        pm.Vector2(1, 0.5),
+        pm.Vector2(1, -0.5)
+    ],
+    'visible': True,
+    'visible_measurement': False
+}
+
+u1_info = {
+    'id': 'u1',
+    'position': [0, 1],
+    'height': 6,
     'rotation': 0,
     'error': 0.02,
     'outline': [
@@ -194,11 +211,13 @@ i0_info = {
     'error': 0.05,
     'bias': 0.1,
     'color': (127, 127, 127),
-    'visible': True
+    'visible': True,
+    'visible_measurement': True
 }
 
 sensors = {
     'u0': Ultrasonic(u0_info),
+    'u1': Ultrasonic(u1_info),
     'g0': Gyroscope(g0_info),
     'c0': Compass(c0_info),
     'i0': Infrared(i0_info)

@@ -82,6 +82,7 @@ class Block():
 
     def append_trail(self):
         '''Appends current position information to the block's trail'''
+        # Not used
 
         self.trail.append({
             'position': self.position,
@@ -126,6 +127,7 @@ class Block():
 
     def move_manual(self, keypress, walls):
         '''Determine the direction to move & rotate the block based on keypresses.'''
+        # Not used
 
         move_vector = pm.Vector2(0, 0)
         rotation = 0
@@ -155,6 +157,8 @@ class Block():
 
     def move(self, velocity, rotation, walls):
         '''Moves the robot, checking for collisions.'''
+        # Not used
+
         # Update robot position
         self.position += pm.Vector2.rotate(velocity, self.rotation)
         self.rotation += rotation
@@ -172,6 +176,7 @@ class Block():
         Checks for a collision between the robot's perimeter segments
         and a set of wall line segments.
         '''
+        # Not used
 
         # Loop through all the robot outline line segments, checking for collisions
         for segment_bot in self.outline_global_segments:

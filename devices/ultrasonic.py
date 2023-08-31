@@ -47,6 +47,9 @@ class Ultrasonic(Device):
             pm.Vector2(1, -0.5)
         ])
 
+        # Device height
+        self.height = info.get('height', CONFIG.block_size)
+
         # Display color
         self.color = info.get('color', (0, 0, 255))
 
@@ -113,7 +116,13 @@ class Ultrasonic(Device):
         ray_lengths = [self.max_range for item in rays]
 
         for ct, ray in enumerate(rays):
-            for square in [BLOCK.block_square, *MAZE.wall_squares]:
+            # Check if the sensor is at a height where the block would be seen
+            if self._block_visible(BLOCK):
+                to_check = [BLOCK.block_square, *MAZE.wall_squares]
+            else:
+                to_check = MAZE.wall_squares
+
+            for square in to_check:
                 for segment_wall in square:
                     collision_points = utilities.collision(ray, segment_wall)
                     if not collision_points:
@@ -129,3 +138,21 @@ class Ultrasonic(Device):
         output = min(self.ray_lengths)
 
         return utilities.add_error(output, self.error_pct, self.reading_bounds)
+
+    def _block_visible(self, BLOCK):
+        '''Determines whether the block is visibile to an ultrasonic sensor based on its height.'''
+
+        # Get some geometric parameters
+        view_angle_z = self.beamwidth/2
+        h = self.height - BLOCK.height
+        vec = pm.Vector2(BLOCK.position.x - self.position_global.x, BLOCK.position.y - self.position_global.y)
+
+        # Calculate distance and angle to block
+        d = vec.magnitude()
+        th = abs(math.atan(h/d)) * 180/math.pi
+
+        # If angle to block is less than sensor view angle, it's visible
+        if th <= view_angle_z:
+            return True
+        else:
+            return False

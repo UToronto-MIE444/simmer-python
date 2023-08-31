@@ -120,7 +120,7 @@ try:
         ROBOT.update_device_positions()
 
         # Manually simulate a specific sensor or sensors
-        utilities.simulate_sensors(environment, ['u0', 'i0'])
+        utilities.simulate_sensors(environment, ['u0', 'u1', 'i0'])
 
         # Update the sensors that need to be updated every frame
         for sensor in ROBOT.sensors.values():

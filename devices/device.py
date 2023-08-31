@@ -55,6 +55,7 @@ class Device():
         self.outline_thickness = 0.2
         self.active_color = (255, 0, 0)
         self.visible = visible
+        self.visible_measurement = False
 
 
     def pos_update(self, bot_pos: pygame.math.Vector2, bot_rot: float):

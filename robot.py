@@ -39,20 +39,15 @@ class Robot():
         '''Initialize the robot class'''
 
         # Position information (stored in inches)
-        self.position = pm.Vector2(CONFIG.start_position[0], CONFIG.start_position[1])
-        self.rotation = CONFIG.start_rotation
+        self.position = pm.Vector2(CONFIG.robot_start_position[0], CONFIG.robot_start_position[1])
+        self.rotation = CONFIG.robot_start_rotation
 
         # Robot size (rectangular)
         self.width = float(CONFIG.robot_width)
         self.height = float(CONFIG.robot_height)
 
         # Define the outline of the robot as a polygon
-        self.outline = [
-            pm.Vector2(-self.width/2, -self.height/2),
-            pm.Vector2(-self.width/2,  self.height/2),
-            pm.Vector2( self.width/2,  self.height/2),
-            pm.Vector2( self.width/2, -self.height/2)
-            ]
+        self.outline = CONFIG.robot_outline
 
         self.outline_global = []
         self.outline_global_segments = []

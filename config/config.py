@@ -18,8 +18,6 @@ This file stores the configuration information for the simulator.
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import math
-import numpy as np
 import pygame.math as pm
 from devices.motors import MotorSimple
 from devices.ultrasonic import Ultrasonic
@@ -50,13 +48,19 @@ timeout = 180
 str_encoding = 'utf-8'
 
 # Robot and Block information
-start_position = [8, 40]    # Robot starting location (in)
-start_rotation = 0          # Robot starting rotation (deg)
-robot_width = 6             # Robot width in inches
-robot_height = 6            # Robot height in inches
-block_position = [66, 5]   # Block starting location
-block_rotation = 0          # Block rotation (deg)
-block_size = 3              # Block side length in inches
+block_position = [66, 5]        # Block starting location
+block_rotation = 0              # Block rotation (deg)
+block_size = 3                  # Block side length in inches
+robot_start_position = [8, 40]  # Robot starting location (in)
+robot_start_rotation = 0        # Robot starting rotation (deg)
+robot_width = 6                 # Robot width in inches
+robot_height = 6                # Robot height in inches
+robot_outline = [               # Robot outline, relative to center position
+                pm.Vector2(-robot_width/2, -robot_width/2),
+                pm.Vector2(-robot_width/2,  robot_width/2),
+                pm.Vector2( robot_width/2,  robot_width/2),
+                pm.Vector2( robot_width/2, -robot_width/2)
+                ]
 
 # Drive information
 num_segments = 10           # Number of movement segments

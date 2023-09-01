@@ -47,7 +47,7 @@ class Device():
         # Absolute position, rotation, and outline points
         self.position_global = [0, 0]
         self.rotation_global = 0
-        self.pos_update(CONFIG.start_position, CONFIG.start_rotation)
+        self.pos_update(CONFIG.robot_start_position, CONFIG.robot_start_rotation)
         self.outline_global = []
 
         # Default display properties

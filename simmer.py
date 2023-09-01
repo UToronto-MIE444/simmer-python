@@ -32,28 +32,6 @@ import utilities
 ### Initialization
 print('SimMeR Loading...')
 
-# Everything in comments needs to be replaced/replicated
-'''
-
-# Build Block
-block = build_block(blocksize, block_center);
-
-## Act on initialization flags
-# Randomize drive biases to verify algorithm robustness
-if randbias
-    drive = bias_randomize(drive, strength);
-end
-
-# Create the plot
-if plot_robot
-
-    # Block
-    block_plot = patch(block(:,1),block(:,2), 'y');
-    set(block_plot,'facealpha',.5)
-
-end
-'''
-
 # Set random error seed
 if not CONFIG.rand_error:
     np.random.seed(CONFIG.error_seed)
@@ -67,6 +45,9 @@ CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
 
 # Load robot
 ROBOT = Robot()
+
+# List of sensors to simulate every frame (for testing only)
+SIMULATE_LIST = CONFIG.simulate_list
 
 # Create the block
 BLOCK = Block()
@@ -93,7 +74,7 @@ try:
         ##########################
         ##### USER INTERFACE #####
         ##########################
-        # Check for and act on keyboard input
+        # Check for keyboard input
         game_events = pygame.event.get()
         RUNNING = HUD.check_input(game_events)
         keypress = pygame.key.get_pressed()
@@ -120,7 +101,7 @@ try:
         ROBOT.update_device_positions()
 
         # Manually simulate a specific sensor or sensors
-        utilities.simulate_sensors(environment, ['u0', 'u1', 'i0'])
+        utilities.simulate_sensors(environment, SIMULATE_LIST)
 
         # Update the sensors that need to be updated every frame
         for sensor in ROBOT.sensors.values():

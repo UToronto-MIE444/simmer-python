@@ -222,3 +222,6 @@ sensors = {
     'c0': Compass(c0_info),
     'i0': Infrared(i0_info)
 }
+
+### TESTING AND DEBUG SETTINGS ###
+simulate_list = ['u0', 'u1', 'i0']

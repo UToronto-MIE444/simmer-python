@@ -19,7 +19,7 @@ Defines the SimMeR device super class.
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import pygame
-import config.config as CONFIG
+import config as CONFIG
 
 class Device():
     '''The base class of all devices that are attached to a robot'''

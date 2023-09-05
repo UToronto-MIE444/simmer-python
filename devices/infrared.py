@@ -23,7 +23,7 @@ import pygame
 import pygame.math as pm
 import shapely as shp
 from devices.device import Device
-import config.config as CONFIG
+import config as CONFIG
 import utilities
 
 class Infrared(Device):

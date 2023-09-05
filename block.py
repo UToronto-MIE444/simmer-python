@@ -30,7 +30,7 @@ from pygame.locals import (
     K_q,
     K_e
 )
-import config.config as CONFIG
+import config as CONFIG
 import utilities
 
 class Block():

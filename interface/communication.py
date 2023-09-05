@@ -21,7 +21,7 @@ Defines the TCP/IP communication functions of the simulator.
 import socket
 import time
 from threading import Thread
-import config.config as CONFIG
+import config as CONFIG
 
 class TCPServer:
     '''A TCP Server to listen for command strings from a control algorithm.'''

@@ -23,7 +23,7 @@ import pygame
 import pygame.math as pm
 from devices.device import Device
 import utilities
-import config.config as CONFIG
+import config as CONFIG
 
 class Drive(Device):
     '''

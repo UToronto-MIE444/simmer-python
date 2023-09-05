@@ -22,7 +22,7 @@ import sys
 import numpy as np
 import pygame
 import shapely as shp
-import config.config as CONFIG
+import config as CONFIG
 
 class Maze:
     '''This class represents the maze/environment'''
@@ -41,8 +41,7 @@ class Maze:
     def import_walls(self):
         '''Imports the walls from a csv file and sets up lines representing them'''
 
-        maze_filename = CONFIG.foldername + '/' + CONFIG.maze_filename
-        wall_map = np.loadtxt(maze_filename, delimiter=',', dtype=int)
+        wall_map = np.array(CONFIG.walls)
         dim_y = np.size(wall_map, 0)
         dim_x = np.size(wall_map, 1)
 

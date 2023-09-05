@@ -20,7 +20,7 @@ Defines a SimMeR device representing a gyroscope.
 
 import pygame.math as pm
 from devices.device import Device
-import config.config as CONFIG
+import config as CONFIG
 import utilities
 
 class Gyroscope(Device):

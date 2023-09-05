@@ -21,7 +21,7 @@ A collection of utility functions for SimMeR.
 import math
 import random
 import pygame
-import config.config as CONFIG
+import config as CONFIG
 
 def add_error(value: float, pct_error: float, bounds: list = []):
     '''

@@ -23,7 +23,7 @@ import statistics
 import pygame
 import pygame.math as pm
 from devices.device import Device
-import config.config as CONFIG
+import config as CONFIG
 import utilities
 
 class Ultrasonic(Device):

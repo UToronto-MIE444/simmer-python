@@ -26,7 +26,7 @@ from robot import Robot
 from block import Block
 from interface.hud import Hud
 from interface.communication import TCPServer
-import config.config as CONFIG
+import config as CONFIG
 import utilities
 
 ### Initialization
@@ -34,7 +34,7 @@ print('SimMeR Loading...')
 
 # Set random error seed
 if not CONFIG.rand_error:
-    np.random.seed(CONFIG.error_seed)
+    np.random.seed(CONFIG.floor_seed)
 
 # Load maze walls and floor pattern
 MAZE = Maze()

@@ -68,16 +68,20 @@ strength = [0.05, 1]	    # How intense the random drive bias is, if enabled
 
 # Control Flags and Setup
 rand_error = False          # Use either true random error generator (True) or repeatable error generation (False)
-error_seed = 5489           # Seed for random error (used if rand_error is False)
 rand_bias = True            # Use a randomized, normally distributed set of bias values for devices with bias
 
 # Plotting Flags
 plot_robot = True           # Plot the robot as it works its way through the maze
 plot_sense = True           # Plot sensor interactions with maze, if relevant
 
-# Maze size information
+# Maze definition information
 wall_segment_length = 12    # Length of maze wall segments (inches)
 floor_segment_length = 3    # Size of floor pattern squares (inches)
+walls = [[3,3,1,1,0,2,0,2],
+         [3,3,0,1,1,1,1,1],
+         [1,0,2,0,0,1,0,1],
+         [1,1,1,1,1,1,0,2]] # Defines the maze walls
+floor_seed = 5489           # Seed for generating floor pattern
 
 # Graphics information
 frame_rate = 60             # Target frame rate (Hz)

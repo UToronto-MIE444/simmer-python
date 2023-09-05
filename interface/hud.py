@@ -30,7 +30,7 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
-import config.config as CONFIG
+import config as CONFIG
 
 class Hud:
     '''Represents the heads up display elements on the canvs.'''

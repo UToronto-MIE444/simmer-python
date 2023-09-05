@@ -28,7 +28,7 @@ from devices.drive import Drive
 
 # Control Flags and Setup
 rand_error = False          # Use either true random error generator (True) or repeatable error generation (False)
-rand_bias = True            # Use a randomized, normally distributed set of bias values for drives (placeholder, not implemented)
+rand_bias = False           # Use a randomized, normally distributed set of bias values for drives (placeholder, not implemented)
 bias_strength = [0.05, 1]   # How intense the random drive bias is, if enabled (placeholder, not implemented)
 
 # Network configuration for sockets
@@ -61,8 +61,8 @@ floor_segment_length = 3    # Size of floor pattern squares (inches)
 walls = [[3,3,1,1,0,2,0,2],
          [3,3,0,1,1,1,1,1],
          [1,0,2,0,0,1,0,1],
-         [1,1,1,1,1,1,0,2]] # Defines the maze walls
-floor_seed = 5489           # Seed for generating floor pattern
+         [1,1,1,1,1,1,0,2]] # Matrix to define the maze walls
+floor_seed = 5489           # Randomization seed for generating correctfloor pattern
 
 # Graphics information
 frame_rate = 60             # Target frame rate (Hz)

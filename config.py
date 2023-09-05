@@ -26,31 +26,24 @@ from devices.compass import Compass
 from devices.infrared import Infrared
 from devices.drive import Drive
 
-foldername = 'config'
-drive_filename = 'drive.csv'
-maze_filename = 'maze.csv'
-robot_filename = 'robot.csv'
-sensors_filename = 'sensors.csv'
+# Control Flags and Setup
+rand_error = False          # Use either true random error generator (True) or repeatable error generation (False)
+rand_bias = True            # Use a randomized, normally distributed set of bias values for drives (placeholder, not implemented)
+bias_strength = [0.05, 1]   # How intense the random drive bias is, if enabled (placeholder, not implemented)
 
-# Simulation control information
-sim = True                  # Use the simulator (True) or connect to robot via blueteooth (False)
-step_time = 0               # Pause time between the algorithm executing commands
-
-# Bluetooth Serial Connection Constants
-comport_num = 6             # Bluetooth serial comport number to connect to
-comport_baud = 9600         # Bluetooth serial baudrate
-
-# Network configuration
+# Network configuration for sockets
 host = '127.0.0.1'
 port_rx = 61200
 port_tx = 61201
-timeout = 180
+timeout = 300
 str_encoding = 'utf-8'
 
-# Robot and Block information
+# Block information
 block_position = [66, 5]        # Block starting location
 block_rotation = 0              # Block rotation (deg)
 block_size = 3                  # Block side length in inches
+
+# Robot information
 robot_start_position = [8, 40]  # Robot starting location (in)
 robot_start_rotation = 0        # Robot starting rotation (deg)
 robot_width = 6                 # Robot width in inches
@@ -61,18 +54,6 @@ robot_outline = [               # Robot outline, relative to center position
                 pm.Vector2( robot_width/2,  robot_width/2),
                 pm.Vector2( robot_width/2, -robot_width/2)
                 ]
-
-# Drive information
-num_segments = 10           # Number of movement segments
-strength = [0.05, 1]	    # How intense the random drive bias is, if enabled
-
-# Control Flags and Setup
-rand_error = False          # Use either true random error generator (True) or repeatable error generation (False)
-rand_bias = True            # Use a randomized, normally distributed set of bias values for devices with bias
-
-# Plotting Flags
-plot_robot = True           # Plot the robot as it works its way through the maze
-plot_sense = True           # Plot sensor interactions with maze, if relevant
 
 # Maze definition information
 wall_segment_length = 12    # Length of maze wall segments (inches)

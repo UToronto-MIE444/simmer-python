@@ -84,7 +84,9 @@ class TCPServer:
                     client_socket.close()
 
                 except TimeoutError:
-                    print('Timeout.')
+                    print('Socket Timeout. Continuing.')
+                except ConnectionResetError:
+                    print('Socket Connection Reset. Continuing.')
 
     def response_transmitter(self):
         '''The main tcp transmit loop'''

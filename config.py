@@ -162,7 +162,7 @@ u0_info = {
         pm.Vector2(1, -0.5)
     ],
     'visible': True,
-    'visible_measurement': False
+    'visible_measurement': True
 }
 
 u1_info = {
@@ -222,4 +222,4 @@ sensors = {
 }
 
 ### TESTING AND DEBUG SETTINGS ###
-simulate_list = ['u0', 'u1', 'i0']
+# simulate_list = ['u0', 'u1', 'i0']

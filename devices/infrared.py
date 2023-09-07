@@ -58,6 +58,8 @@ class Infrared(Device):
 
         # Display measurement when simulating
         self.visible_measurement = info.get('visible_measurement', False)
+        self.visible_measurement_time = info.get('visible_measurement_time', 0.5)    # Measurement time on screen (s)
+        self.visible_measurement_buffer = 0
 
         # Simulation parameters
         self.fov = info.get('fov', 60)              # Field of view angle
@@ -70,21 +72,30 @@ class Infrared(Device):
     def draw_measurement(self, canvas):
         '''Draw ultrasonic sensor rays on the canvas'''
 
-        # Graphics options
-        THICKNESS = int(CONFIG.ppi*0.125)
-        COLOR = (255, 255, 0)
+        # If the measurement should be displayed
+        if self.visible_measurement_buffer:
+            # Graphics options
+            THICKNESS = int(CONFIG.ppi*0.125)
+            COLOR = (255, 255, 0)
 
-        # Circle parameters
-        center = [value*CONFIG.ppi + CONFIG.border_pixels for value in self.position_global]
-        radius = self.view_r * CONFIG.ppi
+            # Circle parameters
+            center = [value*CONFIG.ppi + CONFIG.border_pixels for value in self.position_global]
+            radius = self.view_r * CONFIG.ppi
 
-        pygame.draw.circle(canvas, COLOR, center, radius, THICKNESS)
+            pygame.draw.circle(canvas, COLOR, center, radius, THICKNESS)
+
+            # Decrement the buffer
+            self.visible_measurement_buffer -= 1
 
     def simulate(self, value: float, environment: dict):
         '''
         Simulates the performance of the ultrasonic sensor.
         '''
 
+        # Update the measurement display buffer
+        self.visible_measurement_buffer = int(self.visible_measurement_time * CONFIG.frame_rate)
+
+        # Simulate the performance
         MAZE = environment.get('MAZE', False)
 
         self.view_circle = shp.Point(self.position_global[0], self.position_global[1]).buffer(self.view_r)

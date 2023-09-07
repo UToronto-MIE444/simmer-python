@@ -57,6 +57,8 @@ class Ultrasonic(Device):
 
         # Display measurement when simulating
         self.visible_measurement = info.get('visible_measurement', False)
+        self.visible_measurement_time = info.get('visible_measurement_time', 0.5)    # Measurement time on screen (s)
+        self.visible_measurement_buffer = 0
 
         # Simulation parameters
         self.beamwidth = info.get('beamwidth', 15)              # Beamwidth of the ultrasonic sensor
@@ -90,15 +92,21 @@ class Ultrasonic(Device):
     def draw_measurement(self, canvas):
         '''Draw ultrasonic sensor rays on the canvas'''
 
-        # Graphics options
-        thickness = int(CONFIG.ppi*0.125)
-        color = (0, 0, 255)
+        # If the measurement should be displayed
+        if self.visible_measurement_buffer:
 
-        # Draw the lines on the canvas
-        for ray in self.rays:
-            start = [point*CONFIG.ppi + CONFIG.border_pixels for point in ray[0]]
-            end = [point*CONFIG.ppi + CONFIG.border_pixels for point in ray[1]]
-            pygame.draw.line(canvas, color, start, end, thickness)
+            # Graphics options
+            thickness = int(CONFIG.ppi*0.125)
+            color = (0, 0, 255)
+
+            # Draw the lines on the canvas
+            for ray in self.rays:
+                start = [point*CONFIG.ppi + CONFIG.border_pixels for point in ray[0]]
+                end = [point*CONFIG.ppi + CONFIG.border_pixels for point in ray[1]]
+                pygame.draw.line(canvas, color, start, end, thickness)
+            # Decrement the buffer
+            self.visible_measurement_buffer -= 1
+
 
     def simulate(self, value: float, environment: dict):
         '''
@@ -113,6 +121,9 @@ class Ultrasonic(Device):
 
         rays = self._define_rays()
         ray_lengths = [self.max_range for item in rays]
+
+        # Update the measurement display buffer
+        self.visible_measurement_buffer = int(self.visible_measurement_time * CONFIG.frame_rate)
 
         for ct, ray in enumerate(rays):
             # Check if the sensor is at a height where the block would be seen

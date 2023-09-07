@@ -20,7 +20,6 @@ Defines a SimMeR device representing a compass.
 
 import pygame.math as pm
 from devices.device import Device
-import config as CONFIG
 import utilities
 
 class Compass(Device):

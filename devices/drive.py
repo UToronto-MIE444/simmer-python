@@ -19,7 +19,6 @@ Defines a SimMeR device representing a robot's drive.
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-import pygame
 import pygame.math as pm
 from devices.device import Device
 import utilities

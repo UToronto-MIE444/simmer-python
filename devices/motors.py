@@ -18,10 +18,8 @@ Defines a SimMeR device representing a motor & wheel.
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import pygame
 import pygame.math as pm
 from devices.device import Device
-import config as CONFIG
 
 class MotorSimple(Device):
     '''Defines a basic motor & wheel'''

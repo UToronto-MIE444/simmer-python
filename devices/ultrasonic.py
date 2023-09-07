@@ -19,7 +19,6 @@ Defines a SimMeR device representing an ultrasonic sensor.
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-import statistics
 import pygame
 import pygame.math as pm
 from devices.device import Device

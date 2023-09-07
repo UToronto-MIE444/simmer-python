@@ -47,7 +47,10 @@ CANVAS_HEIGHT = MAZE.size_y * CONFIG.ppi + CONFIG.border_pixels * 2
 ROBOT = Robot()
 
 # List of sensors to simulate every frame (for testing only)
-SIMULATE_LIST = CONFIG.simulate_list
+if hasattr(CONFIG, 'simulate_list'):
+    SIMULATE_LIST = CONFIG.simulate_list
+else:
+    SIMULATE_LIST = []
 
 # Create the block
 BLOCK = Block()

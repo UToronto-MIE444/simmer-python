@@ -24,33 +24,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import socket
 # import time
 from threading import Thread
+import _thread
+from datetime import datetime
 import pygame
 
-def quitter():
-    while True:
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                # deactivate the pygame library and quit the program
-                pygame.quit()
-                quit()
-
-def transmit():
-    while True:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((HOST, PORT_TX))
-            send_string = input('Type in a string to send: ')
-            try:
-                s.send(send_string.encode('utf-8'))
-            except ConnectionRefusedError:
-                print('Tx Connection was refused.')
-            except TimeoutError:
-                print('Tx socket timed out.')
-
-def receive():
+def display():
 
     ### Receive Window Setup ###
     pygame.init()
+    clock = pygame.time.Clock()
 
     # define RGB colors
     white = (255, 255, 255)
@@ -59,7 +41,7 @@ def receive():
 
     # display size
     X = 400
-    Y = 400
+    Y = 225
 
     # create the display surface object
     display_surface = pygame.display.set_mode((X, Y))
@@ -70,39 +52,87 @@ def receive():
     # create a font object
     font = pygame.font.Font('freesansbold.ttf', 16)
 
-    # create a text surface object
-    text = font.render('RxTextField', True, green, blue)
-
-    # create a rectangular object for the text surface object
-    textRect = text.get_rect()
-
-    # set the center of the rectangular object
-    textRect.center = (X // 2, Y // 2)
-
     # Draw the text field
     display_surface.fill(white)
     pygame.display.update()
 
+    # main loop
+    while True:
+
+        # create a text surface object
+        text0 = font.render(f"Last response received at time: {time_rx}", True, green, blue)
+        text1 = font.render(f"Last response was: {display_text}", True, green, blue)
+
+        # create a rectangular object for the text surface object
+        textRect0 = text0.get_rect()
+        textRect1 = text1.get_rect()
+
+        # set the center of the rectangular object
+        textRect0.center = (X // 2, Y // 2 + 15)
+        textRect1.center = (X // 2, Y // 2 - 15)
+
+        display_surface.fill(white)
+        display_surface.blit(text0, textRect0)
+        display_surface.blit(text1, textRect1)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                # deactivate the pygame library and quit the program
+                pygame.quit()
+                quit()
+
+        # update display
+        clock.tick(60)
+        pygame.display.flip()
+
+def transmit():
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.connect((HOST, PORT_TX))
+                send_string = input('Type in a string to send: ')
+                s.send(send_string.encode('utf-8'))
+            except (ConnectionRefusedError, ConnectionResetError):
+                print('Tx Connection was refused or reset.')
+                _thread.interrupt_main()
+            except TimeoutError:
+                print('Tx socket timed out.')
+                _thread.interrupt_main()
+
+def receive():
+    global display_text
+    global time_rx
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
-            s2.connect((HOST, PORT_RX))
             try:
+                s2.connect((HOST, PORT_RX))
                 response = s2.recv(1024).decode('utf-8')
                 if response:
-                    print(f'Received {response!r}')
-                    display_surface.fill(white)
-                    display_surface.blit(text, textRect)
+                    display_text = response
+                    time_rx = datetime.now().strftime("%H:%M:%S")
+            except (ConnectionRefusedError, ConnectionResetError):
+                print('Rx connection was refused or reset.')
+                _thread.interrupt_main()
             except TimeoutError:
                 print('Response not received from robot.')
+                _thread.interrupt_main()
 
 ### Network Setup ###
 HOST = '127.0.0.1'  # The server's hostname or IP address
 PORT_TX = 61200     # The port used by the *CLIENT* to receive
 PORT_RX = 61201     # The port used by the *CLIENT* to send data
 
-# Create tx and rx threads
-Thread(target = transmit).start()
-Thread(target = receive).start()
+# Display text strings
+display_text = 'None'
+time_rx = 'Never'
 
-# Check whether pygame has been requested to close
-Thread(target = quitter).start()
+# Create tx and rx threads
+Thread(target = transmit, daemon = True).start()
+Thread(target = receive, daemon = True).start()
+
+# Display the received text in a pygame window
+try:
+    display()
+except KeyboardInterrupt:
+    pygame.quit()
+    quit()

@@ -86,18 +86,24 @@ def display():
         pygame.display.flip()
 
 def transmit():
+    ask = True
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
                 s.connect((HOST, PORT_TX))
-                send_string = input('Type in a string to send: ')
-                s.send(send_string.encode('utf-8'))
+                if ask:
+                    send_string = input('Type in a string to send: ')
+                    s.send(send_string.encode('utf-8'))
             except (ConnectionRefusedError, ConnectionResetError):
                 print('Tx Connection was refused or reset.')
                 _thread.interrupt_main()
             except TimeoutError:
                 print('Tx socket timed out.')
                 _thread.interrupt_main()
+            except EOFError:
+                print('\nKeyboardInterrupt triggered. Closing...')
+                _thread.interrupt_main()
+                ask = False
 
 def receive():
     global display_text

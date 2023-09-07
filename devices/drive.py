@@ -52,9 +52,11 @@ class Drive(Device):
 
         # Movement values for each direction when this drive command is executed
         # ONLY ONE OF THESE TWO should be non-zero for each drive
-        self.velocity = pm.Vector2(info['velocity'][0] / CONFIG.frame_rate, # inch/frame
-                                   info['velocity'][1] / CONFIG.frame_rate) # inch/frame
-        self.rotation_speed =      info['ang_velocity'] / CONFIG.frame_rate # deg/frame
+        velocity = info.get('velocity', [0, 0])
+        ang_velocity = info.get('ang_velocity', 0)
+        self.velocity = pm.Vector2(velocity[0] / CONFIG.frame_rate, # inch/frame
+                                   velocity[1] / CONFIG.frame_rate) # inch/frame
+        self.rotation_speed =      ang_velocity / CONFIG.frame_rate # deg/frame
 
         # Get the unit vector of the velocity (the direction the robot will move)
         if self.velocity != pm.Vector2(0, 0):

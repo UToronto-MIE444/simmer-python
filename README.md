@@ -17,4 +17,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # simmer-python
 Mechatronics robot simulator written in python.
-This simulator requires Python 3.11 or above, pygame 2.5 or above, and numpy to be installed
+This simulator requires Python 3.11 or above, pygame 2.5 or above, numpy, and shapely to be installed

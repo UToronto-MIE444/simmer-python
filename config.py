@@ -106,6 +106,9 @@ motors = {
 # Drives
 w0_info = {
     'id': 'w0',
+    'position': [0, 0],
+    'rotation': 0,
+    'visible': False,
     'velocity': [0, 6],
     'ang_velocity': 0,
     'motors': [motors['m0'], motors['m1']],
@@ -116,6 +119,9 @@ w0_info = {
 
 d0_info = {
     'id': 'd0',
+    'position': [0, 0],
+    'rotation': 0,
+    'visible': False,
     'velocity': [6, 0],
     'ang_velocity': 0,
     'motors': [motors['m0'], motors['m1']],
@@ -126,6 +132,9 @@ d0_info = {
 
 r0_info = {
     'id': 'r0',
+    'position': [0, 0],
+    'rotation': 0,
+    'visible': False,
     'velocity': [0, 0],
     'ang_velocity': 120,
     'motors': [motors['m0'], motors['m1']],

@@ -42,7 +42,7 @@ class Drive(Device):
 
         # Verify that the list of motors and the number of directions provided are equal
         if len(info['motors']) != len(info['motor_direction']):
-            raise Exception('Lists "motors" and "motor_direction" must be the same length')
+            raise RuntimeError('Lists "motors" and "motor_direction" must be the same length')
 
         # Device outline - use minimal points since the device is abstract and won't be drawn
         self.outline = info.get('outline', [

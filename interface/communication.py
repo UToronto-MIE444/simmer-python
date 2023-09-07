@@ -20,6 +20,7 @@ Defines the TCP/IP communication functions of the simulator.
 
 import socket
 import time
+import math
 from threading import Thread
 import config as CONFIG
 
@@ -80,7 +81,7 @@ class TCPServer:
                     else:
                         print(f'The following data was received: {data!r}, but the receive buffer is full.')
                         if not self.buffer_tx:
-                            self.buffer_tx = 'Receive Data Buffer is full, please retry in a moment.'
+                            self.buffer_tx = math.nan
                     client_socket.close()
 
                 except TimeoutError:
@@ -99,7 +100,7 @@ class TCPServer:
                     client_socket.send(self.buffer_tx.encode(CONFIG.str_encoding))
                     self.buffer_tx = []
                 except OSError:
-                    pass
+                    print("OS Error raised, continuing.")
             client_socket.close()
             time.sleep(1/CONFIG.frame_rate)
 
@@ -122,7 +123,10 @@ class TCPServer:
         cmds = []
         for cmd in data.split(','):
             cmd_id = cmd[0:2]
-            cmd_data = cmd[3:len(cmd)]
+            if len(cmd) == 2:
+                cmd_data = 0
+            else:
+                cmd_data = cmd[3:len(cmd)]
             cmds.append([cmd_id, cmd_data])
 
         return cmds

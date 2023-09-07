@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # and https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
 
 import socket
-# import time
+import struct
 from threading import Thread
 import _thread
 from datetime import datetime
@@ -59,9 +59,11 @@ def display():
     # main loop
     while True:
 
+        responses_rnd = [f"{item:.{2}f}" for item in responses]
+
         # create a text surface object
         text0 = font.render(f"Last response received at time: {time_rx}", True, green, blue)
-        text1 = font.render(f"Last response was: {display_text}", True, green, blue)
+        text1 = font.render(f"Last response was: {responses_rnd}", True, green, blue)
 
         # create a rectangular object for the text surface object
         textRect0 = text0.get_rect()
@@ -106,15 +108,15 @@ def transmit():
                 ask = False
 
 def receive():
-    global display_text
+    global responses
     global time_rx
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
             try:
                 s2.connect((HOST, PORT_RX))
-                response = s2.recv(1024).decode('utf-8')
-                if response:
-                    display_text = response
+                response_raw = s2.recv(1024)
+                if response_raw:
+                    responses = bytes_to_list(response_raw)
                     time_rx = datetime.now().strftime("%H:%M:%S")
             except (ConnectionRefusedError, ConnectionResetError):
                 print('Rx connection was refused or reset.')
@@ -123,13 +125,19 @@ def receive():
                 print('Response not received from robot.')
                 _thread.interrupt_main()
 
+def bytes_to_list(msg):
+    num_responses = int(len(msg)/8)
+    data = struct.unpack("%sd" % str(num_responses), msg)
+    return data
+
+
 ### Network Setup ###
 HOST = '127.0.0.1'  # The server's hostname or IP address
 PORT_TX = 61200     # The port used by the *CLIENT* to receive
 PORT_RX = 61201     # The port used by the *CLIENT* to send data
 
 # Display text strings
-display_text = 'None'
+responses = []
 time_rx = 'Never'
 
 # Create tx and rx threads

@@ -21,6 +21,7 @@ Defines the TCP/IP communication functions of the simulator.
 import socket
 import time
 import math
+import struct
 from threading import Thread
 import config as CONFIG
 
@@ -97,7 +98,8 @@ class TCPServer:
             client_socket, addr = self.sock2.accept()
             if self.buffer_tx:
                 try:
-                    client_socket.send(self.buffer_tx.encode(CONFIG.str_encoding))
+                    # client_socket.send(self.buffer_tx.encode(CONFIG.str_encoding))
+                    client_socket.send(self.buffer_tx)
                     self.buffer_tx = []
                 except OSError:
                     print("OS Error raised, continuing.")
@@ -131,16 +133,11 @@ class TCPServer:
 
         return cmds
 
-    def set_buffer_tx(self, responses: str):
+    def set_buffer_tx(self, responses: list):
         '''
         Put data into the transmit buffer.
         '''
 
-        response_str = ''
-
         if not self.buffer_tx:
-            for response in responses:
-                if response_str:
-                    response_str += '|'
-                response_str += f'{response:.3f}'
-            self.buffer_tx = response_str
+            response_byte = struct.pack("%sd" % len(responses), *responses)
+            self.buffer_tx = response_byte

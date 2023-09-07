@@ -1,5 +1,5 @@
 '''
-Defines a SimMeR device representing a gyroscope.
+A blank template file that can be used to create new types of SimMeR devices.
 '''
 # This file is part of SimMeR, an educational mechatronics robotics simulator.
 # Initial development funded by the University of Toronto MIE Department.
@@ -23,20 +23,22 @@ from devices.device import Device
 import config as CONFIG
 import utilities
 
-class Gyroscope(Device):
-    '''Defines a gyroscope that allows for measurement of rotation.'''
+class Template(Device):
+    '''Defines a new device.'''
 
     def __init__(self, info: dict):
         '''Initialization'''
 
         # Call super initialization
-        super().__init__(info['id'], [0, 0], 0, info['visible'])
+        super().__init__(info['id'], info['position'], info['rotation'], info['visible'])
 
         # Device type (i.e. "drive", "motor", or "sensor")
-        self.d_type = 'sensor'
-        self.name = 'gyroscope'
+        self.d_type = ''
 
-        # Device outline position
+        # A name for the device
+        self.name = ''
+
+        # Device outline
         self.outline = info.get('outline', [
             pm.Vector2(-0.5, -0.5),
             pm.Vector2(0, 1)
@@ -48,24 +50,17 @@ class Gyroscope(Device):
         # Display thickness
         self.outline_thickness = info.get('outline_thickness', 0.25)
 
-        # Simulation parameters
-        self.gyro = 0                               # gyroscope value (in degrees)
-        self.rotation_true = [self.rotation_global, self.rotation_global]   # [Previous rotation, Current rotation] (deg)
-        self.error = info.get('error', 0.2)         # Error when updating the gyroscope value
-        self.bias = info.get('bias', 0.1)           # Bias that the gyroscope drifts with (deg/s)
-
 
     def simulate(self, value: float, environment: dict):
-        '''Returns the odometer value.'''
-        return self.gyro
+        '''
+        This defines what the device does when it is called by a command.
+        It should return a value of some sort to the localization and control code.
+        '''
+        return 0
 
     def update(self, environment: dict):
-        '''Updates the gyroscope value based on the movement of the robot.'''
-
-        # Update the previous and current rotations
-        self.rotation_true[0] = self.rotation_true[1]
-        self.rotation_true[1] = self.rotation_global
-
-        # Add Error and update the device, wrap from 0 - 360 degrees
-        change = self.rotation_true[1] - self.rotation_true[0] + self.bias/CONFIG.frame_rate
-        self.gyro = (self.gyro + utilities.add_error(change, self.error)) % 360
+        '''
+        This function defines what the device does on every frame.
+        It should not return anything, only update the devices self variables.
+        '''
+        pass

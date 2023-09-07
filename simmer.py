@@ -106,7 +106,7 @@ try:
         # Update the sensors that need to be updated every frame
         for sensor in ROBOT.sensors.values():
             if callable(getattr(sensor, "update", None)):
-                sensor.update()
+                sensor.update(environment)
 
         ###########################################
         ##### DRAW RELEVANT OBJECTS ON CANVAS #####

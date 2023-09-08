@@ -103,6 +103,9 @@ class TCPServer:
                     self.buffer_tx = []
                 except OSError:
                     print("OS Error raised, continuing.")
+                except TypeError:
+                    print("Invalid tx buffer, flushing.")
+                    self.buffer_tx = []
             client_socket.close()
             time.sleep(1/CONFIG.frame_rate)
 

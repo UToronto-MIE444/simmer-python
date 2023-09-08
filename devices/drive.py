@@ -58,11 +58,16 @@ class Drive(Device):
                                    velocity[1] / CONFIG.frame_rate) # inch/frame
         self.rotation_speed =      ang_velocity / CONFIG.frame_rate # deg/frame
 
-        # Get the unit vector of the velocity (the direction the robot will move)
+        # Get the unit vector of the velocity and angular velocity (the direction the robot will move)
         if self.velocity != pm.Vector2(0, 0):
             self.velocity_direction = self.velocity.normalize()
         else:
             self.velocity_direction = self.velocity
+
+        if self.rotation_speed != 0:
+            self.rotation_normalize = self.rotation_speed/self.rotation_speed
+        else:
+            self.rotation_normalize = 0
 
         # Motors whose odometers should be incremented when the drive is active
         self.motors = info['motors']
@@ -137,8 +142,16 @@ class Drive(Device):
             if drive.move_buffer:
                 return math.nan
 
+        # Add errors
+        error_total = 0
+        for v, e in zip(self.velocity_direction, self.error_linear):
+            error_total += v*e
+        if self.rotation_normalize:
+            error_total += self.rotation_normalize * self.error_rotation
+        value_error = utilities.add_error(value, error_total)
+
         # Increment the movement buffer
-        self.move_buffer = value
+        self.move_buffer = value_error
 
         # Return "inf" if the command is accepted and acknowledged
         return math.inf
@@ -172,8 +185,8 @@ class Drive(Device):
             rotation = move_amount
 
         # Add bias and error to the drive
-        move_vector_error = [utilities.add_error(move_vector[0] + move_amount * self.bias_linear[0], self.error_linear[0]),
-                             utilities.add_error(move_vector[1] + move_amount * self.bias_linear[1], self.error_linear[1])]
-        rotation_error =     utilities.add_error(rotation       + move_amount * self.bias_rotation,  self.error_rotation)
+        move_vector_error = [move_vector[0] + move_amount * self.bias_linear[0],
+                             move_vector[1] + move_amount * self.bias_linear[1]]
+        rotation_error =     rotation       + move_amount * self.bias_rotation
 
         return [move_vector_error, rotation_error]

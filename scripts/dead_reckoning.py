@@ -88,9 +88,18 @@ ct = 0
 while RUNNING:
 
     if ct < len(cmd_sequence):
-        transmit('u0')
-        time.sleep(0.1)
-        print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
+        # transmit('u0')
+        # time.sleep(0.1)
+        # print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
+        # transmit('u1')
+        # time.sleep(0.1)
+        # print(f"Ultrasonic 1 reading: {round(responses[0], 3)}")
+        # transmit('u2')
+        # time.sleep(0.1)
+        # print(f"Ultrasonic 2 reading: {round(responses[0], 3)}")
+        # transmit('u3')
+        # time.sleep(0.1)
+        # print(f"Ultrasonic 3 reading: {round(responses[0], 3)}")
 
         transmit(cmd_sequence[ct])
         time.sleep(0.1)
@@ -98,7 +107,7 @@ while RUNNING:
         if responses[0] == math.inf:
             ct += 1
 
-        time.sleep(1)
+        time.sleep(0.1)
     else:
         RUNNING = False
         print("Sequence complete!")

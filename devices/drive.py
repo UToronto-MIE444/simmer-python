@@ -149,6 +149,7 @@ class Drive(Device):
         if self.rotation_normalize:
             error_total += self.rotation_normalize * self.error_rotation
         value_error = utilities.add_error(value, error_total)
+        # print(value, value_error)
 
         # Increment the movement buffer
         self.move_buffer = value_error

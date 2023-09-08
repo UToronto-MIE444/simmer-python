@@ -196,6 +196,11 @@ class Robot():
             self.rotation -= rotation
             self.update_outline()
 
+    def stop_drives(self):
+        '''Stops all drives from moving, used as an emergency stop.'''
+        for drive in self.drives.values():
+            drive.move_buffer = 0
+
     def check_collision_walls(self, walls: list):
         '''
         Checks for a collision between the robot's perimeter segments
@@ -229,7 +234,11 @@ class Robot():
                     value = 0
                 responses.append(target_device.simulate(value, environment))
             else:
-                print('Target device ' + cmd[0] + ' not found.')
-                responses.append(math.nan)
+                if cmd[0] == 'xx':
+                    self.stop_drives()
+                    responses.append(math.inf)
+                else:
+                    print('Target device ' + cmd[0] + ' not found.')
+                    responses.append(math.nan)
 
         return responses

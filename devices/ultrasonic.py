@@ -159,7 +159,7 @@ class Ultrasonic(Device):
 
         # Calculate distance and angle to block
         d = vec.magnitude()
-        th = abs(math.atan(h/d)) * 180/math.pi
+        th = math.atan(h/d) * 180/math.pi
 
         # If angle to block is less than sensor view angle, it's visible
         if th <= view_angle_z:

@@ -88,10 +88,16 @@ ct = 0
 while RUNNING:
 
     if ct < len(cmd_sequence):
+        transmit('u0')
+        time.sleep(0.1)
+        print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
+
         transmit(cmd_sequence[ct])
         time.sleep(0.1)
+
         if responses[0] == math.inf:
             ct += 1
+
         time.sleep(1)
     else:
         RUNNING = False

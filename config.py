@@ -168,7 +168,7 @@ u0_info = {
 u1_info = {
     'id': 'u1',
     'position': [0, 1],
-    'height': 6,
+    'height': 4,
     'rotation': 0,
     'error': 0.02,
     'outline': [

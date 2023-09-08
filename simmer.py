@@ -95,9 +95,9 @@ try:
 
         # Move the robot, either from keypress commands or from the movement buffers
         if True in keypress:
-            ROBOT.move_manual(keypress, MAZE.wall_squares)
+            ROBOT.move_manual(keypress, [BLOCK.block_square, *MAZE.wall_squares])
         else:
-            ROBOT.move_from_command(MAZE.wall_squares)
+            ROBOT.move_from_command([BLOCK.block_square, *MAZE.wall_squares])
 
         # Recalculate global positions of the robot and its devices
         ROBOT.update_outline()

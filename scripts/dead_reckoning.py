@@ -66,7 +66,7 @@ def receive_tcp():
             s2.connect((HOST, PORT_RX))
             response_raw = s2.recv(1024)
             if response_raw:
-                responses = bytes_to_list_tcp(response_raw)
+                responses = bytes_to_list(response_raw)
                 time_rx = datetime.now().strftime("%H:%M:%S")
                 return [responses, time_rx]
             else:
@@ -77,15 +77,6 @@ def receive_tcp():
         except TimeoutError:
             print('Response not received from robot.')
             _thread.interrupt_main()
-
-def bytes_to_list_tcp(msg):
-    '''
-    Convert a sequence of double precision floats (SimMeR respose format)
-    to a list of numerical responses.
-    '''
-    num_responses = int(len(msg)/8)
-    data = struct.unpack("%sd" % str(num_responses), msg)
-    return data
 
 # Serial communication functions
 def transmit_serial(data):
@@ -98,7 +89,7 @@ def receive_serial():
     response_raw = (SER.readline().strip().decode('ascii'),)
 
     # If responses are a series of 4-byte floats, use this
-    response_raw = bytes_to_list_serial(SER.readline())
+    response_raw = bytes_to_list(SER.readline())
 
     # If response received, save it
     if response_raw[0]:
@@ -108,14 +99,15 @@ def receive_serial():
     else:
         return [[False], None]
 
-def bytes_to_list_serial(msg):
+# Convert string of bytes to a list of values
+def bytes_to_list(msg):
     '''
-    Convert a sequence of single precision floats (Arduino float format)
+    Convert a sequence of single precision floats (Arduino/SimMerR float format)
     to a list of numerical responses.
     '''
     num_responses = int(len(msg)/4)
     if num_responses:
-        data = struct.unpack("%sf" % str(num_responses), msg)
+        data = struct.unpack(f'{str(num_responses)}f', msg)
         return data
     else:
         return ([False])

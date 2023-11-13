@@ -113,7 +113,7 @@ def bytes_to_list(msg):
         return ([False])
 
 # Set whether to use TCP (SimMeR) or serial (Arduino)
-SIMULATE = False
+SIMULATE = True
 
 ### Network Setup ###
 HOST = '127.0.0.1'      # The server's hostname or IP address

@@ -142,5 +142,5 @@ class TCPServer:
         '''
 
         if not self.buffer_tx:
-            response_byte = struct.pack("%sf" % len(responses), *responses)
-            self.buffer_tx = response_byte
+            response_bytes = struct.pack(f'{len(responses)}f', *responses)
+            self.buffer_tx = response_bytes

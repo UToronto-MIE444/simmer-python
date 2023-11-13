@@ -66,9 +66,8 @@ def receive_tcp():
             s2.connect((HOST, PORT_RX))
             response_raw = s2.recv(1024)
             if response_raw:
-                responses = bytes_to_list(response_raw)
-                time_rx = datetime.now().strftime("%H:%M:%S")
-                return [responses, time_rx]
+                # return the data received as well as the current time
+                return [bytes_to_list(response_raw), datetime.now().strftime("%H:%M:%S")]
             else:
                 return [[False], None]
         except (ConnectionRefusedError, ConnectionResetError):
@@ -89,15 +88,21 @@ def receive_serial():
     response_raw = (SER.readline().strip().decode('ascii'),)
 
     # If responses are a series of 4-byte floats, use this
-    response_raw = bytes_to_list(SER.readline())
+    available_bytes = SER.in_waiting()
+    read_bytes = max(4, available_bytes - (available_bytes % 4))
+    if read_bytes >= 4:
+        response_raw = bytes_to_list(SER.read(read_bytes))
 
-    # If response received, save it
+    # If response received, return it
     if response_raw[0]:
-        responses = response_raw
-        time_rx = datetime.now().strftime("%H:%M:%S")
-        return [responses, time_rx]
+        return [response_raw, datetime.now().strftime("%H:%M:%S")]
     else:
-        return [[False], None]
+        return [[False], datetime.now().strftime("%H:%M:%S")]
+
+def clear_serial(delay_time):
+    '''Wait some time (delay_time) and then clear the serial buffer.'''
+    time.sleep(delay_time)
+    SER.read(SER.in_waiting())
 
 # Convert string of bytes to a list of values
 def bytes_to_list(msg):
@@ -112,8 +117,12 @@ def bytes_to_list(msg):
     else:
         return ([False])
 
+
 # Set whether to use TCP (SimMeR) or serial (Arduino)
 SIMULATE = True
+
+# Pause time
+PAUSE = 0.05
 
 ### Network Setup ###
 HOST = '127.0.0.1'      # The server's hostname or IP address
@@ -142,12 +151,12 @@ while RUNNING:
 
     if ct < len(cmd_sequence):
         transmit('u0')
-        time.sleep(0.05)
+        time.sleep(PAUSE)
         [responses, time_rx] = receive()
         print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
 
         transmit('u1')
-        time.sleep(0.05)
+        time.sleep(PAUSE)
         [responses, time_rx] = receive()
         print(f"Ultrasonic 1 reading: {round(responses[0], 3)}")
 
@@ -160,7 +169,7 @@ while RUNNING:
         # print(f"Ultrasonic 3 reading: {round(responses[0], 3)}")
 
         transmit(cmd_sequence[ct])
-        time.sleep(0.05)
+        time.sleep(PAUSE)
         [responses, time_rx] = receive()
 
         if responses[0] == math.inf:

@@ -23,13 +23,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import socket
 import struct
-import time
 import math
-from threading import Thread
+import time
 import _thread
 from datetime import datetime
+import serial
 
+# Wrapper functions
 def transmit(data):
+    if SIMULATE:
+        transmit_tcp(data)
+    else:
+        transmit_serial(data)
+
+def receive():
+    if SIMULATE:
+        return receive_tcp()
+    else:
+        return receive_serial()
+
+# TCP communication functions
+def transmit_tcp(data):
+    '''Send a command over the TCP connection.'''
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.connect((HOST, PORT_TX))
@@ -44,70 +59,121 @@ def transmit(data):
             print('\nKeyboardInterrupt triggered. Closing...')
             _thread.interrupt_main()
 
-def receive():
-    global responses
-    global time_rx
-    while True:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
-            try:
-                s2.connect((HOST, PORT_RX))
-                response_raw = s2.recv(1024)
-                if response_raw:
-                    responses = bytes_to_list(response_raw)
-                    time_rx = datetime.now().strftime("%H:%M:%S")
-            except (ConnectionRefusedError, ConnectionResetError):
-                print('Rx connection was refused or reset.')
-                _thread.interrupt_main()
-            except TimeoutError:
-                print('Response not received from robot.')
-                _thread.interrupt_main()
+def receive_tcp():
+    '''Receive a reply over the TCP connection.'''
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
+        try:
+            s2.connect((HOST, PORT_RX))
+            response_raw = s2.recv(1024)
+            if response_raw:
+                responses = bytes_to_list_tcp(response_raw)
+                time_rx = datetime.now().strftime("%H:%M:%S")
+                return [responses, time_rx]
+            else:
+                return [[False], None]
+        except (ConnectionRefusedError, ConnectionResetError):
+            print('Rx connection was refused or reset.')
+            _thread.interrupt_main()
+        except TimeoutError:
+            print('Response not received from robot.')
+            _thread.interrupt_main()
 
-def bytes_to_list(msg):
+def bytes_to_list_tcp(msg):
+    '''
+    Convert a sequence of double precision floats (SimMeR respose format)
+    to a list of numerical responses.
+    '''
     num_responses = int(len(msg)/8)
     data = struct.unpack("%sd" % str(num_responses), msg)
     return data
 
+# Serial communication functions
+def transmit_serial(data):
+    '''Transmit a command over a serial connection.'''
+    SER.write(data.encode('ascii'))
+
+def receive_serial():
+    '''Receive a reply over a serial connection.'''
+    # If responses are ascii characters, use this
+    response_raw = (SER.readline().strip().decode('ascii'),)
+
+    # If responses are a series of 4-byte floats, use this
+    response_raw = bytes_to_list_serial(SER.readline())
+
+    # If response received, save it
+    if response_raw[0]:
+        responses = response_raw
+        time_rx = datetime.now().strftime("%H:%M:%S")
+        return [responses, time_rx]
+    else:
+        return [[False], None]
+
+def bytes_to_list_serial(msg):
+    '''
+    Convert a sequence of single precision floats (Arduino float format)
+    to a list of numerical responses.
+    '''
+    num_responses = int(len(msg)/4)
+    if num_responses:
+        data = struct.unpack("%sf" % str(num_responses), msg)
+        return data
+    else:
+        return ([False])
+
+# Set whether to use TCP (SimMeR) or serial (Arduino)
+SIMULATE = False
 
 ### Network Setup ###
-HOST = '127.0.0.1'  # The server's hostname or IP address
-PORT_TX = 61200     # The port used by the *CLIENT* to receive
-PORT_RX = 61201     # The port used by the *CLIENT* to send data
+HOST = '127.0.0.1'      # The server's hostname or IP address
+PORT_TX = 61200         # The port used by the *CLIENT* to receive
+PORT_RX = 61201         # The port used by the *CLIENT* to send data
+
+### Serial Setup ###
+BAUDRATE = 9600         # Baudrate in bps
+PORT_SERIAL = 'COM3'    # COM port identification
+try:
+    SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=0)
+except serial.SerialException:
+    pass
 
 # Received responses
 responses = [False]
 time_rx = 'Never'
 
-# Create tx and rx threads
-Thread(target = receive, daemon = True).start()
-
-# Run the sequence of commands
-RUNNING = True
+# The sequence of commands to run
 cmd_sequence = ['w0-36', 'r0-90', 'w0-36', 'r0-90', 'w0-12', 'r0--90', 'w0-24', 'r0--90', 'w0-6', 'r0-720']
 
+# Main loop
+RUNNING = True
 ct = 0
 while RUNNING:
 
     if ct < len(cmd_sequence):
-        # transmit('u0')
-        # time.sleep(0.1)
-        # print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
-        # transmit('u1')
-        # time.sleep(0.1)
-        # print(f"Ultrasonic 1 reading: {round(responses[0], 3)}")
+        transmit('u0')
+        time.sleep(0.05)
+        [responses, time_rx] = receive()
+        print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
+
+        transmit('u1')
+        time.sleep(0.05)
+        [responses, time_rx] = receive()
+        print(f"Ultrasonic 1 reading: {round(responses[0], 3)}")
+
         # transmit('u2')
-        # time.sleep(0.1)
+        # [responses, time_rx] = receive()
         # print(f"Ultrasonic 2 reading: {round(responses[0], 3)}")
+
         # transmit('u3')
-        # time.sleep(0.1)
+        # [responses, time_rx] = receive()
         # print(f"Ultrasonic 3 reading: {round(responses[0], 3)}")
 
         transmit(cmd_sequence[ct])
-        time.sleep(0.1)
+        time.sleep(0.05)
+        [responses, time_rx] = receive()
 
         if responses[0] == math.inf:
             ct += 1
 
-        time.sleep(0.1)
     else:
         RUNNING = False
         print("Sequence complete!")

@@ -23,109 +23,89 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import socket
 import struct
-from threading import Thread
-import _thread
+import time
 from datetime import datetime
-import pygame
+import serial
 
-def display():
-
-    ### Receive Window Setup ###
-    pygame.init()
-    clock = pygame.time.Clock()
-
-    # define RGB colors
-    white = (255, 255, 255)
-    green = (0, 255, 0)
-    blue = (0, 0, 128)
-
-    # display size
-    X = 400
-    Y = 225
-
-    # create the display surface object
-    display_surface = pygame.display.set_mode((X, Y))
-
-    # set the pygame window name
-    pygame.display.set_caption('Received text')
-
-    # create a font object
-    font = pygame.font.Font('freesansbold.ttf', 16)
-
-    # Draw the text field
-    display_surface.fill(white)
-    pygame.display.update()
-
-    # main loop
-    while True:
-
-        responses_rnd = [f"{item:.{2}f}" for item in responses]
-
-        # create a text surface object
-        text0 = font.render(f"Last response received at time: {time_rx}", True, green, blue)
-        text1 = font.render(f"Last response was: {responses_rnd}", True, green, blue)
-
-        # create a rectangular object for the text surface object
-        textRect0 = text0.get_rect()
-        textRect1 = text1.get_rect()
-
-        # set the center of the rectangular object
-        textRect0.center = (X // 2, Y // 2 + 15)
-        textRect1.center = (X // 2, Y // 2 - 15)
-
-        display_surface.fill(white)
-        display_surface.blit(text0, textRect0)
-        display_surface.blit(text1, textRect1)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                # deactivate the pygame library and quit the program
-                pygame.quit()
-                quit()
-
-        # update display
-        clock.tick(60)
-        pygame.display.flip()
-
-def transmit():
-    ask = True
-    while True:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.connect((HOST, PORT_TX))
-                if ask:
-                    send_string = input('Type in a string to send: ')
-                    s.send(send_string.encode('utf-8'))
-            except (ConnectionRefusedError, ConnectionResetError):
-                print('Tx Connection was refused or reset.')
-                _thread.interrupt_main()
-            except TimeoutError:
-                print('Tx socket timed out.')
-                _thread.interrupt_main()
-            except EOFError:
-                print('\nKeyboardInterrupt triggered. Closing...')
-                _thread.interrupt_main()
-                ask = False
+# Wrapper functions
+def transmit(data):
+    '''Selects whether to use serial or tcp for transmitting.'''
+    if SIMULATE:
+        transmit_tcp(data)
+    else:
+        transmit_serial(data)
+    time.sleep(TRANSMIT_PAUSE)
 
 def receive():
-    global responses
-    global time_rx
-    while True:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
-            try:
-                s2.connect((HOST, PORT_RX))
-                response_raw = s2.recv(1024)
-                if response_raw:
-                    responses = bytes_to_list(response_raw)
-                    time_rx = datetime.now().strftime("%H:%M:%S")
-            except (ConnectionRefusedError, ConnectionResetError):
-                print('Rx connection was refused or reset.')
-                _thread.interrupt_main()
-            except TimeoutError:
-                print('Response not received from robot.')
-                _thread.interrupt_main()
+    '''Selects whether to use serial or tcp for receiving.'''
+    if SIMULATE:
+        return receive_tcp()
+    else:
+        return receive_serial()
 
+# TCP communication functions
+def transmit_tcp(data):
+    '''Send a command over the TCP connection.'''
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.connect((HOST, PORT_TX))
+            s.send(data.encode('utf-8'))
+        except (ConnectionRefusedError, ConnectionResetError):
+            print('Tx Connection was refused or reset.')
+        except TimeoutError:
+            print('Tx socket timed out.')
+        except EOFError:
+            print('\nKeyboardInterrupt triggered. Closing...')
+
+def receive_tcp():
+    '''Receive a reply over the TCP connection.'''
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
+        try:
+            s2.connect((HOST, PORT_RX))
+            response_raw = s2.recv(1024)
+            if response_raw:
+                # return the data received as well as the current time
+                return [bytes_to_list(response_raw), datetime.now().strftime("%H:%M:%S")]
+            else:
+                return [[False], None]
+        except (ConnectionRefusedError, ConnectionResetError):
+            print('Rx connection was refused or reset.')
+        except TimeoutError:
+            print('Response not received from robot.')
+
+# Serial communication functions
+def transmit_serial(data):
+    '''Transmit a command over a serial connection.'''
+    SER.write(data.encode('ascii'))
+
+def receive_serial():
+    '''Receive a reply over a serial connection.'''
+    # If responses are ascii characters, use this
+    # response_raw = (SER.readline().strip().decode('ascii'),)
+
+    # If responses are a series of 4-byte floats, use this
+    available_bytes = SER.in_waiting
+    read_bytes = max(4, available_bytes - (available_bytes % 4))
+    if read_bytes >= 4:
+        response_raw = bytes_to_list(SER.read(read_bytes))
+
+    # If response received, return it
+    if response_raw[0]:
+        return [response_raw, datetime.now().strftime("%H:%M:%S")]
+    else:
+        return [[False], datetime.now().strftime("%H:%M:%S")]
+
+def clear_serial(delay_time):
+    '''Wait some time (delay_time) and then clear the serial buffer.'''
+    time.sleep(delay_time)
+    SER.read(SER.in_waiting())
+
+# Convert string of bytes to a list of values
 def bytes_to_list(msg):
+    '''
+    Convert a sequence of single precision floats (Arduino/SimMerR float format)
+    to a list of numerical responses.
+    '''
     num_responses = int(len(msg)/4)
     if num_responses:
         data = struct.unpack(f'{str(num_responses)}f', msg)
@@ -135,27 +115,33 @@ def bytes_to_list(msg):
 
 
 # Set whether to use TCP (SimMeR) or serial (Arduino)
-SIMULATE = True
+SIMULATE = False
 
-# Time to pause after transmitting (seconds)
+# Pause time
 TRANSMIT_PAUSE = 0.1
 
 ### Network Setup ###
-HOST = '127.0.0.1'  # The server's hostname or IP address
-PORT_TX = 61200     # The port used by the *CLIENT* to receive
-PORT_RX = 61201     # The port used by the *CLIENT* to send data
+HOST = '127.0.0.1'      # The server's hostname or IP address
+PORT_TX = 61200         # The port used by the *CLIENT* to receive
+PORT_RX = 61201         # The port used by the *CLIENT* to send data
 
-# Display text strings
-responses = []
-time_rx = 'Never'
-
-# Create tx and rx threads
-Thread(target = transmit, daemon = True).start()
-Thread(target = receive, daemon = True).start()
-
-# Display the received text in a pygame window
+### Serial Setup ###
+BAUDRATE = 115200       # Baudrate in bps
+PORT_SERIAL = 'COM4'    # COM port identification
 try:
-    display()
-except KeyboardInterrupt:
-    pygame.quit()
-    quit()
+    SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=0)
+except serial.SerialException:
+    pass
+
+# Source
+SOURCE = 'serial device ' + PORT_SERIAL
+if SIMULATE:
+    SOURCE = 'SimMeR'
+
+# Main loop
+RUNNING = True
+while RUNNING:
+    cmd = input('Type in a string to send: ')
+    transmit(cmd)
+    [responses, time_rx] = receive()
+    print(f"At time '{time_rx}' received '{round(responses[0], 3)}' from {SOURCE}\n")

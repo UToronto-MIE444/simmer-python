@@ -25,12 +25,12 @@ import socket
 import struct
 import math
 import time
-import _thread
 from datetime import datetime
 import serial
 
 # Wrapper functions
 def transmit(data):
+    '''Selects whether to use serial or tcp for transmitting.'''
     if SIMULATE:
         transmit_tcp(data)
     else:
@@ -38,6 +38,7 @@ def transmit(data):
     time.sleep(TRANSMIT_PAUSE)
 
 def receive():
+    '''Selects whether to use serial or tcp for receiving.'''
     if SIMULATE:
         return receive_tcp()
     else:
@@ -52,13 +53,10 @@ def transmit_tcp(data):
             s.send(data.encode('utf-8'))
         except (ConnectionRefusedError, ConnectionResetError):
             print('Tx Connection was refused or reset.')
-            _thread.interrupt_main()
         except TimeoutError:
             print('Tx socket timed out.')
-            _thread.interrupt_main()
         except EOFError:
             print('\nKeyboardInterrupt triggered. Closing...')
-            _thread.interrupt_main()
 
 def receive_tcp():
     '''Receive a reply over the TCP connection.'''
@@ -73,10 +71,8 @@ def receive_tcp():
                 return [[False], None]
         except (ConnectionRefusedError, ConnectionResetError):
             print('Rx connection was refused or reset.')
-            _thread.interrupt_main()
         except TimeoutError:
             print('Response not received from robot.')
-            _thread.interrupt_main()
 
 # Serial communication functions
 def transmit_serial(data):
@@ -138,42 +134,38 @@ try:
 except serial.SerialException:
     pass
 
-# Received responses
-responses = [False]
-time_rx = 'Never'
-
 # The sequence of commands to run
-cmd_sequence = ['w0-36', 'r0-90', 'w0-36', 'r0-90', 'w0-12', 'r0--90', 'w0-24', 'r0--90', 'w0-6', 'r0-720']
+CMD_SEQUENCE = ['w0-36', 'r0-90', 'w0-36', 'r0-90', 'w0-12', 'r0--90', 'w0-24', 'r0--90', 'w0-6', 'r0-720']
 
 # Main loop
 RUNNING = True
 ct = 0
 while RUNNING:
 
-    if ct < len(cmd_sequence):
+    # If the command sequence hasn't been completed yet
+    if ct < len(CMD_SEQUENCE):
+
+        # Check an ultrasonic sensor 'u0'
         transmit('u0')
         [responses, time_rx] = receive()
         print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
 
+        # Check an ultrasonic sensor 'u1'
         transmit('u1')
         [responses, time_rx] = receive()
         print(f"Ultrasonic 1 reading: {round(responses[0], 3)}")
 
-        # transmit('u2')
-        # [responses, time_rx] = receive()
-        # print(f"Ultrasonic 2 reading: {round(responses[0], 3)}")
-
-        # transmit('u3')
-        # [responses, time_rx] = receive()
-        # print(f"Ultrasonic 3 reading: {round(responses[0], 3)}")
-
-        transmit(cmd_sequence[ct])
+        # Send a drive command
+        transmit(CMD_SEQUENCE[ct])
         [responses, time_rx] = receive()
         print(f"Drive command response: {round(responses[0], 3)}")
 
+        # If we receive a drive response indicating the command was accepted,
+        # move to the next command in the sequence
         if responses[0] == math.inf:
             ct += 1
 
+    # If the command sequence is complete, finish the program
     else:
         RUNNING = False
         print("Sequence complete!")

@@ -127,9 +127,18 @@ def receive():
 
 def bytes_to_list(msg):
     num_responses = int(len(msg)/4)
-    data = struct.unpack("%sf" % str(num_responses), msg)
-    return data
+    if num_responses:
+        data = struct.unpack(f'{str(num_responses)}f', msg)
+        return data
+    else:
+        return ([False])
 
+
+# Set whether to use TCP (SimMeR) or serial (Arduino)
+SIMULATE = True
+
+# Time to pause after transmitting (seconds)
+TRANSMIT_PAUSE = 0.1
 
 ### Network Setup ###
 HOST = '127.0.0.1'  # The server's hostname or IP address

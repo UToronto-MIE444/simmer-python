@@ -122,7 +122,7 @@ def bytes_to_list(msg):
 # Set whether to use TCP (SimMeR) or serial (Arduino)
 SIMULATE = True
 
-# Pause time
+# Time to pause after transmitting (seconds)
 TRANSMIT_PAUSE = 0.1
 
 ### Network Setup ###

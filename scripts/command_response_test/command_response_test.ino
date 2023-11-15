@@ -33,6 +33,7 @@ void setup() {
 
   // Use a higher data rate because the VS Code serial monitor uses 115200 as default
   Serial.begin(115200);
+  // Set timeout to a low number so responses are quick
   Serial.setTimeout(50);
 }
 
@@ -43,11 +44,6 @@ void debugMessage(String msg1, String msg2) {
       Serial.println(msg1);
       Serial.println(msg2);
     }
-}
-
-// Primary parsing function
-void parse(String s) {
-
 }
 
 // main loop

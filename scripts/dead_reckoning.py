@@ -142,22 +142,30 @@ RUNNING = True
 ct = 0
 while RUNNING:
 
+    # If the command sequence hasn't been completed yet
     if ct < len(CMD_SEQUENCE):
+
+        # Check an ultrasonic sensor 'u0'
         transmit('u0')
         [responses, time_rx] = receive()
         print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
 
+        # Check an ultrasonic sensor 'u1'
         transmit('u1')
         [responses, time_rx] = receive()
         print(f"Ultrasonic 1 reading: {round(responses[0], 3)}")
 
+        # Send a drive command
         transmit(CMD_SEQUENCE[ct])
         [responses, time_rx] = receive()
         print(f"Drive command response: {round(responses[0], 3)}")
 
+        # If we receive a drive response indicating the command was accepted,
+        # move to the next command in the sequence
         if responses[0] == math.inf:
             ct += 1
 
+    # If the command sequence is complete, finish the program
     else:
         RUNNING = False
         print("Sequence complete!")

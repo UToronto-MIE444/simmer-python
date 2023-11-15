@@ -25,7 +25,6 @@ import socket
 import struct
 import math
 import time
-import _thread
 from datetime import datetime
 import serial
 
@@ -52,13 +51,10 @@ def transmit_tcp(data):
             s.send(data.encode('utf-8'))
         except (ConnectionRefusedError, ConnectionResetError):
             print('Tx Connection was refused or reset.')
-            _thread.interrupt_main()
         except TimeoutError:
             print('Tx socket timed out.')
-            _thread.interrupt_main()
         except EOFError:
             print('\nKeyboardInterrupt triggered. Closing...')
-            _thread.interrupt_main()
 
 def receive_tcp():
     '''Receive a reply over the TCP connection.'''
@@ -73,10 +69,8 @@ def receive_tcp():
                 return [[False], None]
         except (ConnectionRefusedError, ConnectionResetError):
             print('Rx connection was refused or reset.')
-            _thread.interrupt_main()
         except TimeoutError:
             print('Response not received from robot.')
-            _thread.interrupt_main()
 
 # Serial communication functions
 def transmit_serial(data):
@@ -137,10 +131,6 @@ try:
     SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=0)
 except serial.SerialException:
     pass
-
-# Received responses
-responses = [False]
-time_rx = 'Never'
 
 # The sequence of commands to run
 cmd_sequence = ['w0-36', 'r0-90', 'w0-36', 'r0-90', 'w0-12', 'r0--90', 'w0-24', 'r0--90', 'w0-6', 'r0-720']

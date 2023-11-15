@@ -126,8 +126,8 @@ def receive():
                 _thread.interrupt_main()
 
 def bytes_to_list(msg):
-    num_responses = int(len(msg)/8)
-    data = struct.unpack("%sd" % str(num_responses), msg)
+    num_responses = int(len(msg)/4)
+    data = struct.unpack("%sf" % str(num_responses), msg)
     return data
 
 

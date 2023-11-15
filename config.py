@@ -88,19 +88,39 @@ m0_info = {
     'id': 'm0',
     'position': [2, 0],
     'rotation': 0,
-    'visible': True
+    'visible': True,
+    'color': (128, 128, 0)
 }
 
 m1_info = {
     'id': 'm0',
     'position': [-2, 0],
     'rotation': 0,
-    'visible': True
+    'visible': True,
+    'color': (0, 128, 0)
+}
+
+m2_info = {
+    'id': 'm0',
+    'position': [0, 2],
+    'rotation': 90,
+    'visible': True,
+    'color': (128, 0, 0)
+}
+
+m3_info = {
+    'id': 'm0',
+    'position': [0, -2],
+    'rotation': 90,
+    'visible': True,
+    'color': (0, 0, 128)
 }
 
 motors = {
     'm0': MotorSimple(m0_info),
-    'm1': MotorSimple(m1_info)
+    'm1': MotorSimple(m1_info),
+    'm2': MotorSimple(m2_info),
+    'm3': MotorSimple(m3_info)
 }
 
 # Drives
@@ -113,8 +133,8 @@ w0_info = {
     'ang_velocity': 0,
     'motors': [motors['m0'], motors['m1']],
     'motor_direction': [1, 1],
-    'bias': {'x': 0, 'y': 0, 'rotation': 0.2},
-    'error': {'x': 0.05, 'y': 0.05, 'rotation': 1}
+    'bias': {'x': 0, 'y': 0, 'rotation': 0},
+    'error': {'x': 0, 'y': 0, 'rotation': 0}
 }
 
 d0_info = {
@@ -122,12 +142,12 @@ d0_info = {
     'position': [0, 0],
     'rotation': 0,
     'visible': False,
-    'velocity': [6, 0],
+    'velocity': [-6, 0],
     'ang_velocity': 0,
-    'motors': [motors['m0'], motors['m1']],
+    'motors': [motors['m2'], motors['m3']],
     'motor_direction': [1, 1],
-    'bias': {'x': 0, 'y': 0, 'rotation': 0.2},
-    'error': {'x': 0.05, 'y': 0.05, 'rotation': 1}
+    'bias': {'x': 0, 'y': 0, 'rotation': 0},
+    'error': {'x': 0, 'y': 0, 'rotation': 0}
 }
 
 r0_info = {
@@ -137,14 +157,15 @@ r0_info = {
     'visible': False,
     'velocity': [0, 0],
     'ang_velocity': 120,
-    'motors': [motors['m0'], motors['m1']],
-    'motor_direction': [1, -1],
-    'bias': {'x': 0, 'y': 0, 'rotation': 0.01},
-    'error': {'x': 0.003, 'y': 0.003, 'rotation': 0.05}
+    'motors': [motors['m0'], motors['m1'], motors['m2'], motors['m3']],
+    'motor_direction': [1, -1, 1, -1],
+    'bias': {'x': 0, 'y': 0, 'rotation': 0},
+    'error': {'x': 0, 'y': 0, 'rotation': 0}
 }
 
 drives = {
     'w0': Drive(w0_info),
+    'd0': Drive(d0_info),
     'r0': Drive(r0_info)
 }
 

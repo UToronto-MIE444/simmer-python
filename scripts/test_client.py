@@ -26,6 +26,7 @@ import struct
 from threading import Thread
 import _thread
 from datetime import datetime
+import serial
 import pygame
 
 def display():

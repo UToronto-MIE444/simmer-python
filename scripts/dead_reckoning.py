@@ -35,6 +35,7 @@ def transmit(data):
         transmit_tcp(data)
     else:
         transmit_serial(data)
+    time.sleep(TRANSMIT_PAUSE)
 
 def receive():
     if SIMULATE:
@@ -85,10 +86,10 @@ def transmit_serial(data):
 def receive_serial():
     '''Receive a reply over a serial connection.'''
     # If responses are ascii characters, use this
-    response_raw = (SER.readline().strip().decode('ascii'),)
+    # response_raw = (SER.readline().strip().decode('ascii'),)
 
     # If responses are a series of 4-byte floats, use this
-    available_bytes = SER.in_waiting()
+    available_bytes = SER.in_waiting
     read_bytes = max(4, available_bytes - (available_bytes % 4))
     if read_bytes >= 4:
         response_raw = bytes_to_list(SER.read(read_bytes))
@@ -122,7 +123,7 @@ def bytes_to_list(msg):
 SIMULATE = True
 
 # Pause time
-PAUSE = 0.05
+TRANSMIT_PAUSE = 0.1
 
 ### Network Setup ###
 HOST = '127.0.0.1'      # The server's hostname or IP address
@@ -130,8 +131,8 @@ PORT_TX = 61200         # The port used by the *CLIENT* to receive
 PORT_RX = 61201         # The port used by the *CLIENT* to send data
 
 ### Serial Setup ###
-BAUDRATE = 9600         # Baudrate in bps
-PORT_SERIAL = 'COM3'    # COM port identification
+BAUDRATE = 115200       # Baudrate in bps
+PORT_SERIAL = 'COM4'    # COM port identification
 try:
     SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=0)
 except serial.SerialException:
@@ -151,12 +152,10 @@ while RUNNING:
 
     if ct < len(cmd_sequence):
         transmit('u0')
-        time.sleep(PAUSE)
         [responses, time_rx] = receive()
         print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
 
         transmit('u1')
-        time.sleep(PAUSE)
         [responses, time_rx] = receive()
         print(f"Ultrasonic 1 reading: {round(responses[0], 3)}")
 
@@ -169,8 +168,8 @@ while RUNNING:
         # print(f"Ultrasonic 3 reading: {round(responses[0], 3)}")
 
         transmit(cmd_sequence[ct])
-        time.sleep(PAUSE)
         [responses, time_rx] = receive()
+        print(f"Drive command response: {round(responses[0], 3)}")
 
         if responses[0] == math.inf:
             ct += 1

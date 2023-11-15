@@ -29,6 +29,7 @@ import serial
 
 # Wrapper functions
 def transmit(data):
+    '''Selects whether to use serial or tcp for transmitting.'''
     if SIMULATE:
         transmit_tcp(data)
     else:
@@ -36,6 +37,7 @@ def transmit(data):
     time.sleep(TRANSMIT_PAUSE)
 
 def receive():
+    '''Selects whether to use serial or tcp for receiving.'''
     if SIMULATE:
         return receive_tcp()
     else:
@@ -132,9 +134,9 @@ except serial.SerialException:
     pass
 
 # Source
-source = 'serial device ' + PORT_SERIAL
-if (SIMULATE):
-    source = 'SimMeR'
+SOURCE = 'serial device ' + PORT_SERIAL
+if SIMULATE:
+    SOURCE = 'SimMeR'
 
 # Main loop
 RUNNING = True
@@ -142,4 +144,4 @@ while RUNNING:
     cmd = input('Type in a string to send: ')
     transmit(cmd)
     [responses, time_rx] = receive()
-    print(f"At time '{time_rx}' received '{round(responses[0], 3)}' from {source}\n")
+    print(f"At time '{time_rx}' received '{round(responses[0], 3)}' from {SOURCE}\n")

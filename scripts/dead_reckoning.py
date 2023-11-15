@@ -30,6 +30,7 @@ import serial
 
 # Wrapper functions
 def transmit(data):
+    '''Selects whether to use serial or tcp for transmitting.'''
     if SIMULATE:
         transmit_tcp(data)
     else:
@@ -37,6 +38,7 @@ def transmit(data):
     time.sleep(TRANSMIT_PAUSE)
 
 def receive():
+    '''Selects whether to use serial or tcp for receiving.'''
     if SIMULATE:
         return receive_tcp()
     else:
@@ -133,14 +135,14 @@ except serial.SerialException:
     pass
 
 # The sequence of commands to run
-cmd_sequence = ['w0-36', 'r0-90', 'w0-36', 'r0-90', 'w0-12', 'r0--90', 'w0-24', 'r0--90', 'w0-6', 'r0-720']
+CMD_SEQUENCE = ['w0-36', 'r0-90', 'w0-36', 'r0-90', 'w0-12', 'r0--90', 'w0-24', 'r0--90', 'w0-6', 'r0-720']
 
 # Main loop
 RUNNING = True
 ct = 0
 while RUNNING:
 
-    if ct < len(cmd_sequence):
+    if ct < len(CMD_SEQUENCE):
         transmit('u0')
         [responses, time_rx] = receive()
         print(f"Ultrasonic 0 reading: {round(responses[0], 3)}")
@@ -149,15 +151,7 @@ while RUNNING:
         [responses, time_rx] = receive()
         print(f"Ultrasonic 1 reading: {round(responses[0], 3)}")
 
-        # transmit('u2')
-        # [responses, time_rx] = receive()
-        # print(f"Ultrasonic 2 reading: {round(responses[0], 3)}")
-
-        # transmit('u3')
-        # [responses, time_rx] = receive()
-        # print(f"Ultrasonic 3 reading: {round(responses[0], 3)}")
-
-        transmit(cmd_sequence[ct])
+        transmit(CMD_SEQUENCE[ct])
         [responses, time_rx] = receive()
         print(f"Drive command response: {round(responses[0], 3)}")
 

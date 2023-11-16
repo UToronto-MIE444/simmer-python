@@ -32,7 +32,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   // Use a higher data rate because the VS Code serial monitor uses 115200 as default
-  Serial.begin(115200);
+  Serial.begin(9600);
   // Set timeout to a low number so responses are quick
   Serial.setTimeout(50);
 }

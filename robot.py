@@ -1,6 +1,6 @@
-"""
+'''
 Defines the SimMeR Robot class.
-"""
+'''
 # This file is part of SimMeR, an educational mechatronics robotics simulator.
 # Initial development funded by the University of Toronto MIE Department.
 # Copyright (C) 2023  Ian G. Bennett
@@ -21,22 +21,25 @@ Defines the SimMeR Robot class.
 import math
 import pygame
 import pygame.math as pm
-from pygame.locals import K_w, K_a, K_s, K_d, K_q, K_e
+from pygame.locals import (
+    K_w,
+    K_a,
+    K_s,
+    K_d,
+    K_q,
+    K_e
+)
 import config as CONFIG
 import utilities
-from shapely.geometry import Polygon, Point
 
-
-class Robot:
-    """This class represents the robot"""
+class Robot():
+    '''This class represents the robot'''
 
     def __init__(self):
-        """Initialize the robot class"""
+        '''Initialize the robot class'''
 
         # Position information (stored in inches)
-        self.position = pm.Vector2(
-            CONFIG.robot_start_position[0], CONFIG.robot_start_position[1]
-        )
+        self.position = pm.Vector2(CONFIG.robot_start_position[0], CONFIG.robot_start_position[1])
         self.rotation = CONFIG.robot_start_rotation
 
         # Robot size (rectangular)
@@ -54,13 +57,11 @@ class Robot:
         self.collision = False
 
         # A trail of points where the robot has moved
-        self.trail = [
-            {
-                "position": self.position,
-                "rotation": self.rotation,
-                "collision": self.collision,
-            }
-        ]
+        self.trail = [{
+            'position': self.position,
+            'rotation': self.rotation,
+            'collision': self.collision
+        }]
 
         # Import the list of motors from the config file
         self.motors = CONFIG.motors
@@ -74,22 +75,21 @@ class Robot:
         # All devices
         self.devices = self.motors | self.drives | self.sensors
 
-    def append_trail(self):
-        """Appends current position information to the robot's trail"""
 
-        self.trail.append(
-            {
-                "position": self.position,
-                "rotation": self.rotation,
-                "collision": self.collision,
-            }
-        )
+    def append_trail(self):
+        '''Appends current position information to the robot's trail'''
+
+        self.trail.append({
+            'position': self.position,
+            'rotation': self.rotation,
+            'collision': self.collision
+        })
 
     def update_outline(self):
-        """
+        '''
         Define the absolute outline points of the robot, in inches, relative
         to the center point of the robot.
-        """
+        '''
 
         # Rotate the outline
         outline_global = [point.rotate(self.rotation) for point in self.outline]
@@ -100,38 +100,36 @@ class Robot:
         # Convert the outline points to line segments
         segments = []
         for ct in range(-1, len(self.outline_global) - 1):
-            segments.append((self.outline_global[ct], self.outline_global[ct + 1]))
+            segments.append((self.outline_global[ct], self.outline_global[ct+1]))
 
         self.outline_global_segments = segments
 
     def draw(self, canvas):
-        """Draws the robot outline on the canvas"""
+        '''Draws the robot outline on the canvas'''
 
         # Graphics
         THICKNESS = int(CONFIG.robot_thickness * CONFIG.ppi)
         COLOR = CONFIG.robot_color
 
         # Convert the outline from inches to pixels
-        outline = [
-            point * CONFIG.ppi + [CONFIG.border_pixels, CONFIG.border_pixels]
-            for point in self.outline_global
-        ]
+        outline = [point * CONFIG.ppi + [CONFIG.border_pixels, CONFIG.border_pixels]
+                   for point in self.outline_global]
 
         # Draw the polygon
         pygame.draw.polygon(canvas, COLOR, outline, THICKNESS)
 
     def update_device_positions(self):
-        """
+        '''
         Updates the global positions and outlines of all the robot's devices.
-        """
+        '''
         for device in self.devices.values():
             device.pos_update(self.position, self.rotation)
             device.update_outline()
 
     def draw_devices(self, canvas):
-        """
+        '''
         Draws all devices on the robot onto the canvas unless marked otherwise.
-        """
+        '''
 
         for device in self.devices.values():
             if device.visible:
@@ -140,12 +138,12 @@ class Robot:
                     device.draw_measurement(canvas)
 
     def move_manual(self, keypress, walls):
-        """Determine the direction to move & rotate the robot based on keypresses."""
+        '''Determine the direction to move & rotate the robot based on keypresses.'''
 
         move_vector = pm.Vector2(0, 0)
         rotation = 0
-        speed = 6 / CONFIG.frame_rate  # inch/s / frame/s
-        rotation_speed = 120 / CONFIG.frame_rate  # deg/s / frame/s
+        speed = 6 / CONFIG.frame_rate               # inch/s / frame/s
+        rotation_speed = 120 / CONFIG.frame_rate    # deg/s / frame/s
 
         # Forward/backward movement
         if keypress[K_w]:
@@ -169,7 +167,7 @@ class Robot:
         self.move(move_vector, rotation, walls)
 
     def move_from_command(self, walls):
-        """Move the robot based on all the movement "stored" in the drives"""
+        '''Move the robot based on all the movement "stored" in the drives'''
 
         move_vector = pm.Vector2(0, 0)
         rotation = 0
@@ -185,7 +183,7 @@ class Robot:
         self.move(move_vector, rotation, walls)
 
     def move(self, velocity, rotation, walls):
-        """Moves the robot, checking for collisions."""
+        '''Moves the robot, checking for collisions.'''
         # Update robot position
         self.position += pm.Vector2.rotate(velocity, self.rotation)
         self.rotation += rotation
@@ -198,30 +196,16 @@ class Robot:
             self.rotation -= rotation
             self.update_outline()
 
-    def teleport(self, x, y, angle, walls):
-        """Attempts to teleport the robot to a location,
-        returns True if successful
-        if collision, reverts to previous location and returns False"""
-
-        self.position = pm.Vector2(x, y)
-        self.rotation = angle
-        self.update_outline()
-
-        if not (0 < self.position.x < 96 and 0 < self.position.y < 48):
-            return False
-        # returns true if there's no intersection with walls.
-        return not self.check_collision_walls_fast(walls)
-
     def stop_drives(self):
-        """Stops all drives from moving, used as an emergency stop."""
+        '''Stops all drives from moving, used as an emergency stop.'''
         for drive in self.drives.values():
             drive.move_buffer = 0
 
     def check_collision_walls(self, walls: list):
-        """
+        '''
         Checks for a collision between the robot's perimeter segments
         and a set of wall line segments.
-        """
+        '''
 
         # Loop through all the robot outline line segments, checking for collisions
         for segment_bot in self.outline_global_segments:
@@ -231,26 +215,11 @@ class Robot:
                     if collision_points:
                         return collision_points
 
-    def check_collision_walls_fast(self, walls: list):
-        """
-        Checks for a collision between the robot's perimeter segments
-        and a set of wall line segments.
-        """
-
-        # Loop through all the robot outline line segments, checking for collisions
-        for segment_bot in self.outline_global_segments:
-            for segment_wall in walls:
-                collides = utilities.check_collision_fast(
-                    segment_bot, segment_wall
-                )  # bool value
-                if collides:
-                    return True
-
     def command(self, cmds: list, environment: dict):
-        """
+        '''
         Parse text string of commands and act on them, sending them to the appropriate
         device.
-        """
+        '''
 
         responses = []
         for cmd in cmds:
@@ -261,19 +230,15 @@ class Robot:
                 try:
                     value = float(cmd[1])
                 except ValueError:
-                    print(
-                        "Command data ("
-                        + cmd[1]
-                        + ") not in valid float format. Trying with 0."
-                    )
+                    print('Command data (' + cmd[1] + ') not in valid float format. Trying with 0.')
                     value = 0
                 responses.append(target_device.simulate(value, environment))
             else:
-                if cmd[0] == "xx":
+                if cmd[0] == 'xx':
                     self.stop_drives()
                     responses.append(math.inf)
                 else:
-                    print("Target device " + cmd[0] + " not found.")
+                    print('Target device ' + cmd[0] + ' not found.')
                     responses.append(math.nan)
 
         return responses

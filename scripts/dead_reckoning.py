@@ -99,7 +99,7 @@ def receive_serial():
 def clear_serial(delay_time):
     '''Wait some time (delay_time) and then clear the serial buffer.'''
     time.sleep(delay_time)
-    SER.read(SER.in_waiting())
+    SER.read(SER.in_waiting)
 
 # Convert string of bytes to a list of values
 def bytes_to_list(msg):

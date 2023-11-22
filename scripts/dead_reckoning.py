@@ -119,7 +119,10 @@ def bytes_to_list(msg):
 SIMULATE = True
 
 # Time to pause after transmitting (seconds)
-TRANSMIT_PAUSE = 0.1
+if SIMULATE:
+    TRANSMIT_PAUSE = 0.1
+else:
+    TRANSMIT_PAUSE = 0.25
 
 ### Network Setup ###
 HOST = '127.0.0.1'      # The server's hostname or IP address

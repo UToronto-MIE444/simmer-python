@@ -23,6 +23,8 @@ import numpy as np
 import pygame
 import shapely as shp
 import config as CONFIG
+import utilities
+
 
 class Maze:
     '''This class represents the maze/environment'''
@@ -32,6 +34,8 @@ class Maze:
         self.size_x = 0
 
         self.wall_squares = []
+        self.walls = []
+        self.reduced_walls = []
         self.floor_tiles = []
         self.floor_tile_colors = 0
         self.floor_rect_black = []
@@ -45,8 +49,8 @@ class Maze:
         dim_y = np.size(wall_map, 0)
         dim_x = np.size(wall_map, 1)
 
-        self.size_y = dim_y * CONFIG.wall_segment_length
-        self.size_x = dim_x * CONFIG.wall_segment_length
+        self.size_y = CONFIG.maze_dim_y
+        self.size_x = CONFIG.maze_dim_x
 
         # Outer maze dimensions
         self.wall_squares.append([
@@ -71,6 +75,9 @@ class Maze:
                                for point in line]
                               for line in square]
                              for square in self.wall_squares]
+        
+        self.walls= [wall for wallsquare in self.wall_squares for wall in wallsquare]
+        self.reduced_walls = utilities.merge_colinear_intersecting_segments(self.walls)
 
     def draw_walls(self, canvas):
         '''Draws the maze walls onto the screen'''

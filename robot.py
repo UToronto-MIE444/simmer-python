@@ -201,12 +201,30 @@ class Robot():
         for drive in self.drives.values():
             drive.move_buffer = 0
 
-    def check_collision_walls(self, walls: list):
+    def check_collision_walls_fast(self, walls: list):
+        """
+        Checks for a collision between the robot's perimeter segments
+        and a set of wall line segments.
+        """
+
+
+                
+    def check_collision_walls(self, walls: list,fast:bool = True):
         '''
         Checks for a collision between the robot's perimeter segments
         and a set of wall line segments.
         '''
-
+        if fast:
+            # Loop through all the robot outline line segments, checking for collisions
+            for segment_bot in self.outline_global_segments:
+                for segment_wall in walls:
+                    collides = utilities.check_collision_fast(
+                        segment_bot, segment_wall
+                    )  # bool value
+                    if collides:
+                        return True
+            return False
+                    
         # Loop through all the robot outline line segments, checking for collisions
         for segment_bot in self.outline_global_segments:
             for square in walls:
@@ -214,6 +232,8 @@ class Robot():
                     collision_points = utilities.collision(segment_bot, segment_wall)
                     if collision_points:
                         return collision_points
+                    
+
 
     def command(self, cmds: list, environment: dict):
         '''

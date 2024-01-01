@@ -23,8 +23,8 @@ import random
 import pygame
 import config as CONFIG
 
-def add_error(value: float, pct_error: float, bounds: list = []):
-    '''
+def add_error(value: float, pct_error: float, bounds: list = [],sigma=2):
+    """
     ADD_ERROR Adds normally distributed percent error to a measurement
     As an input, this function takes a measurement value and an error
     percentage (from 0 to 1). It uses randn to calculate a normally
@@ -33,13 +33,13 @@ def add_error(value: float, pct_error: float, bounds: list = []):
     bounds is an optional two-value vector that can be added to specify
     limits to the returned values. For example, if bounds is [0 1], values
     will be limited to those within the given values
-    '''
+    """
 
     def clamp(number, bounds):
         return max(min(bounds[1], number), bounds[0])
 
     # Calculate the error value
-    error_value = random.gauss(0) * pct_error * value
+    error_value = random.gauss(0,sigma) * pct_error * value
     # Add to the original value
     value_noisy = value + error_value
     # Clamp it to the specified bounds
@@ -47,7 +47,8 @@ def add_error(value: float, pct_error: float, bounds: list = []):
         return clamp(value_noisy, bounds)
     else:
         return value_noisy
-
+    
+    
 def collision(segment1: list, segment2: list):
     '''
     Checks for a collision between two line segments in format [[x1, y1], [x2, y2]],
@@ -178,3 +179,217 @@ def simulate_sensors(environment, sensors):
     for d_id in sensors:
         if d_id in ROBOT.sensors:
             ROBOT.sensors[d_id].simulate(0, environment)
+
+def angle(segment1:list, segment2:list):    
+
+    theta1 = math.degrees(math.atan2(segment1[0][1]-segment1[1][1],segment1[0][0]-segment1[1][0]))
+    theta2 = math.degrees(math.atan2(segment2[0][1]-segment2[1][1],segment2[0][0]-segment2[1][0]))
+
+    diff = abs(theta1 - theta2)
+    
+    # while diff>=360:
+    #     diff-=360
+    
+    if diff>270:
+        return 360-diff
+    if diff>180:
+        return diff - 180
+    if diff>90:
+        return 180 - diff
+
+
+def closestFast(start: list, test_pts: list):
+    """
+    Returns the closest point in the test_pts list to the point start, and
+    the Euclidean distance between them.
+    """
+
+    def sqrt_newton_raphson(n, accuracy=0.05):
+        x = n
+        while abs(x * x - n) > accuracy:
+            x = (x + n / x) / 2
+        return x
+
+    # If the list is empty, return the empty list and a nan for length
+    if not test_pts:
+        return test_pts, math.nan
+
+    # Otherwise calculate the closest point to the "start" point
+    else:
+        distSq_minimum = math.inf
+        closest_pt = []
+        for test_pt in test_pts:
+            # calculates squared distance between start and test_pt (to avoid sqrt calculation)
+            distSq = (test_pt[0] - start[0]) ** 2 + (test_pt[1] - start[1]) ** 2
+
+            # minimum squared distance corresponds to minimum distance
+            if distSq < distSq_minimum:
+                distSq_minimum = distSq
+                closest_pt = test_pt
+
+    # calculate the actual distance using sqrt only at the end, to reduce sqrt calculations
+    return closest_pt, sqrt_newton_raphson(distSq_minimum)
+
+
+def isVertical(line_segment):
+    return line_segment[0][0] == line_segment[1][0]
+
+
+def slopeIntercept(segment):
+    """
+    Returns the slope and the intercept of a line segment
+    """
+
+    # Check if two line segments are parallel, handling vertical lines
+    dx = segment[1][0] - segment[0][0]
+
+    if dx == 0:
+        # Both segments are vertical, consider them parallel
+        slope = math.inf
+
+    else:
+        # Check the slope for non-vertical segments
+        slope = (segment[1][1] - segment[0][1]) / dx
+
+    intercept = segment[0][1] - slope * segment[0][0]
+
+    return slope, intercept
+
+
+def merge_sloped_line_segments(line_segments):
+    """
+    takes a list of line 2d segments (list of list of lists)
+    returns reduced list where colinear intersecting lines
+    are joined into a single line
+    """
+
+    if not line_segments:
+        return []
+
+    for i in range(len(line_segments)):
+        # sorts on x values, ensuring left point is fist
+        line_segments[i].sort()
+
+    # sorts on first x value of each line, if equal,
+    # uses first y value >> second x value >> second y value
+    line_segments.sort()
+    
+    non_duplicate_segments = remove_duplicates(line_segments)
+
+    merged_segments = []
+    merged_indices = []
+
+    # [[[0, 0], [1, 1]], [[0.9, 0.9], [4, 4]], [[2, 2], [4, 4]], [[5, 5], [7, 7]]]
+    for i, segment1 in enumerate(non_duplicate_segments):
+        if i in merged_indices:
+            # this line segment has already been merged with one before it. ignore.
+            continue
+
+        current_segment = segment1.copy()
+
+        for j, segment2 in enumerate(non_duplicate_segments[i + 1 :]):
+            # right most point of seg1 is left of leftmost point of seg2. intersection impossible
+            if segment2[0][0] > current_segment[1][0]:
+                break  # breaks out of j loop
+
+            if slopeIntercept(segment1) == slopeIntercept(segment2):
+                current_segment = [current_segment[0], max(segment1[1], segment2[1])]
+                merged_indices.append(i + j + 1)  # index of segment2 in line_segments
+
+        merged_segments.append(current_segment)
+
+    return merged_segments
+
+
+def merge_vertical_line_segments(line_segments):
+    if not line_segments:
+        return []
+
+    for ls in line_segments:
+        if not isVertical(ls):
+            b = (
+                repr(ls)
+                + " is not vertical. input_list[0][0] should equal input_list[1][0]"
+            )
+            raise ValueError(b)
+
+        # sort on y values, i.e. make sure all lines start point is the bottom
+        ls.sort(key=lambda pt: pt[1])
+    # sort on x values, i.e. order line segments from left to right
+    line_segments.sort()
+    
+    non_duplicate_segments = remove_duplicates(line_segments)
+
+    merged_segments = []
+    current_segment = non_duplicate_segments[0]
+    for next_segment in non_duplicate_segments[1:]:
+        # if colinear and overlapping
+        if (
+            current_segment[0][0] == next_segment[0][0]
+            and current_segment[1][1] >= next_segment[0][1]
+        ):
+            # Overlapping and parallel, merge the segments
+            current_segment[1] = [
+                current_segment[0][0],
+                max(current_segment[1][1], next_segment[1][1]),
+            ]
+        else:
+            # Non-overlapping or not parallel, add the current segment to the result
+            merged_segments.append(current_segment)
+            current_segment = next_segment
+
+            # Add the last segment
+    merged_segments.append(current_segment)
+    return merged_segments
+
+
+def merge_colinear_intersecting_segments(line_segments):
+    vert = []
+    non_vert = []
+
+    for ls in line_segments:
+        if isVertical(ls):
+            vert.append(ls)
+        else:
+            non_vert.append(ls)
+
+    return merge_sloped_line_segments(non_vert) + merge_vertical_line_segments(vert)
+
+def simulate_sensors_fast(environment, sensors):
+    """Simulate a list of sensors"""
+    readings = []
+    ROBOT = environment.get("ROBOT", None)
+    for d_id in sensors:
+        if d_id in ROBOT.sensors:
+            readings.append(round(ROBOT.sensors[d_id].simulateFast(0, environment), 3))
+
+    return readings
+
+def remove_duplicates(sorted_list:list)->list:
+    '''
+    returns a list of elements that ONLY show up once in the input list
+    '''
+    unique_list = []
+
+    i = 0
+    while i < len(sorted_list):
+        current = sorted_list[i]
+
+        # Skip all occurrences of the current element
+        while i < len(sorted_list) and sorted_list[i] == current:
+            i += 1
+
+        # If there was only one occurrence, add it to the result
+        if i == sorted_list.index(current) + 1:
+            unique_list.append(current)
+
+    return unique_list
+
+
+def in_block(vec):
+    '''determins whether a vector is inside a wall block or not'''
+    
+    x_idx = int(vec.x//CONFIG.wall_segment_length)
+    y_idx = int(vec.y//CONFIG.wall_segment_length)
+    
+    return CONFIG.walls[y_idx][x_idx]==0

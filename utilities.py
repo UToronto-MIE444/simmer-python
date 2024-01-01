@@ -149,6 +149,7 @@ def collision(segment1: list, segment2: list):
 
     return collisions
 
+
 def closest(start: list, test_pts: list):
     '''
     Returns the closest point in the test_pts list to the point start, and
@@ -172,6 +173,7 @@ def closest(start: list, test_pts: list):
 
     return closest_pt, distance_minimum
 
+
 def simulate_sensors(environment, sensors):
     '''Simulate a list of sensors'''
 
@@ -179,6 +181,7 @@ def simulate_sensors(environment, sensors):
     for d_id in sensors:
         if d_id in ROBOT.sensors:
             ROBOT.sensors[d_id].simulate(0, environment)
+
 
 def angle(segment1:list, segment2:list):    
 
@@ -355,6 +358,7 @@ def merge_colinear_intersecting_segments(line_segments):
 
     return merge_sloped_line_segments(non_vert) + merge_vertical_line_segments(vert)
 
+
 def simulate_sensors_fast(environment, sensors):
     """Simulate a list of sensors"""
     readings = []
@@ -364,6 +368,7 @@ def simulate_sensors_fast(environment, sensors):
             readings.append(round(ROBOT.sensors[d_id].simulateFast(0, environment), 3))
 
     return readings
+
 
 def remove_duplicates(sorted_list:list)->list:
     '''
@@ -393,3 +398,72 @@ def in_block(vec):
     y_idx = int(vec.y//CONFIG.wall_segment_length)
     
     return CONFIG.walls[y_idx][x_idx]==0
+
+
+def check_collision_fast(s1: list, s2: list) -> bool:
+    """
+    returns whether or not two line segments are intersecting, without calculating intersection points
+    """
+
+    def onSegment(p, q, r):
+        if (
+            (q[0] <= max(p[0], r[0]))
+            and (q[0] >= min(p[0], r[0]))
+            and (q[1] <= max(p[1], r[1]))
+            and (q[1] >= min(p[1], r[1]))
+        ):
+            return True
+        return False
+
+    def orientation(p, q, r):
+        # to find the orientation of an ordered triplet (p,q,r)
+        # function returns the following values:
+        # 0 : Collinear points
+        # 1 : Clockwise points
+        # 2 : Counterclockwise
+
+        # See https://www.geeksforgeeks.org/orientation-3-ordered-points/amp/
+        # for details of below formula.
+
+        val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
+        if val > 0:
+            # Clockwise orientation
+            return 1
+        elif val < 0:
+            # Counterclockwise orientation
+            return 2
+        else:
+            # Collinear orientation
+            return 0
+
+    # Find the 4 orientations required for
+    # the general and special cases
+    o1 = orientation(s1[0], s1[1], s2[0])
+    o2 = orientation(s1[0], s1[1], s2[1])
+    o3 = orientation(s2[0], s2[1], s1[0])
+    o4 = orientation(s2[0], s2[1], s1[1])
+
+    # General case
+    if (o1 != o2) and (o3 != o4):
+        return True
+
+    # Special Cases
+
+    # s1[0] , s1[1] and s2[0] are collinear and s2[0] lies on segment s1[0]s1[1]
+    if (o1 == 0) and onSegment(s1[0], s2[0], s1[1]):
+        return True
+
+    # s1[0] , s1[1] and s2[1] are collinear and s2[1] lies on segment s1[0]s1[1]
+    if (o2 == 0) and onSegment(s1[0], s2[1], s1[1]):
+        return True
+
+    # s2[0] , s2[1] and s1[0] are collinear and s1[0] lies on segment s2[0]s2[1]
+    if (o3 == 0) and onSegment(s2[0], s1[0], s2[1]):
+        return True
+
+    # s2[0] , s2[1] and s1[1] are collinear and s1[1] lies on segment s2[0]s2[1]
+    if (o4 == 0) and onSegment(s2[0], s1[1], s2[1]):
+        return True
+
+    # If none of the cases
+    return False

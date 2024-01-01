@@ -63,6 +63,9 @@ walls = [[3,3,1,1,0,2,0,2],
          [1,0,2,0,0,1,0,1],
          [1,1,1,1,1,1,0,2]] # Matrix to define the maze walls
 floor_seed = 5489           # Randomization seed for generating correctfloor pattern
+maze_dim_x = len(walls[0])*wall_segment_length
+maze_dim_y = len(walls)*wall_segment_length
+        
 
 # Graphics information
 frame_rate = 60             # Target frame rate (Hz)

@@ -86,8 +86,7 @@ class Maze:
         THICKNESS = int(CONFIG.wall_thickness * CONFIG.ppi)
         COLOR = CONFIG.wall_color
 
-        for wall in self.wall_squares:
-            for line in wall:
+        for line in self.reduced_walls:
                 start = [scalar * CONFIG.ppi + CONFIG.border_pixels for scalar in line[0]]
                 end = [scalar * CONFIG.ppi + CONFIG.border_pixels for scalar in line[1]]
                 pygame.draw.line(canvas, COLOR, start, end, THICKNESS)

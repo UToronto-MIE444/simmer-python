@@ -22,6 +22,7 @@ import math
 import random
 import pygame
 import config as CONFIG
+from collections import Counter
 
 def add_error(value: float, pct_error: float, bounds: list = [],sigma=2):
     """
@@ -347,10 +348,31 @@ def merge_vertical_line_segments(line_segments):
 
 
 def merge_colinear_intersecting_segments(line_segments):
+    
+    if not line_segments:
+        return []
+
+    for i in range(len(line_segments)):
+        # sorts on x values, ensuring left point is fist
+        line_segments[i].sort()
+
+    # sorts on first x value of each line, if equal,
+    # uses first y value >> second x value >> second y value
+    line_segments.sort()
+    
+    # Flatten the list of lists of lists to a list of tuples
+    ls_tuples = [tuple([tuple(pt) for pt in ls]) for ls in line_segments]
+    
+    counts=Counter(ls_tuples)
+    
+    fewer_segment_tuples = [element for element, count in counts.items() if count == 1]
+    
+    # Convert back to a list of lists of lists
+    fewer_segments = [[list(inner_tuple) for inner_tuple in outer_tuple] for outer_tuple in fewer_segment_tuples]
     vert = []
     non_vert = []
 
-    for ls in line_segments:
+    for ls in fewer_segments:
         if isVertical(ls):
             vert.append(ls)
         else:

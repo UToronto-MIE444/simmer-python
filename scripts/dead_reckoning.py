@@ -99,7 +99,7 @@ def receive_serial():
 def clear_serial(delay_time):
     '''Wait some time (delay_time) and then clear the serial buffer.'''
     time.sleep(delay_time)
-    SER.read(SER.in_waiting())
+    SER.read(SER.in_waiting)
 
 # Convert string of bytes to a list of values
 def bytes_to_list(msg):
@@ -119,7 +119,10 @@ def bytes_to_list(msg):
 SIMULATE = True
 
 # Time to pause after transmitting (seconds)
-TRANSMIT_PAUSE = 0.1
+if SIMULATE:
+    TRANSMIT_PAUSE = 0.1
+else:
+    TRANSMIT_PAUSE = 0.25
 
 ### Network Setup ###
 HOST = '127.0.0.1'      # The server's hostname or IP address

@@ -94,7 +94,7 @@ class Maze:
     def generate_floor(self):
         '''Generates the floor of the maze'''
 
-        if not self.wall_squares:
+        if not self.reduced_walls:
             sys.exit('Walls must be imported before a floor pattern is generated.')
 
         # Get the number of floor checker points

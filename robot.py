@@ -164,7 +164,7 @@ class Robot():
             rotation += -rotation_speed
 
         # Move the robot
-        self.move(move_vector, rotation, walls)
+        self.move(move_vector, rotation, walls) 
 
     def move_from_command(self, walls):
         '''Move the robot based on all the movement "stored" in the drives'''
@@ -190,7 +190,7 @@ class Robot():
         self.update_outline()
 
         # Reset the position if a collision is detected
-        collisions = self.check_collision_walls(walls)
+        collisions = self.check_collision_walls_fast(walls)
         if collisions:
             self.position -= pm.Vector2.rotate(velocity, self.rotation)
             self.rotation -= rotation
@@ -229,7 +229,7 @@ class Robot():
                     if collision_points:
                         return collision_points
 
-    def check_collision_walls_fast(self, walls: list):
+    def check_collision_walls_fast(self, walls: list)->bool:
         """
         Checks for a collision between the robot's perimeter segments
         and a set of wall line segments.

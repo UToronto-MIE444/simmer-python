@@ -147,6 +147,7 @@ class Ultrasonic(Device):
         
         return utilities.add_error(output, self.error_pct, self.reading_bounds)
 
+    ### old version of simulate(). Delete if new one is stable.
     # def simulate(self, value: float, environment: dict):
     #     '''
     #     Simulates the performance of an ultrasonic sensor.

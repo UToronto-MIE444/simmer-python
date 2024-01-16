@@ -207,13 +207,7 @@ def closestFast(start: list, test_pts: list):
     Returns the closest point in the test_pts list to the point start, and
     the Euclidean distance between them.
     """
-
-    def sqrt_newton_raphson(n, accuracy=0.05):
-        x = n
-        while abs(x * x - n) > accuracy:
-            x = (x + n / x) / 2
-        return x
-
+    
     # If the list is empty, return the empty list and a nan for length
     if not test_pts:
         return test_pts, math.nan
@@ -231,8 +225,11 @@ def closestFast(start: list, test_pts: list):
                 distSq_minimum = distSq
                 closest_pt = test_pt
 
+    #TODO: potentially only calculate sqrt once rather than 7 times per sensor
+    # by moving sqrt calculation into ultrasonic.simulate() function
+    
     # calculate the actual distance using sqrt only at the end, to reduce sqrt calculations
-    return closest_pt, sqrt_newton_raphson(distSq_minimum)
+    return closest_pt, math.sqrt(distSq_minimum) 
 
 
 def isVertical(line_segment):
@@ -264,7 +261,9 @@ def merge_sloped_line_segments(line_segments):
     """
     takes a list of line 2d segments (list of list of lists)
     returns reduced list where colinear intersecting lines
-    are joined into a single line
+    are joined into a single line.
+    
+    works for lines that are NOT vertical
     """
 
     if not line_segments:
@@ -306,6 +305,14 @@ def merge_sloped_line_segments(line_segments):
 
 
 def merge_vertical_line_segments(line_segments):
+    """
+    takes a list of line 2d segments (list of list of lists)
+    returns reduced list where colinear intersecting lines
+    are joined into a single line.
+    
+    works for lines that are ONLY vertical
+    """
+    
     if not line_segments:
         return []
 
@@ -347,8 +354,13 @@ def merge_vertical_line_segments(line_segments):
     return merged_segments
 
 
-def merge_colinear_intersecting_segments(line_segments):
-    
+def optimize_walls(line_segments):
+    """
+    takes a list of walls (line_segments)
+    deletes shared walls of neighboring blocks (both instances)
+    merges collinear intersecting/overlapping walls
+    returns reduced list of walls
+    """
     if not line_segments:
         return []
 
@@ -379,17 +391,6 @@ def merge_colinear_intersecting_segments(line_segments):
             non_vert.append(ls)
 
     return merge_sloped_line_segments(non_vert) + merge_vertical_line_segments(vert)
-
-
-def simulate_sensors_fast(environment, sensors):
-    """Simulate a list of sensors"""
-    readings = []
-    ROBOT = environment.get("ROBOT", None)
-    for d_id in sensors:
-        if d_id in ROBOT.sensors:
-            readings.append(round(ROBOT.sensors[d_id].simulateFast(0, environment), 3))
-
-    return readings
 
 
 def remove_duplicates(sorted_list:list)->list:

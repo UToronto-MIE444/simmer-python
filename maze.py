@@ -76,8 +76,9 @@ class Maze:
                               for line in square]
                              for square in self.wall_squares]
         
+        # Flattens list of walls, removes unnecessary walls
         self.walls= [wall for wallsquare in self.wall_squares for wall in wallsquare]
-        self.reduced_walls = utilities.merge_colinear_intersecting_segments(self.walls)
+        self.reduced_walls = utilities.optimize_walls(self.walls)
 
     def draw_walls(self, canvas):
         '''Draws the maze walls onto the screen'''

@@ -108,14 +108,14 @@ class Ultrasonic(Device):
             self.visible_measurement_buffer -= 1
 
     def simulate(self, value: float, environment: dict):
-        """
+        '''
         Simulates the performance of an ultrasonic sensor.
 
         Response data format
         [0:7] - Eight byte double
-        """
+        '''
         MAZE = environment.get("MAZE", False)
-        # BLOCK = environment.get('BLOCK', False)
+        BLOCK = environment.get('BLOCK', False)
 
         rays = self._define_rays()
         ray_lengths = [self.max_range for item in rays]
@@ -123,20 +123,21 @@ class Ultrasonic(Device):
         # Update the measurement display buffer
         self.visible_measurement_buffer = int(self.visible_measurement_time * CONFIG.frame_rate)
 
-        for ct, ray in enumerate(rays):
-            # Check if the sensor is at a height where the block would be seen
-            # if self._block_visible(BLOCK):
-            #     to_check = [BLOCK.block_square, *MAZE.wall_squares]
-            # else:
+        # Check if the sensor is at a height where the block would be seen
+        if self._block_visible(BLOCK):
+            walls_to_check = BLOCK.block_square + MAZE.reduced_walls
+        else:
+            walls_to_check = MAZE.reduced_walls
 
-                for wall in MAZE.reduced_walls:
-                    collision_points = utilities.collision(ray, wall)
-                    if not collision_points:
-                        pass
-                    else:
-                        rays[ct][1], ray_lengths[ct] = utilities.closestFast(
-                            self.position_global, collision_points
-                        )
+        for ct, ray in enumerate(rays):
+            for wall in walls_to_check:
+                collision_points = utilities.collision(ray, wall)
+                if not collision_points:
+                    pass
+                else:
+                    rays[ct][1], ray_lengths[ct] = utilities.closestFast(
+                        self.position_global, collision_points
+                    )
 
         # Update stored variables
         self.rays = rays
@@ -147,47 +148,7 @@ class Ultrasonic(Device):
         
         return utilities.add_error(output, self.error_pct, self.reading_bounds)
 
-    ### old version of simulate(). Delete if new one is stable.
-    # def simulate(self, value: float, environment: dict):
-    #     '''
-    #     Simulates the performance of an ultrasonic sensor.
-
-    #     Response data format
-    #     [0:7] - Eight byte double
-    #     '''
-    #     ROBOT = environment.get('ROBOT', False)
-    #     MAZE = environment.get('MAZE', False)
-    #     BLOCK = environment.get('BLOCK', False)
-
-    #     rays = self._define_rays()
-    #     ray_lengths = [self.max_range for item in rays]
-
-    #     # Update the measurement display buffer
-    #     self.visible_measurement_buffer = int(self.visible_measurement_time * CONFIG.frame_rate)
-
-    #     for ct, ray in enumerate(rays):
-    #         # Check if the sensor is at a height where the block would be seen
-    #         if self._block_visible(BLOCK):
-    #             to_check = [BLOCK.block_square, *MAZE.wall_squares]
-    #         else:
-    #             to_check = MAZE.wall_squares
-
-    #         for square in to_check:
-    #             for segment_wall in square:
-    #                 collision_points = utilities.collision(ray, segment_wall)
-    #                 if not collision_points:
-    #                     pass
-    #                 else:
-    #                     rays[ct][1], ray_lengths[ct] = utilities.closest(self.position_global, collision_points)
-
-    #     # Update stored variables
-    #     self.rays = rays
-    #     self.ray_lengths = ray_lengths
-
-    #     # Build the value to return
-    #     output = min(self.ray_lengths)
-
-    #     return utilities.add_error(output, self.error_pct, self.reading_bounds)
+    
 
     def _block_visible(self, BLOCK):
         '''Determines whether the block is visibile to an ultrasonic sensor based on its height.'''

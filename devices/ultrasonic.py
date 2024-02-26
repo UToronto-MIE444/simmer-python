@@ -56,7 +56,7 @@ class Ultrasonic(Device):
         self.outline_thickness = info.get('outline_thickness', 0.25)
 
         # Display measurement when simulating
-        self.visible_measurement = info.get('visible_measurement', False)
+        self.visible_measurement = info.get('visible_measurement', True)
         self.visible_measurement_time = info.get('visible_measurement_time', 0.5)    # Measurement time on screen (s)
         self.visible_measurement_buffer = 0
 
@@ -135,7 +135,7 @@ class Ultrasonic(Device):
                 if not collision_points:
                     pass
                 else:
-                    rays[ct][1], ray_lengths[ct] = utilities.closestFast(
+                    rays[ct][1], ray_lengths[ct] = utilities.closest_fast(
                         self.position_global, collision_points
                     )
 

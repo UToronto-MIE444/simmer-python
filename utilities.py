@@ -25,7 +25,7 @@ import config as CONFIG
 from collections import Counter
 
 def add_error(value: float, pct_error: float, bounds: list = [],sigma=2):
-    """
+    '''
     ADD_ERROR Adds normally distributed percent error to a measurement
     As an input, this function takes a measurement value and an error
     percentage (from 0 to 1). It uses randn to calculate a normally
@@ -34,7 +34,7 @@ def add_error(value: float, pct_error: float, bounds: list = [],sigma=2):
     bounds is an optional two-value vector that can be added to specify
     limits to the returned values. For example, if bounds is [0 1], values
     will be limited to those within the given values
-    """
+    '''
 
     def clamp(number, bounds):
         return max(min(bounds[1], number), bounds[0])
@@ -203,10 +203,10 @@ def angle(segment1:list, segment2:list):
 
 
 def closest_fast(start: list, test_pts: list):
-    """
+    '''
     Returns the closest point in the test_pts list to the point start, and
     the Euclidean distance between them.
-    """
+    '''
     
     # If the list is empty, return the empty list and a nan for length
     if not test_pts:
@@ -237,9 +237,9 @@ def is_vertical(line_segment):
 
 
 def slopeIntercept(segment):
-    """
+    '''
     Returns the slope and the intercept of a line segment
-    """
+    '''
 
     # Check if two line segments are parallel, handling vertical lines
     dx = segment[1][0] - segment[0][0]
@@ -258,13 +258,13 @@ def slopeIntercept(segment):
 
 
 def merge_sloped_line_segments(line_segments):
-    """
+    '''
     takes a list of line 2d segments (list of list of lists)
     returns reduced list where colinear intersecting lines
     are joined into a single line.
     
     works for lines that are NOT vertical
-    """
+    '''
 
     if not line_segments:
         return []
@@ -305,13 +305,13 @@ def merge_sloped_line_segments(line_segments):
 
 
 def merge_vertical_line_segments(line_segments):
-    """
+    '''
     takes a list of line 2d segments (list of list of lists)
     returns reduced list where colinear intersecting lines
     are joined into a single line.
     
     works for lines that are ONLY vertical
-    """
+    '''
     
     if not line_segments:
         return []
@@ -355,12 +355,12 @@ def merge_vertical_line_segments(line_segments):
 
 
 def optimize_walls(line_segments):
-    """
+    '''
     takes a list of walls (line_segments)
     deletes shared walls of neighboring blocks (both instances)
     merges collinear intersecting/overlapping walls
     returns reduced list of walls
-    """
+    '''
     if not line_segments:
         return []
 
@@ -424,9 +424,9 @@ def in_block(vec):
 
 
 def check_collision_fast(s1: list, s2: list) -> bool:
-    """
+    '''
     returns whether or not two line segments are intersecting, without calculating intersection points
-    """
+    '''
 
     def onSegment(p, q, r):
         if (

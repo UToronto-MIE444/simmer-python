@@ -202,7 +202,7 @@ def angle(segment1:list, segment2:list):
         return 180 - diff
 
 
-def closestFast(start: list, test_pts: list):
+def closest_fast(start: list, test_pts: list):
     """
     Returns the closest point in the test_pts list to the point start, and
     the Euclidean distance between them.
@@ -232,7 +232,7 @@ def closestFast(start: list, test_pts: list):
     return closest_pt, math.sqrt(distSq_minimum) 
 
 
-def isVertical(line_segment):
+def is_vertical(line_segment):
     return line_segment[0][0] == line_segment[1][0]
 
 
@@ -317,7 +317,7 @@ def merge_vertical_line_segments(line_segments):
         return []
 
     for ls in line_segments:
-        if not isVertical(ls):
+        if not is_vertical(ls):
             b = (
                 repr(ls)
                 + " is not vertical. input_list[0][0] should equal input_list[1][0]"
@@ -385,7 +385,7 @@ def optimize_walls(line_segments):
     non_vert = []
 
     for ls in fewer_segments:
-        if isVertical(ls):
+        if is_vertical(ls):
             vert.append(ls)
         else:
             non_vert.append(ls)

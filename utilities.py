@@ -205,7 +205,7 @@ def angle(segment1:list, segment2:list):
 def closest_fast(start: list, test_pts: list):
     '''
     Returns the closest point in the test_pts list to the point start, and
-    the Euclidean distance between them.
+    the SQUARED Euclidean distance between them.
     '''
     
     # If the list is empty, return the empty list and a nan for length
@@ -224,12 +224,8 @@ def closest_fast(start: list, test_pts: list):
             if distSq < distSq_minimum:
                 distSq_minimum = distSq
                 closest_pt = test_pt
-
-    #TODO: potentially only calculate sqrt once rather than 7 times per sensor
-    # by moving sqrt calculation into ultrasonic.simulate() function
     
-    # calculate the actual distance using sqrt only at the end, to reduce sqrt calculations
-    return closest_pt, math.sqrt(distSq_minimum) 
+    return closest_pt, distSq_minimum 
 
 
 def is_vertical(line_segment):

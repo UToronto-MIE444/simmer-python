@@ -69,7 +69,7 @@ class Ultrasonic(Device):
         self.reading_bounds = [self.min_range, self.max_range]  # Upper and lower bounds for sensor reading
 
         self.rays = self._define_rays() # Define the initial rays, without detecting collisions
-        self.ray_lengths = [self.max_range for item in self.rays]   # The length of the rays
+        self.ray_lengths_squared = [self.max_range**2 for item in self.rays]   # The length of the rays
 
     def _define_rays(self):
         '''Define the rays used to get the ultrasonic distance.'''
@@ -118,7 +118,7 @@ class Ultrasonic(Device):
         BLOCK = environment.get('BLOCK', False)
 
         rays = self._define_rays()
-        ray_lengths = [self.max_range for item in rays]
+        ray_lengths_squared = [self.max_range**2 for item in rays]
 
         # Update the measurement display buffer
         self.visible_measurement_buffer = int(self.visible_measurement_time * CONFIG.frame_rate)
@@ -135,20 +135,18 @@ class Ultrasonic(Device):
                 if not collision_points:
                     pass
                 else:
-                    rays[ct][1], ray_lengths[ct] = utilities.closest_fast(
+                    rays[ct][1], ray_lengths_squared[ct] = utilities.closest_fast(
                         self.position_global, collision_points
                     )
 
         # Update stored variables
         self.rays = rays
-        self.ray_lengths = ray_lengths
+        self.ray_lengths_squared = ray_lengths_squared
 
         # Build the value to return
-        output = min(self.ray_lengths)
+        output = math.sqrt(min(self.ray_lengths_squared))
         
         return utilities.add_error(output, self.error_pct, self.reading_bounds)
-
-    
 
     def _block_visible(self, BLOCK):
         '''Determines whether the block is visibile to an ultrasonic sensor based on its height.'''

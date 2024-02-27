@@ -197,9 +197,9 @@ class Robot():
             self.update_outline()
             
     def teleport(self, x, y, angle, walls):
-        """Attempts to teleport the robot to a location,
+        '''Attempts to teleport the robot to a location,
         returns True if successful
-        if collision, reverts to previous location and returns False"""
+        if collision, reverts to previous location and returns False'''
 
         self.position = pm.Vector2(x, y)
         self.rotation = angle
@@ -216,10 +216,10 @@ class Robot():
             drive.move_buffer = 0
                 
     def check_collision_walls(self, walls: list):
-        """
+        '''
         Checks for a collision between the robot's perimeter segments
         and a set of wall line segments.
-        """
+        '''
 
         # Loop through all the robot outline line segments, checking for collisions
         for segment_bot in self.outline_global_segments:
@@ -230,10 +230,10 @@ class Robot():
                         return collision_points
 
     def check_collision_walls_fast(self, walls: list)->bool:
-        """
+        '''
         Checks for a collision between the robot's perimeter segments
         and a set of wall line segments.
-        """
+        '''
 
         # Loop through all the robot outline line segments, checking for collisions
         for segment_bot in self.outline_global_segments:

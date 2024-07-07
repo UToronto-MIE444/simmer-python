@@ -145,7 +145,7 @@ class Ultrasonic(Device):
 
         # Build the value to return
         output = math.sqrt(min(self.ray_lengths_squared))
-        
+
         return utilities.add_error(output, self.error_pct, self.reading_bounds)
 
     def _block_visible(self, BLOCK):

@@ -65,11 +65,11 @@ walls = [[3,3,1,1,0,2,0,2],
 floor_seed = 5489           # Randomization seed for generating correctfloor pattern
 maze_dim_x = len(walls[0])*wall_segment_length
 maze_dim_y = len(walls)*wall_segment_length
-        
+
 
 # Graphics information
 frame_rate = 60             # Target frame rate (Hz)
-ppi = 8                    # Number of on-screen pixels per inch on display
+ppi = 12                    # Number of on-screen pixels per inch on display
 border_pixels = floor_segment_length * ppi  # Size of the border surrounding the maze area
 
 background_color = (43, 122, 120)

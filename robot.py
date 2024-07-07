@@ -27,7 +27,8 @@ from pygame.locals import (
     K_s,
     K_d,
     K_q,
-    K_e
+    K_e,
+    K_t
 )
 import config as CONFIG
 import utilities
@@ -163,8 +164,14 @@ class Robot():
         if keypress[K_a]:
             rotation += -rotation_speed
 
+        # Teleportation test
+        # if keypress[K_t]:
+        #    teleport_success = self.teleport(10, 10, 0, walls)
+        #    if not teleport_success:
+        #        print("Teleport failed due to collision.")
+
         # Move the robot
-        self.move(move_vector, rotation, walls) 
+        self.move(move_vector, rotation, walls)
 
     def move_from_command(self, walls):
         '''Move the robot based on all the movement "stored" in the drives'''
@@ -195,26 +202,40 @@ class Robot():
             self.position -= pm.Vector2.rotate(velocity, self.rotation)
             self.rotation -= rotation
             self.update_outline()
-            
+
     def teleport(self, x, y, angle, walls):
         '''Attempts to teleport the robot to a location,
         returns True if successful
         if collision, reverts to previous location and returns False'''
 
+        original_position = [self.position, self.rotation]
+
         self.position = pm.Vector2(x, y)
         self.rotation = angle
         self.update_outline()
+        print(CONFIG.maze_dim_x, CONFIG.maze_dim_y)
 
-        if not (0 < self.position.x < 96 and 0 < self.position.y < 48):
+        # Returns False if the selected position is outside of the bounds of the map
+        if not (0 < self.position.x < CONFIG.maze_dim_x and 0 < self.position.y < CONFIG.maze_dim_y):
+            self.position = original_position[0]
+            self.rotation = original_position[1]
+            self.update_outline()
             return False
-        # returns true if the robot isn't inside a block and if there's no intersection with walls.
-        return not utilities.in_block(self.position) and not self.check_collision_walls_fast(walls)
+
+        # Returns True if the robot isn't inside a block and if there's no intersection with walls.
+        if not utilities.in_block(self.position) and not self.check_collision_walls_fast(walls):
+            return True
+        else:
+            self.position = original_position[0]
+            self.rotation = original_position[1]
+            self.update_outline()
+            return False
 
     def stop_drives(self):
         '''Stops all drives from moving, used as an emergency stop.'''
         for drive in self.drives.values():
             drive.move_buffer = 0
-                
+
     def check_collision_walls(self, walls: list):
         '''
         Checks for a collision between the robot's perimeter segments
@@ -243,9 +264,9 @@ class Robot():
                 )  # bool value
                 if collides:
                     return True
-        
+
         return False
-                    
+
 
 
     def command(self, cmds: list, environment: dict):

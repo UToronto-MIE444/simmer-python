@@ -75,7 +75,7 @@ class Maze:
                                for point in line]
                               for line in square]
                              for square in self.wall_squares]
-        
+
         # Flattens list of walls, removes unnecessary walls
         self.walls= [wall for wallsquare in self.wall_squares for wall in wallsquare]
         self.reduced_walls = utilities.optimize_walls(self.walls)

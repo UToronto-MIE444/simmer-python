@@ -286,13 +286,13 @@ class Robot():
                 except ValueError:
                     print('Command data (' + cmd[1] + ') not in valid float format. Trying with 0.')
                     value = 0
-                responses.append(target_device.simulate(value, environment))
+                responses.append([cmd[0], target_device.simulate(value, environment)])
             else:
                 if cmd[0] == 'xx':
                     self.stop_drives()
-                    responses.append(math.inf)
+                    responses.append([cmd[0], 'DRIVE STOP'])
                 else:
                     print('Target device ' + cmd[0] + ' not found.')
-                    responses.append(math.nan)
+                    responses.append([cmd[0], 'Not Found'])
 
         return responses

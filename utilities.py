@@ -48,8 +48,8 @@ def add_error(value: float, pct_error: float, bounds: list = [],sigma=2):
         return clamp(value_noisy, bounds)
     else:
         return value_noisy
-    
-    
+
+
 def collision(segment1: list, segment2: list):
     '''
     Checks for a collision between two line segments in format [[x1, y1], [x2, y2]],
@@ -184,16 +184,16 @@ def simulate_sensors(environment, sensors):
             ROBOT.sensors[d_id].simulate(0, environment)
 
 
-def angle(segment1:list, segment2:list):    
+def angle(segment1:list, segment2:list):
 
     theta1 = math.degrees(math.atan2(segment1[0][1]-segment1[1][1],segment1[0][0]-segment1[1][0]))
     theta2 = math.degrees(math.atan2(segment2[0][1]-segment2[1][1],segment2[0][0]-segment2[1][0]))
 
     diff = abs(theta1 - theta2)
-    
+
     # while diff>=360:
     #     diff-=360
-    
+
     if diff>270:
         return 360-diff
     if diff>180:
@@ -207,7 +207,7 @@ def closest_fast(start: list, test_pts: list):
     Returns the closest point in the test_pts list to the point start, and
     the SQUARED Euclidean distance between them.
     '''
-    
+
     # If the list is empty, return the empty list and a nan for length
     if not test_pts:
         return test_pts, math.nan
@@ -224,8 +224,8 @@ def closest_fast(start: list, test_pts: list):
             if distSq < distSq_minimum:
                 distSq_minimum = distSq
                 closest_pt = test_pt
-    
-    return closest_pt, distSq_minimum 
+
+    return closest_pt, distSq_minimum
 
 
 def is_vertical(line_segment):
@@ -258,7 +258,7 @@ def merge_sloped_line_segments(line_segments):
     takes a list of line 2d segments (list of list of lists)
     returns reduced list where colinear intersecting lines
     are joined into a single line.
-    
+
     works for lines that are NOT vertical
     '''
 
@@ -272,7 +272,7 @@ def merge_sloped_line_segments(line_segments):
     # sorts on first x value of each line, if equal,
     # uses first y value >> second x value >> second y value
     line_segments.sort()
-    
+
     non_duplicate_segments = remove_duplicates(line_segments)
 
     merged_segments = []
@@ -305,10 +305,10 @@ def merge_vertical_line_segments(line_segments):
     takes a list of line 2d segments (list of list of lists)
     returns reduced list where colinear intersecting lines
     are joined into a single line.
-    
+
     works for lines that are ONLY vertical
     '''
-    
+
     if not line_segments:
         return []
 
@@ -324,7 +324,7 @@ def merge_vertical_line_segments(line_segments):
         ls.sort(key=lambda pt: pt[1])
     # sort on x values, i.e. order line segments from left to right
     line_segments.sort()
-    
+
     non_duplicate_segments = remove_duplicates(line_segments)
 
     merged_segments = []
@@ -367,14 +367,14 @@ def optimize_walls(line_segments):
     # sorts on first x value of each line, if equal,
     # uses first y value >> second x value >> second y value
     line_segments.sort()
-    
+
     # Flatten the list of lists of lists to a list of tuples
     ls_tuples = [tuple([tuple(pt) for pt in ls]) for ls in line_segments]
-    
+
     counts=Counter(ls_tuples)
-    
+
     fewer_segment_tuples = [element for element, count in counts.items() if count == 1]
-    
+
     # Convert back to a list of lists of lists
     fewer_segments = [[list(inner_tuple) for inner_tuple in outer_tuple] for outer_tuple in fewer_segment_tuples]
     vert = []
@@ -412,10 +412,10 @@ def remove_duplicates(sorted_list:list)->list:
 
 def in_block(vec):
     '''determins whether a vector is inside a wall block or not'''
-    
+
     x_idx = int(vec.x//CONFIG.wall_segment_length)
     y_idx = int(vec.y//CONFIG.wall_segment_length)
-    
+
     return CONFIG.walls[y_idx][x_idx]==0
 
 

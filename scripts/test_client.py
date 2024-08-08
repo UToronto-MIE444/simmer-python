@@ -113,6 +113,31 @@ def bytes_to_list(msg):
     else:
         return ([False])
 
+def depacketize(data_raw: str):
+    '''
+    Take a raw string received and verify that it's a complete packet, returning just the data.
+    '''
+
+    start = data_raw.find('\x02')
+    end = data_raw.find('\x03')
+    if (start >= 0 and end >= start):
+        return data_raw[start+1:end]
+    else:
+        return False
+
+def packetize(data: str):
+    '''
+    Take a message that is to be sent to the command script and packetize it with start and end framing.
+    '''
+
+    # Check to make sure that a packet doesn't include any forbidden characters (0x01, 0x02, 0x03, 0x04)
+    forbidden = ['\x02', '\x03']
+    check_fail = any(char in data for char in forbidden)
+
+    if not check_fail:
+        return '\x02' + data + '\x03'
+
+    return False
 
 # Set whether to use TCP (SimMeR) or serial (Arduino)
 SIMULATE = True
@@ -144,6 +169,7 @@ if SIMULATE:
 RUNNING = True
 while RUNNING:
     cmd = input('Type in a string to send: ')
-    transmit(cmd)
+    transmit(packetize(cmd))
     [responses, time_rx] = receive()
+    responses = [depacketize(item) for item in responses]
     print(f"At time '{time_rx}' received '{round(responses[0], 3)}' from {SOURCE}\n")

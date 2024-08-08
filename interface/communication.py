@@ -95,7 +95,7 @@ class TCPServer:
 
         while True:
             # Send the response over the socket
-            client_socket, addr = self.sock2.accept()
+            client_socket, _ = self.sock2.accept()
             if self.buffer_tx:
                 try:
                     # client_socket.send(self.buffer_tx.encode(CONFIG.str_encoding))

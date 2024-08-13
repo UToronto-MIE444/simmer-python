@@ -38,6 +38,9 @@ port_tx = 61201
 timeout = 300
 str_encoding = 'utf-8'
 
+# General communication settings
+round_digits = 3
+
 # Block information
 block_position = [66, 5]        # Block starting location
 block_rotation = 0              # Block rotation (deg)

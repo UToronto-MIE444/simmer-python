@@ -108,7 +108,7 @@ def depacketize(data_raw: str):
 
     # Check that the start and end framing characters are present, then return commands as a list
     if (start >= 0 and end >= start):
-        data = data_raw[start+1:end].split(',')
+        data = data_raw[start+1:end].replace('\x03\x02', ',').split(',')
         return [item.split('-') for item in data]
     else:
         return [False]

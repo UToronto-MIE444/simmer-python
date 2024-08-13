@@ -21,7 +21,6 @@ Defines the TCP/IP communication functions of the simulator.
 import socket
 import time
 import math
-import struct
 from threading import Thread
 import config as CONFIG
 
@@ -122,7 +121,11 @@ class TCPServer:
         '''
         packet = ''
         for response in self.buffer_tx:
-            packet = packet + (f'{response[0]}-{response[1]},')
+            cmd = response[0]
+            value = response[1]
+            if isinstance(response[1], float):
+                value = round(value, CONFIG.round_digits)
+            packet = packet + (f'{cmd}-{value},')
         return self.packetize(packet[:-1])
 
     def get_buffer_rx(self):
@@ -159,16 +162,17 @@ class TCPServer:
         for response in responses:
             self.buffer_tx.append(response)
 
-
+    # Packetization and Depacketization functions
     def depacketize(self, data_raw: str):
         '''
         Take a raw string received and verify that it's a complete packet, returning just the data.
         '''
 
+
         start = data_raw.find('\x02')
         end = data_raw.find('\x03')
         if (start >= 0 and end >= start):
-            return data_raw[start+1:end]
+            return data_raw[start+1:end].replace('\x03\x02', ',')
         else:
             return False
 

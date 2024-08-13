@@ -65,7 +65,7 @@ def receive_tcp():
             response_raw = s2.recv(1024)
             if response_raw:
                 # return the data received as well as the current time
-                return [bytes_to_list(response_raw), datetime.now().strftime("%H:%M:%S")]
+                return [depacketize(response_raw), datetime.now().strftime("%H:%M:%S")]
             else:
                 return [[False], None]
         except (ConnectionRefusedError, ConnectionResetError):
@@ -81,17 +81,14 @@ def transmit_serial(data):
 def receive_serial():
     '''Receive a reply over a serial connection.'''
     # If responses are ascii characters, use this
-    # response_raw = (SER.readline().strip().decode('ascii'),)
+    response_raw = (SER.readline().strip().decode('ascii'),)
 
     # If responses are a series of 4-byte floats, use this
     available_bytes = SER.in_waiting
-    read_bytes = max(4, available_bytes - (available_bytes % 4))
-    if read_bytes >= 4:
-        response_raw = bytes_to_list(SER.read(read_bytes))
 
     # If response received, return it
     if response_raw[0]:
-        return [response_raw, datetime.now().strftime("%H:%M:%S")]
+        return [depacketize(response_raw), datetime.now().strftime("%H:%M:%S")]
     else:
         return [[False], datetime.now().strftime("%H:%M:%S")]
 
@@ -100,27 +97,20 @@ def clear_serial(delay_time):
     time.sleep(delay_time)
     SER.read(SER.in_waiting)
 
-# Convert string of bytes to a list of values
-def bytes_to_list(msg):
-    '''
-    Convert a sequence of single precision floats (Arduino/SimMerR float format)
-    to a list of numerical responses.
-    '''
-    num_responses = int(len(msg)/4)
-    if num_responses:
-        data = struct.unpack(f'{str(num_responses)}f', msg)
-        return data
-    else:
-        return ([False])
-
 def depacketize(data_raw: str):
     '''
-    Take a raw string received and verify that it's a complete packet, returning just the data.
+    Take a raw string received and verify that it's a complete packet, returning just the data messages in a list.
     '''
 
     start = data_raw.find('\x02')
     end = data_raw.find('\x03')
+
+    # Check that the start and end framing characters are present
     if (start >= 0 and end >= start):
+        data = []
+        # Find all instances of ',' in the string
+        # If there are any, circle through it with a for loop to break out each data segment and append it to data
+        # If there are none, return the whole message
         return data_raw[start+1:end]
     else:
         return False

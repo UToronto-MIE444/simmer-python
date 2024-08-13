@@ -22,7 +22,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # and https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
 
 import socket
-import struct
 import time
 from datetime import datetime
 import serial
@@ -62,7 +61,7 @@ def receive_tcp():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
         try:
             s2.connect((HOST, PORT_RX))
-            response_raw = s2.recv(1024)
+            response_raw = s2.recv(1024).decode('utf-8')
             if response_raw:
                 # return the data received as well as the current time
                 return [depacketize(response_raw), datetime.now().strftime("%H:%M:%S")]
@@ -97,23 +96,22 @@ def clear_serial(delay_time):
     time.sleep(delay_time)
     SER.read(SER.in_waiting)
 
+# Packetization and validation functions
 def depacketize(data_raw: str):
     '''
     Take a raw string received and verify that it's a complete packet, returning just the data messages in a list.
     '''
 
+    # Locate start and end framing characters
     start = data_raw.find('\x02')
     end = data_raw.find('\x03')
 
-    # Check that the start and end framing characters are present
+    # Check that the start and end framing characters are present, then return commands as a list
     if (start >= 0 and end >= start):
-        data = []
-        # Find all instances of ',' in the string
-        # If there are any, circle through it with a for loop to break out each data segment and append it to data
-        # If there are none, return the whole message
-        return data_raw[start+1:end]
+        data = data_raw[start+1:end].split(',')
+        return [item.split('-') for item in data]
     else:
-        return False
+        return [False]
 
 def packetize(data: str):
     '''
@@ -129,6 +127,43 @@ def packetize(data: str):
 
     return False
 
+def response_string(cmds: str, responses_list: list):
+    '''
+    Build a string that shows the responses to the transmitted commands that can be displayed easily.
+    '''
+    # Validate that the command ids of the responses match those that were sent
+    cmd_list = [item.split('-')[0] for item in cmds.split(',')]
+    valid = validate_responses(cmd_list, responses_list)
+
+    # Build the response string
+    out_string = ''
+    sgn = ''
+    for item in zip(cmd_list, responses_list, valid):
+        if item[2]:
+            sgn = '='
+        else:
+            sgn = '!='
+
+        out_string = out_string + (f'cmd {item[0]} {sgn} {item[1][0]}, response "{item[1][1]}"\n')
+
+    return out_string
+
+def validate_responses(cmd_list: list, responses_list: list):
+    '''
+    Validate that the list of commands and received responses have the same command id's. Takes a
+    list of commands and list of responses as inputs, and returns a list of true and false values
+    indicating whether each id matches.
+    '''
+    valid = []
+    for pair in zip(cmd_list, responses_list):
+        if pair[0] == pair[1][0]:
+            valid.append(True)
+        else:
+            valid.append(False)
+    return(valid)
+
+
+############## Main Script Begins ##############
 # Set whether to use TCP (SimMeR) or serial (Arduino)
 SIMULATE = True
 
@@ -161,5 +196,4 @@ while RUNNING:
     cmd = input('Type in a string to send: ')
     transmit(packetize(cmd))
     [responses, time_rx] = receive()
-    responses = [depacketize(item) for item in responses]
-    print(f"At time '{time_rx}' received '{round(responses[0], 3)}' from {SOURCE}\n")
+    print(f"At time '{time_rx}' received from {SOURCE}:\n{response_string(cmd, responses)}")

@@ -50,7 +50,7 @@ def transmit_tcp(data):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.connect((HOST, PORT_TX))
-            s.send(data.encode('utf-8'))
+            s.send(data.encode('ascii'))
         except (ConnectionRefusedError, ConnectionResetError):
             print('Tx Connection was refused or reset.')
         except TimeoutError:

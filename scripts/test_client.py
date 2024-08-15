@@ -48,7 +48,7 @@ def transmit_tcp(data):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.connect((HOST, PORT_TX))
-            s.send(data.encode('utf-8'))
+            s.send(data.encode('ascii'))
         except (ConnectionRefusedError, ConnectionResetError):
             print('Tx Connection was refused or reset.')
         except TimeoutError:
@@ -61,12 +61,12 @@ def receive_tcp():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
         try:
             s2.connect((HOST, PORT_RX))
-            response_raw = s2.recv(1024).decode('utf-8')
+            response_raw = s2.recv(1024).decode('ascii')
             if response_raw:
                 # return the data received as well as the current time
                 return [depacketize(response_raw), datetime.now().strftime("%H:%M:%S")]
             else:
-                return [[False], None]
+                return [[False], datetime.now().strftime("%H:%M:%S")]
         except (ConnectionRefusedError, ConnectionResetError):
             print('Rx connection was refused or reset.')
         except TimeoutError:
@@ -79,11 +79,8 @@ def transmit_serial(data):
 
 def receive_serial():
     '''Receive a reply over a serial connection.'''
-    # If responses are ascii characters, use this
-    response_raw = (SER.readline().strip().decode('ascii'),)
 
-    # If responses are a series of 4-byte floats, use this
-    available_bytes = SER.in_waiting
+    response_raw = (SER.readline().strip().decode('ascii'),)
 
     # If response received, return it
     if response_raw[0]:

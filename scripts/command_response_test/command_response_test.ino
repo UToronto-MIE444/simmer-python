@@ -2,20 +2,16 @@
 command_response_test
 
 This Arduino sketch serves as an example to help students understand command data
-parsing and response value packing. It will take any command received over the serial
-connection, split out the command ID and data values, and parse the data value as a
-floating point number. It will then respond to the command by echoing back the data
-value in a response format chosen by selecting either FloatResponse or StringResponse
-to be true. If no data value is given in the command, the response will be the number
-"100.001" in the selected format.
+parsing, response construction, and packetization. It will take any command received
+over the serial connection, split out the command ID and data values, and parse the
+data value as a floating point number. It will then respond to the command by echoing
+back the data value in the correct response format.
 
 */
 
 String s;
 String cmdID;
 String dataValue;
-float var = 100.001;
-byte * b = (byte *) &var;
 
 // If not debugging, set this to false to suppress debug messages
 boolean DEBUG = false;
@@ -34,7 +30,7 @@ void setup() {
   // Use a higher data rate because the VS Code serial monitor uses 115200 as default
   Serial.begin(9600);
   // Set timeout to a low number so responses are quick
-  Serial.setTimeout(50);
+  Serial.setTimeout(100);
 }
 
 // If DEBUG is true, send some debug messages over the serial port
@@ -51,11 +47,13 @@ void loop() {
   if (Serial.available())
   {
     // Get the received command
-    s = Serial.readStringUntil('\n');
+    Serial.readStringUntil('\x02');
+    s = Serial.readStringUntil('\x03');
+    s = '\x02' + s;
     debugMessage("Received String:", s);
 
     // Parse the command string
-    if (s.length() >= 1)
+    if (s.length() >= 3)
     {
       // Get the command ID
       cmdID = s.substring(0,min(2, s.length()));
@@ -77,20 +75,8 @@ void loop() {
         debugMessage("There is no data in the command to parse, returning:", dataValue);
       }
 
+      Serial.println(dataValue);
 
-      // Respond with a packed float, if set
-      if (FloatResponse) {
-        // Create a response byte
-        var = dataValue.toFloat();
-        byte * b = (byte *) &var;
-        // Transmit a floating point number
-        Serial.write(b, 4);
-      }
-
-      // Respond with a string, if set
-      if (StringResponse) {
-        Serial.println(dataValue);
-      }
     }
   }
 }

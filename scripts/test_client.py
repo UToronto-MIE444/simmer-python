@@ -93,6 +93,11 @@ def clear_serial(delay_time):
     time.sleep(delay_time)
     SER.read(SER.in_waiting)
 
+def serial_read(s):
+    '''Custom function for reading in serial data'''
+    start_char = '\x02'
+    end_char = '\x03'
+
 # Packetization and validation functions
 def depacketize(data_raw: str):
     '''
@@ -176,7 +181,7 @@ PORT_RX = 61201         # The port used by the *CLIENT* to send data
 
 ### Serial Setup ###
 BAUDRATE = 9600         # Baudrate in bps
-PORT_SERIAL = 'COM4'    # COM port identification
+PORT_SERIAL = 'COM3'    # COM port identification
 try:
     SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=0)
 except serial.SerialException:

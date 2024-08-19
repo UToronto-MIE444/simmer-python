@@ -182,7 +182,7 @@ class TCPServer:
         '''
 
         # Check to make sure that a packet doesn't include any forbidden characters (0x01, 0x02, 0x03, 0x04)
-        forbidden = ['\x02', '\x03']
+        forbidden = ['\x02', '\x03', '\n']
         check_fail = any(char in data for char in forbidden)
 
         if not check_fail:

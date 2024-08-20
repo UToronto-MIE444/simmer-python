@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # Code modified from examples on https://realpython.com/python-sockets/
 # and https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
 
+import sys
 import socket
 import time
 from datetime import datetime
@@ -80,10 +81,10 @@ def transmit_serial(data):
 
 def receive_serial():
     '''Receive a reply over a serial connection.'''
-    start_time = time.time()
 
+    start_time = time.time()
     response_raw = ''
-    while time.time() < start_time + 1:
+    while time.time() < start_time + TIMEOUT_SERIAL:
         if SER.in_waiting:
             response_char = SER.read().decode('ascii')
             if response_char == FRAMEEND:
@@ -92,7 +93,7 @@ def receive_serial():
             else:
                 response_raw += response_char
 
-    print(f'Response was: {response_raw}')
+    print(f'Raw response was: {response_raw}')
 
     # If response received, return it
     if response_raw:
@@ -104,7 +105,6 @@ def clear_serial(delay_time):
     '''Wait some time (delay_time) and then clear the serial buffer.'''
     time.sleep(delay_time)
     SER.read(SER.in_waiting)
-
 
 # Packetization and validation functions
 def depacketize(data_raw: str):
@@ -148,13 +148,16 @@ def response_string(cmds: str, responses_list: list):
     # Build the response string
     out_string = ''
     sgn = ''
+    chk = ''
     for item in zip(cmd_list, responses_list, valid):
         if item[2]:
             sgn = '='
+            chk = '✓'
         else:
             sgn = '!='
+            chk = 'X'
 
-        out_string = out_string + (f'cmd {item[0]} {sgn} {item[1][0]}, response "{item[1][1]}"\n')
+        out_string = out_string + (f'cmd {item[0]} {sgn} {item[1][0]} {chk}, response "{item[1][1]}"\n')
 
     return out_string
 
@@ -166,22 +169,15 @@ def validate_responses(cmd_list: list, responses_list: list):
     '''
     valid = []
     for pair in zip(cmd_list, responses_list):
-        if pair[0] == pair[1][0]:
-            valid.append(True)
-        else:
-            valid.append(False)
-    return(valid)
+        if pair[1]:
+            if pair[0] == pair[1][0]:
+                valid.append(True)
+            else:
+                valid.append(False)
+    return valid
 
 
-############## Main Script Begins ##############
-# Set whether to use TCP (SimMeR) or serial (Arduino)
-SIMULATE = False
-
-# Pause time
-TRANSMIT_PAUSE = 0
-if SIMULATE:
-    TRANSMIT_PAUSE = 0.1
-
+############## Constant Definitions Begins ##############
 ### Network Setup ###
 HOST = '127.0.0.1'      # The server's hostname or IP address
 PORT_TX = 61200         # The port used by the *CLIENT* to receive
@@ -190,24 +186,39 @@ PORT_RX = 61201         # The port used by the *CLIENT* to send data
 ### Serial Setup ###
 BAUDRATE = 9600         # Baudrate in bps
 PORT_SERIAL = 'COM3'    # COM port identification
-TIMEOUT_SERIAL = 1      # Serial port timeout, in seconds
+TIMEOUT_SERIAL = 0.25   # Serial port timeout, in seconds
 try:
     SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=TIMEOUT_SERIAL)
 except serial.SerialException:
-    pass
+    print(f'Serial connection was refused.\nEnsure {PORT_SERIAL} is the correct port and nothing else is connected to it.')
+    sys.exit(1)
+
 
 ### Packet Framing values ###
 FRAMESTART = '['
 FRAMEEND = ']'
 
-# Source
-SOURCE = 'serial device ' + PORT_SERIAL
+### Set whether to use TCP (SimMeR) or serial (Arduino) ###
+SIMULATE = False
+
+# Source to display
 if SIMULATE:
     SOURCE = 'SimMeR'
+else:
+    SOURCE = 'serial device ' + PORT_SERIAL
 
-# Main loop
-RUNNING = True
-while RUNNING:
+# Pause time after sending messages
+if SIMULATE:
+    TRANSMIT_PAUSE = 0.1
+else:
+    TRANSMIT_PAUSE = 0
+
+
+
+
+############## Main loop for the communication client ##############
+RUN_COMMUNICATION_CLIENT = False # If true, run this. If false, skip it
+while RUN_COMMUNICATION_CLIENT:
     # Input a command
     cmd = input('Type in a string to send: ')
 
@@ -222,3 +233,60 @@ while RUNNING:
         print(f"At time '{time_rx}' received from {SOURCE}:\n{response_string(cmd, responses)}")
     else:
         print(f"At time '{time_rx}' received from {SOURCE}:\nMalformed Packet")
+
+
+
+
+############## Main loop for the open loop control algorithm ##############
+# The sequence of commands to run
+CMD_SEQUENCE = ['w0-36', 'r0-90', 'w0-36', 'r0-90', 'w0-12', 'r0--90', 'w0-24', 'r0--90', 'w0-6', 'r0-720']
+LOOP_PAUSE_TIME = 1 # seconds
+
+# Main loop
+RUN_DEAD_RECKONING = True
+ct = 0
+while RUN_DEAD_RECKONING:
+    # Pause for a little while so as to not spam commands insanely fast
+    time.sleep(LOOP_PAUSE_TIME)
+
+    # If the command sequence hasn't been completed yet
+    if ct < len(CMD_SEQUENCE):
+
+        # Check an ultrasonic sensor 'u0'
+        packet_tx = packetize('u0')
+        if packet_tx:
+            transmit(packet_tx)
+            [responses, time_rx] = receive()
+            print(f"Ultrasonic 0 reading: {response_string('u0',responses)}")
+
+        # Check an ultrasonic sensor 'u1'
+        packet_tx = packetize('u1')
+        if packet_tx:
+            transmit(packet_tx)
+            [responses, time_rx] = receive()
+            print(f"Ultrasonic 1 reading: {response_string('u1',responses)}")
+
+        # Check the remaining three sensors: gyroscope, compass, and IR
+        packet_tx = packetize('g0,c0,i0')
+        if packet_tx:
+            transmit(packet_tx)
+            [responses, time_rx] = receive()
+            print(f"Other sensor readings:\n{response_string('g0,c0,i0',responses)}")
+
+        # Send a drive command
+        packet_tx = packetize(CMD_SEQUENCE[ct])
+        if packet_tx:
+            transmit(packet_tx)
+            [responses, time_rx] = receive()
+            print(f"Drive command response: {response_string(CMD_SEQUENCE[ct],responses)}")
+
+        # If we receive a drive response indicating the command was accepted,
+        # move to the next command in the sequence
+        if responses[0]:
+            if responses[0][1] == 'True':
+                ct += 1
+
+    # If the command sequence is complete, finish the program
+    else:
+        RUN_DEAD_RECKONING = False
+        print("Sequence complete!")

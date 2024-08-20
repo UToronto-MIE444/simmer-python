@@ -15,54 +15,93 @@ String packet;
 String cmdID;
 String dataValue;
 
-bool DEBUG = false; // If not debugging, set this to false to suppress debug messages
-char FRAMESTART = '\x02';
-char FRAMEEND = '\x03';
+bool DEBUG = true; // If not debugging, set this to false to suppress debug messages
+char FRAMESTART = '[';
+char FRAMEEND = ']';
+int TIMEOUT = 10000; // Serial timeout in milliseconds
 double DIFFERENCE = 1.2;
+int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx-#####", with 15 delimiting commas between them
 
 /* Create a debug message */
-void debugMessage(String msg1, String msg2) {
+void debugMessage(String msg) {
   // If DEBUG is true, send some debug messages over the serial port
   if (DEBUG)
     {
-      Serial.println(msg1);
-      Serial.println(msg2);
+      Serial.println(msg);
     }
 }
 
 /* Serial receive function */
 String receiveSerial() {
   // Declare message variable
-  String msg;
+  String frontmatter = "";
+  String msg = "";
+  char front_char;
+  char msg_char;
+  int start_time;
 
   // If there's anything available in the serial buffer, get it
   if (Serial.available()) {
-    // Read characters until the FRAMESTART character is found, dumping them all
-    Serial.readStringUntil(FRAMESTART);
-    // If serial characters are still available, read them into msg until the FRAMEEND character is reached
-    if (Serial.available()) {
-      msg = Serial.readStringUntil(FRAMEEND);
-      msg = FRAMESTART + msg;
-      debugMessage("Received String:", msg);
+
+    // Read characters until the FRAMESTART character is found, dumping them all into frontmatter (for debugging only)
+    start_time = millis();
+    while (millis() < start_time + TIMEOUT) {
+      if (Serial.available()) {
+        front_char = Serial.read();
+        if (front_char == FRAMESTART) {
+          msg += front_char;
+          break;
+        } else {
+          frontmatter += front_char;
+        }
+      }
+    }
+    if (frontmatter.length() > 0) {
+      debugMessage("Prior to FRAMESTART, received: " + frontmatter);
+    }
+
+    // Read more serial characters into msg until the FRAMEEND character is reached
+    while (millis() < start_time + TIMEOUT) {
+      if (Serial.available()) {
+        msg_char = Serial.read();
+        msg += msg_char;
+        if (msg_char == FRAMEEND) {
+          break;
+        }
+      }
+    }
+
+    // Flush any remaining bytes in the serial port
+    Serial.flush();
+
+    // Check if the message timed out
+    if (msg.length() < 1) {
+      debugMessage("No data received; serial timed out.");
+      return "";
+    } else if (msg_char != FRAMEEND) {
+      debugMessage("Timed out while receiving a message.");
+      return "";
+    } else {
+      debugMessage("Depacketizing received message:" + msg);
       return depacketize(msg);
     }
   }
 
-  // If a correctly packed string isn't found, return an empty string
-  return String();
+  // If a correctly packed string isn't found, flush the serial port and return an empty string
+  return "";
 }
 
 /* Remove packet framing information */
 String depacketize(String msg) {
   // If the message is correctly framed (packetized), trim framing characters and return it
-  if (msg.length() > 0 && msg[0] == FRAMESTART) {
-    if (msg[msg.length()] == FRAMEEND) {
-      return msg.substring(1, msg.length());
+  if (msg.length() > 1 && msg[0] == FRAMESTART) {
+    if (msg[msg.length()-1] == FRAMEEND) {
+      return msg.substring(1, msg.length()-1);
     }
   }
-
   // If anything doesn't match the expected format, return an empty string
-  return String();
+  debugMessage("Missing valid packet framing characters, instead detected these: " + String(msg[0]) + ',' + String(msg[msg.length()-1]));
+  return "";
 }
 
 /* Add packet framing information */
@@ -72,28 +111,28 @@ String packetize(String msg) {
 
 /* Handle the received commands (in this case just sending back the command and the data + DIFFERENCE)*/
 String parseCmd(String cmdString) {
-  String cmdID;
+  String cmdID = "";
   double data = 0;
-  debugMessage("Parsed command: ", cmdString);
+  debugMessage("Parsed command: " + cmdString);
 
   // Get the command ID
-  cmdID = cmdString.substring(0,min(2, packet.length()));
+  cmdID = cmdString.substring(0,min(2, cmdString.length()));
 
   // Get the data, if the command is long enough to contain it
   if (cmdString.length() >= 4) {
-    data = packet.substring(3).toDouble();
+    data = cmdString.substring(3).toDouble();
   }
 
   // Debug print messages
-  debugMessage("Command ID is: ", cmdID);
-  debugMessage("The parsed data string is:", String(data));
+  debugMessage("Command ID is: " + cmdID);
+  debugMessage("The parsed data string is:" + String(data));
 
   /*
   Here you would insert code to do something with the received cmdID and data
   */
 
   // Create a string response
-  return cmdID + '-' + String(data + DIFFERENCE) + ',';
+  return cmdID + '-' + String(data + DIFFERENCE);
 
 }
 
@@ -104,10 +143,12 @@ void setup() {
   // initialize digital pin LED_BUILTIN as output in case it's needed
   pinMode(LED_BUILTIN, OUTPUT);
 
-  // Use a higher data rate because the VS Code serial monitor uses 115200 as default
+  // Set serial parameters
   Serial.begin(9600);
-  // Set timeout to a quarter second as the max time to listen for a message
-  Serial.setTimeout(250);
+  Serial.setTimeout(TIMEOUT);
+  Serial.flush();
+
+  debugMessage("Arduino is ready");
 }
 
 /* Main Loop */
@@ -115,24 +156,28 @@ void loop() {
 
   // Get a string from the serial port
   packet = receiveSerial();
+  if (packet.length() > 0) {
+    debugMessage("Received good packet: " + packet);
+  }
 
   // Parse a correctly formatted command string
-  if (packet.length() >= 3 && packet.length() <= 256)
+  if (packet.length() >= 2 && packet.length() <= MAX_PACKET_LENGTH)
   {
     // Loop through the received string, splitting any commands by the ',' character and parsing each
     int cmdStartIndex = 0;
     String responseString = String();
     for (int ct = 0; ct < packet.length(); ct++) {
       if (packet[ct] == ',') {
-        responseString += parseCmd(packet.substring(cmdStartIndex, ct));
+        responseString += parseCmd(packet.substring(cmdStartIndex, ct)) + ',';
         cmdStartIndex = ct + 1;
       }
     }
     // For the last command (or if there were no ',' characters), parse it as well
     responseString += parseCmd(packet.substring(cmdStartIndex));
-    debugMessage("Response String is: ", responseString);
+    debugMessage("Response String is: " + responseString);
 
-    // Packetize and send the response string (removing the trailing ',')
-    Serial.println(packetize(responseString.substring(0,responseString.length())));
+    // Packetize and send the response string
+    Serial.print(packetize(responseString));
+    debugMessage("");
   }
 }

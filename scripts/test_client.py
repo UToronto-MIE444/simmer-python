@@ -80,11 +80,22 @@ def transmit_serial(data):
 
 def receive_serial():
     '''Receive a reply over a serial connection.'''
+    start_time = time.time()
 
-    response_raw = (SER.readline().strip().decode('ascii'),)
+    response_raw = ''
+    while time.time() < start_time + 1:
+        if SER.in_waiting:
+            response_char = SER.read().decode('ascii')
+            if response_char == FRAMEEND:
+                response_raw += response_char
+                break
+            else:
+                response_raw += response_char
+
+    print(f'Response was: {response_raw}')
 
     # If response received, return it
-    if response_raw[0]:
+    if response_raw:
         return [depacketize(response_raw), datetime.now().strftime("%H:%M:%S")]
     else:
         return [[False], datetime.now().strftime("%H:%M:%S")]
@@ -94,10 +105,6 @@ def clear_serial(delay_time):
     time.sleep(delay_time)
     SER.read(SER.in_waiting)
 
-def serial_read(s):
-    '''Custom function for reading in serial data'''
-    start_char = '\x02'
-    end_char = '\x03'
 
 # Packetization and validation functions
 def depacketize(data_raw: str):
@@ -106,12 +113,12 @@ def depacketize(data_raw: str):
     '''
 
     # Locate start and end framing characters
-    start = data_raw.find('\x02')
-    end = data_raw.find('\x03')
+    start = data_raw.find(FRAMESTART)
+    end = data_raw.find(FRAMEEND)
 
     # Check that the start and end framing characters are present, then return commands as a list
     if (start >= 0 and end >= start):
-        data = data_raw[start+1:end].replace('\x03\x02', ',').split(',')
+        data = data_raw[start+1:end].replace(f'{FRAMEEND}{FRAMESTART}', ',').split(',')
         return [item.split('-') for item in data]
     else:
         return [False]
@@ -122,11 +129,11 @@ def packetize(data: str):
     '''
 
     # Check to make sure that a packet doesn't include any forbidden characters (0x01, 0x02, 0x03, 0x04)
-    forbidden = ['\x02', '\x03', '\n']
+    forbidden = [FRAMESTART, FRAMEEND, '\n']
     check_fail = any(char in data for char in forbidden)
 
     if not check_fail:
-        return '\x02' + data + '\x03'
+        return FRAMESTART + data + FRAMEEND
 
     return False
 
@@ -168,10 +175,10 @@ def validate_responses(cmd_list: list, responses_list: list):
 
 ############## Main Script Begins ##############
 # Set whether to use TCP (SimMeR) or serial (Arduino)
-SIMULATE = True
+SIMULATE = False
 
 # Pause time
-TRANSMIT_PAUSE = 0.25
+TRANSMIT_PAUSE = 0.1
 if SIMULATE:
     TRANSMIT_PAUSE = 0.1
 
@@ -183,10 +190,15 @@ PORT_RX = 61201         # The port used by the *CLIENT* to send data
 ### Serial Setup ###
 BAUDRATE = 9600         # Baudrate in bps
 PORT_SERIAL = 'COM3'    # COM port identification
+TIMEOUT_SERIAL = 1      # Serial port timeout, in seconds
 try:
-    SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=0)
+    SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=TIMEOUT_SERIAL)
 except serial.SerialException:
     pass
+
+### Packet Framing values ###
+FRAMESTART = '['
+FRAMEEND = ']'
 
 # Source
 SOURCE = 'serial device ' + PORT_SERIAL
@@ -196,7 +208,17 @@ if SIMULATE:
 # Main loop
 RUNNING = True
 while RUNNING:
+    # Input a command
     cmd = input('Type in a string to send: ')
-    transmit(packetize(cmd))
+
+    # Send the command
+    packet_tx = packetize(cmd)
+    if packet_tx:
+        transmit(packet_tx)
+
+    # Receive the response
     [responses, time_rx] = receive()
-    print(f"At time '{time_rx}' received from {SOURCE}:\n{response_string(cmd, responses)}")
+    if responses[0]:
+        print(f"At time '{time_rx}' received from {SOURCE}:\n{response_string(cmd, responses)}")
+    else:
+        print(f"At time '{time_rx}' received from {SOURCE}:\nMalformed Packet")

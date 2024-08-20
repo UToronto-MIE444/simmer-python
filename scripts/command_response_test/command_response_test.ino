@@ -15,7 +15,7 @@ String packet;
 String cmdID;
 String dataValue;
 
-bool DEBUG = true; // If not debugging, set this to false to suppress debug messages
+bool DEBUG = false; // If not debugging, set this to false to suppress debug messages
 char FRAMESTART = '[';
 char FRAMEEND = ']';
 int TIMEOUT = 250; // Serial timeout in milliseconds

@@ -178,7 +178,7 @@ def validate_responses(cmd_list: list, responses_list: list):
 SIMULATE = False
 
 # Pause time
-TRANSMIT_PAUSE = 0.1
+TRANSMIT_PAUSE = 0
 if SIMULATE:
     TRANSMIT_PAUSE = 0.1
 

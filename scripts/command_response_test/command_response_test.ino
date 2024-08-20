@@ -33,17 +33,18 @@ void debugMessage(String msg) {
 
 /* Serial receive function */
 String receiveSerial() {
-  // Declare variables
+  // Declare variables, making sure to set types explicitly
   String frontmatter = "";
   String msg = "";
   char front_char = 0;
   char msg_char = 0;
-  int start_time = 0;
+  unsigned long start_time = 0; // This MUST be usigned long or else timeouts will be wonky
 
   // If there's anything available in the serial buffer, get it
   if (Serial.available()) {
 
-    // Read characters until the FRAMESTART character is found, dumping them all into frontmatter (for debugging only)
+    // Read characters until the FRAMESTART character is found, dumping them all into frontmatter
+    // frontmatter is only stored for debugging purposes
     start_time = millis();
     while (millis() < start_time + TIMEOUT) {
       if (Serial.available()) {
@@ -64,6 +65,15 @@ String receiveSerial() {
     while (millis() < start_time + TIMEOUT) {
       if (Serial.available()) {
         msg_char = Serial.read();
+
+        // If a second frame start character is received, then restart the message
+        if (msg_char == FRAMESTART) {
+          debugMessage("A new framestart character was received, dumping: " + msg);
+          msg = "";
+        }
+
+        // If any other character is received, then add it to the message
+        // Break if FRAMEEND character is received.
         msg += msg_char;
         if (msg_char == FRAMEEND) {
           break;
@@ -71,13 +81,11 @@ String receiveSerial() {
       }
     }
 
-    // Flush any remaining bytes in the serial port
-    Serial.flush();
-
     // Check if the message timed out
-    if (msg_char != FRAMEEND) {
+    if (msg.length() < 1) {
+      debugMessage("Timed out without receiving any message.");
+    } else if (msg_char != FRAMEEND) {
       debugMessage("Timed out while receiving a message.");
-      return "";
     } else {
       debugMessage("Depacketizing received message:" + msg);
       return depacketize(msg);

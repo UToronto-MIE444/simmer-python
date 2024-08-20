@@ -177,7 +177,7 @@ def validate_responses(cmd_list: list, responses_list: list):
     return valid
 
 
-############## Constant Definitions Begins ##############
+############## Constant Definitions Begin ##############
 ### Network Setup ###
 HOST = '127.0.0.1'      # The server's hostname or IP address
 PORT_TX = 61200         # The port used by the *CLIENT* to receive
@@ -199,7 +199,7 @@ FRAMESTART = '['
 FRAMEEND = ']'
 
 ### Set whether to use TCP (SimMeR) or serial (Arduino) ###
-SIMULATE = False
+SIMULATE = True
 
 # Source to display
 if SIMULATE:
@@ -216,8 +216,8 @@ else:
 
 
 
-############## Main loop for the communication client ##############
-RUN_COMMUNICATION_CLIENT = False # If true, run this. If false, skip it
+############## Main section for the communication client ##############
+RUN_COMMUNICATION_CLIENT = True # If true, run this. If false, skip it
 while RUN_COMMUNICATION_CLIENT:
     # Input a command
     cmd = input('Type in a string to send: ')
@@ -237,13 +237,13 @@ while RUN_COMMUNICATION_CLIENT:
 
 
 
-############## Main loop for the open loop control algorithm ##############
+############## Main section for the open loop control algorithm ##############
 # The sequence of commands to run
 CMD_SEQUENCE = ['w0-36', 'r0-90', 'w0-36', 'r0-90', 'w0-12', 'r0--90', 'w0-24', 'r0--90', 'w0-6', 'r0-720']
 LOOP_PAUSE_TIME = 1 # seconds
 
 # Main loop
-RUN_DEAD_RECKONING = True
+RUN_DEAD_RECKONING = False # If true, run this. If false, skip it
 ct = 0
 while RUN_DEAD_RECKONING:
     # Pause for a little while so as to not spam commands insanely fast

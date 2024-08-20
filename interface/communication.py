@@ -169,10 +169,10 @@ class TCPServer:
         '''
 
 
-        start = data_raw.find('\x02')
-        end = data_raw.find('\x03')
+        start = data_raw.find(CONFIG.frame_start)
+        end = data_raw.find(CONFIG.frame_end)
         if (start >= 0 and end >= start):
-            return data_raw[start+1:end].replace('\x03\x02', ',')
+            return data_raw[start+1:end].replace(CONFIG.frame_start + CONFIG.frame_end, ',')
         else:
             return False
 
@@ -182,10 +182,10 @@ class TCPServer:
         '''
 
         # Check to make sure that a packet doesn't include any forbidden characters (0x01, 0x02, 0x03, 0x04)
-        forbidden = ['\x02', '\x03', '\n']
+        forbidden = [CONFIG.frame_start, CONFIG.frame_end, '\n']
         check_fail = any(char in data for char in forbidden)
 
         if not check_fail:
-            return '\x02' + data + '\x03'
+            return CONFIG.frame_start + data + CONFIG.frame_end
 
         return False

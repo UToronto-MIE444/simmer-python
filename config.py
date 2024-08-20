@@ -37,6 +37,8 @@ port_rx = 61200
 port_tx = 61201
 timeout = 300
 str_encoding = 'ascii'
+frame_start = '['
+frame_end = ']'
 
 # General communication settings
 round_digits = 3

@@ -21,7 +21,6 @@ Defines the TCP/IP communication functions of the simulator.
 import socket
 import time
 import math
-import struct
 from threading import Thread
 import config as CONFIG
 
@@ -68,7 +67,15 @@ class TCPServer:
                     print(f"The robot's socket has been connected to by address: {addr}")
 
                     # Store the incoming data as a string
-                    data = client_socket.recv(1024).decode(CONFIG.str_encoding)
+                    data_raw = client_socket.recv(1024).decode(CONFIG.str_encoding)
+
+                    # Ensure that the received data includes a start and end marker
+                    data = self.depacketize(data_raw)
+
+                    if not data:
+                        print(f'The following data was recieved but is missing packet framing chars: {data_raw!r}')
+                        client_socket.close()
+                        continue
 
                     # If the receive buffer is empty, act on it. Else dump the data.
                     if not self.buffer_rx:
@@ -78,9 +85,8 @@ class TCPServer:
                         if self.loopback:
                             if not self.buffer_tx:
                                 self.buffer_tx = data
-                            # client_socket.sendall(data.encode(CONFIG.str_encoding))
                     else:
-                        print(f'The following data was received: {data!r}, but the receive buffer is full.')
+                        print(f'The following data was received but the receive buffer is full: {data!r}')
                         if not self.buffer_tx:
                             self.buffer_tx = math.nan
                     client_socket.close()
@@ -95,11 +101,11 @@ class TCPServer:
 
         while True:
             # Send the response over the socket
-            client_socket, addr = self.sock2.accept()
+            client_socket, _ = self.sock2.accept()
             if self.buffer_tx:
                 try:
-                    # client_socket.send(self.buffer_tx.encode(CONFIG.str_encoding))
-                    client_socket.send(self.buffer_tx)
+                    packet = self.make_tx_packet()
+                    client_socket.send(packet.encode(CONFIG.str_encoding))
                     self.buffer_tx = []
                 except OSError:
                     print("OS Error raised, continuing.")
@@ -108,6 +114,19 @@ class TCPServer:
                     self.buffer_tx = []
             client_socket.close()
             time.sleep(1/CONFIG.frame_rate)
+
+    def make_tx_packet(self):
+        '''
+        Build the packet from the responses
+        '''
+        packet = ''
+        for response in self.buffer_tx:
+            cmd = response[0]
+            value = response[1]
+            if isinstance(response[1], float):
+                value = round(value, CONFIG.round_digits)
+            packet = packet + (f'{cmd}-{value},')
+        return self.packetize(packet[:-1])
 
     def get_buffer_rx(self):
         '''Get and clear the receive buffer.'''
@@ -140,7 +159,33 @@ class TCPServer:
         '''
         Put data into the transmit buffer.
         '''
+        for response in responses:
+            self.buffer_tx.append(response)
 
-        if not self.buffer_tx:
-            response_bytes = struct.pack(f'{len(responses)}f', *responses)
-            self.buffer_tx = response_bytes
+    # Packetization and Depacketization functions
+    def depacketize(self, data_raw: str):
+        '''
+        Take a raw string received and verify that it's a complete packet, returning just the data.
+        '''
+
+
+        start = data_raw.find(CONFIG.frame_start)
+        end = data_raw.find(CONFIG.frame_end)
+        if (start >= 0 and end >= start):
+            return data_raw[start+1:end].replace(CONFIG.frame_start + CONFIG.frame_end, ',')
+        else:
+            return False
+
+    def packetize(self, data: str):
+        '''
+        Take a message that is to be sent to the command script and packetize it with start and end framing.
+        '''
+
+        # Check to make sure that a packet doesn't include any forbidden characters (0x01, 0x02, 0x03, 0x04)
+        forbidden = [CONFIG.frame_start, CONFIG.frame_end, '\n']
+        check_fail = any(char in data for char in forbidden)
+
+        if not check_fail:
+            return CONFIG.frame_start + data + CONFIG.frame_end
+
+        return False

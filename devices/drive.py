@@ -140,7 +140,7 @@ class Drive(Device):
         # Refuse the movement command if the robot is currently moving
         for drive in ROBOT.drives.values():
             if drive.move_buffer:
-                return math.nan
+                return False
 
         # Add errors
         error_total = 0
@@ -155,7 +155,7 @@ class Drive(Device):
         self.move_buffer = value_error
 
         # Return "inf" if the command is accepted and acknowledged
-        return math.inf
+        return True
 
 
     def move_update(self):

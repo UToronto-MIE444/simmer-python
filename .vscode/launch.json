@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Python: SimMeR",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "simmer.py",
             "console": "integratedTerminal",

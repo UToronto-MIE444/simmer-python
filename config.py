@@ -36,7 +36,12 @@ host = '127.0.0.1'
 port_rx = 61200
 port_tx = 61201
 timeout = 300
-str_encoding = 'utf-8'
+str_encoding = 'ascii'
+frame_start = '['
+frame_end = ']'
+
+# General communication settings
+round_digits = 3
 
 # Block information
 block_position = [66, 5]        # Block starting location

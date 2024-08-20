@@ -18,7 +18,7 @@ String dataValue;
 bool DEBUG = true; // If not debugging, set this to false to suppress debug messages
 char FRAMESTART = '[';
 char FRAMEEND = ']';
-int TIMEOUT = 10000; // Serial timeout in milliseconds
+int TIMEOUT = 250; // Serial timeout in milliseconds
 double DIFFERENCE = 1.2;
 int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx-#####", with 15 delimiting commas between them
 
@@ -33,12 +33,12 @@ void debugMessage(String msg) {
 
 /* Serial receive function */
 String receiveSerial() {
-  // Declare message variable
+  // Declare variables
   String frontmatter = "";
   String msg = "";
-  char front_char;
-  char msg_char;
-  int start_time;
+  char front_char = 0;
+  char msg_char = 0;
+  int start_time = 0;
 
   // If there's anything available in the serial buffer, get it
   if (Serial.available()) {
@@ -75,10 +75,7 @@ String receiveSerial() {
     Serial.flush();
 
     // Check if the message timed out
-    if (msg.length() < 1) {
-      debugMessage("No data received; serial timed out.");
-      return "";
-    } else if (msg_char != FRAMEEND) {
+    if (msg_char != FRAMEEND) {
       debugMessage("Timed out while receiving a message.");
       return "";
     } else {

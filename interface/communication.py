@@ -125,7 +125,7 @@ class TCPServer:
             value = response[1]
             if isinstance(response[1], float):
                 value = round(value, CONFIG.round_digits)
-            packet = packet + (f'{cmd}-{value},')
+            packet = packet + (f'{cmd}:{value},')
         return self.packetize(packet[:-1])
 
     def get_buffer_rx(self):
@@ -140,7 +140,7 @@ class TCPServer:
         '''
         Parses a command string into a command for the robot to act on.
         [0:1] - The first two characters identify the device to query/command.
-        [2] - The third character (optional) should be a hyphen.
+        [2] - The third character (optional) should be a colon.
         [3:end] - The remaining characters form a data string to tell the device what to do.
         '''
 

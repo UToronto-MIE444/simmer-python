@@ -21,7 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # Code modified from examples on https://realpython.com/python-sockets/
 # and https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
 
-import sys
 import socket
 import time
 from datetime import datetime
@@ -74,7 +73,6 @@ def receive_tcp():
             print('Response not received from robot.')
 
 # Serial communication functions
-# TODO: Finish updating these to use packetization
 def transmit_serial(data):
     '''Transmit a command over a serial connection.'''
     SER.write(data.encode('ascii'))
@@ -119,9 +117,24 @@ def depacketize(data_raw: str):
     # Check that the start and end framing characters are present, then return commands as a list
     if (start >= 0 and end >= start):
         data = data_raw[start+1:end].replace(f'{FRAMEEND}{FRAMESTART}', ',').split(',')
-        return [item.split('-') for item in data]
+        cmd_list = [item.split(':') for item in data]
+
+        # Make sure this list is formatted in the expected manner
+        for cmd_single in cmd_list:
+            match len(cmd_single):
+                case 0:
+                    cmd_single.append('')
+                    cmd_single.append('')
+                case 1:
+                    cmd_single.append('')
+                case 2:
+                    pass
+                case _:
+                    cmd_single = cmd_single[0:2]
+
+        return cmd_list
     else:
-        return [False]
+        return [[False, '']]
 
 def packetize(data: str):
     '''
@@ -142,7 +155,7 @@ def response_string(cmds: str, responses_list: list):
     Build a string that shows the responses to the transmitted commands that can be displayed easily.
     '''
     # Validate that the command ids of the responses match those that were sent
-    cmd_list = [item.split('-')[0] for item in cmds.split(',')]
+    cmd_list = [item.split(':')[0] for item in cmds.split(',')]
     valid = validate_responses(cmd_list, responses_list)
 
     # Build the response string
@@ -186,28 +199,30 @@ PORT_RX = 61201         # The port used by the *CLIENT* to send data
 ### Serial Setup ###
 BAUDRATE = 9600         # Baudrate in bps
 PORT_SERIAL = 'COM3'    # COM port identification
-TIMEOUT_SERIAL = 0.25   # Serial port timeout, in seconds
-try:
-    SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=TIMEOUT_SERIAL)
-except serial.SerialException:
-    print(f'Serial connection was refused.\nEnsure {PORT_SERIAL} is the correct port and nothing else is connected to it.')
-    sys.exit(1)
-
+TIMEOUT_SERIAL = 0.5    # Serial port timeout, in seconds
 
 ### Packet Framing values ###
 FRAMESTART = '['
 FRAMEEND = ']'
+CMD_DELIMITER = ','
 
 ### Set whether to use TCP (SimMeR) or serial (Arduino) ###
-SIMULATE = True
+SIMULATE = False
 
-# Source to display
+
+
+############### Initialize ##############
+### Source to display
 if SIMULATE:
     SOURCE = 'SimMeR'
 else:
     SOURCE = 'serial device ' + PORT_SERIAL
+try:
+    SER = serial.Serial(PORT_SERIAL, BAUDRATE, timeout=TIMEOUT_SERIAL)
+except serial.SerialException:
+    print(f'Serial connection was refused.\nEnsure {PORT_SERIAL} is the correct port and nothing else is connected to it.')
 
-# Pause time after sending messages
+### Pause time after sending messages
 if SIMULATE:
     TRANSMIT_PAUSE = 0.1
 else:
@@ -239,7 +254,7 @@ while RUN_COMMUNICATION_CLIENT:
 
 ############## Main section for the open loop control algorithm ##############
 # The sequence of commands to run
-CMD_SEQUENCE = ['w0-36', 'r0-90', 'w0-36', 'r0-90', 'w0-12', 'r0--90', 'w0-24', 'r0--90', 'w0-6', 'r0-720']
+CMD_SEQUENCE = ['w0:36', 'r0:90', 'w0:36', 'r0:90', 'w0:12', 'r0:-90', 'w0:24', 'r0:-90', 'w0:6', 'r0:720']
 LOOP_PAUSE_TIME = 1 # seconds
 
 # Main loop

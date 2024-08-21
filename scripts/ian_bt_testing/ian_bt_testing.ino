@@ -9,17 +9,21 @@ back the data value in the correct response format.
 
 */
 
+/* Include Libraries */
+#include <SoftwareSerial.h>
+
 /* Declarations and Constants */
-// Declare some string variables
 String packet;
 String responseString;
-
-bool DEBUG = true; // If not debugging, set this to false to suppress debug messages
+bool DEBUG = false; // If not debugging, set this to false to suppress debug messages
 char FRAMESTART = '[';
 char FRAMEEND = ']';
 int TIMEOUT = 250; // Serial timeout in milliseconds
-double DIFFERENCE = 1.2;
-int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx-#####", with 15 delimiting commas between them
+double DIFFERENCE = 1.2; // value to increment numerical data by before responding
+int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx:#####", with 15 delimiting commas between them
+
+// Software Serial Definition
+SoftwareSerial SerialBT(4, 3); // (rx, tx)
 
 /* Create a debug message */
 void debugMessage(String msg) {
@@ -135,12 +139,14 @@ String parseCmd(String cmdString) {
   String cmdID = "";
   double data = 0;
   bool led_state;
+  String ATdata = "";
+  String ATresponse = "";
 
 
   debugMessage("Parsed command: " + cmdString);
 
   // Get the command ID
-  cmdID = cmdString.substring(0,min(2, cmdString.length()));
+  cmdID = cmdString.substring(0, min(2, cmdString.length()));
 
   // Get the data, if the command is long enough to contain it
   if (cmdString.length() >= 4) {
@@ -156,11 +162,19 @@ String parseCmd(String cmdString) {
     led_state = digitalRead(LED_BUILTIN);
     digitalWrite(LED_BUILTIN, !led_state);
     digitalWrite(2, !led_state);
-    return cmdID + '-' + (!led_state ? "True" : "False");
+    return cmdID + ':' + (!led_state ? "True" : "False");
+  }
+
+  if (cmdID == "AT") {
+    ATdata = cmdString.substring(3);
+    SerialBT.print(ATdata);
+    ATresponse = SerialBT.readStringUntil("\n");
+    debugMessage("ATdata is: " + ATdata + ", Response is: " + ATresponse);
+    return cmdID + ':' + ATresponse;
   }
 
   // Create a string response
-  return cmdID + '-' + String(data + DIFFERENCE);
+  return cmdID + ':' + String(data + DIFFERENCE);
 
 }
 
@@ -175,6 +189,11 @@ void setup() {
   // Set serial parameters
   Serial.begin(9600);
   Serial.setTimeout(TIMEOUT);
+
+  // Set up software serial port for BT module communication
+  SerialBT.begin(9600);
+  // SerialBT.begin(38400); // For AT Commands
+  SerialBT.setTimeout(4*TIMEOUT);
 
   debugMessage("Arduino is ready");
 }

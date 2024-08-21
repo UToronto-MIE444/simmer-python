@@ -19,7 +19,7 @@ char FRAMESTART = '[';
 char FRAMEEND = ']';
 int TIMEOUT = 250; // Serial timeout in milliseconds
 double DIFFERENCE = 1.2;
-int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx-#####", with 15 delimiting commas between them
+int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx:#####", with 15 delimiting commas between them
 
 /* Create a debug message */
 void debugMessage(String msg) {
@@ -153,7 +153,7 @@ String parseCmd(String cmdString) {
   */
 
   // Create a string response
-  return cmdID + '-' + String(data + DIFFERENCE);
+  return cmdID + ':' + String(data + DIFFERENCE);
 
 }
 

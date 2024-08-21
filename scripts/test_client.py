@@ -102,7 +102,7 @@ def receive_serial():
 def clear_serial(delay_time):
     '''Wait some time (delay_time) and then clear the serial buffer.'''
     time.sleep(delay_time)
-    SER.read(SER.in_waiting)
+    print(f'Clearing Serial... Dumped: {SER.read(SER.in_waiting)}')
 
 # Packetization and validation functions
 def depacketize(data_raw: str):

@@ -14,7 +14,7 @@ back the data value in the correct response format.
 String packet;
 String responseString;
 
-bool DEBUG = false; // If not debugging, set this to false to suppress debug messages
+bool DEBUG = true; // If not debugging, set this to false to suppress debug messages
 char FRAMESTART = '[';
 char FRAMEEND = ']';
 int TIMEOUT = 250; // Serial timeout in milliseconds
@@ -134,6 +134,9 @@ String parsePacket(String pkt) {
 String parseCmd(String cmdString) {
   String cmdID = "";
   double data = 0;
+  bool led_state;
+
+
   debugMessage("Parsed command: " + cmdString);
 
   // Get the command ID
@@ -148,9 +151,13 @@ String parseCmd(String cmdString) {
   debugMessage("Command ID is: " + cmdID);
   debugMessage("The parsed data string is:" + String(data));
 
-  /*
-  Here you would insert code to do something with the received cmdID and data
-  */
+  // Toggle the built-in LED if the ld command is received
+  if (cmdID == "ld") {
+    led_state = digitalRead(LED_BUILTIN);
+    digitalWrite(LED_BUILTIN, !led_state);
+    digitalWrite(2, !led_state);
+    return cmdID + '-' + (!led_state ? "True" : "False");
+  }
 
   // Create a string response
   return cmdID + '-' + String(data + DIFFERENCE);
@@ -163,6 +170,7 @@ String parseCmd(String cmdString) {
 void setup() {
   // initialize digital pin LED_BUILTIN as output in case it's needed
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(2, OUTPUT);
 
   // Set serial parameters
   Serial.begin(9600);

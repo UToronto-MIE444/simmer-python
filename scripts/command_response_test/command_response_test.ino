@@ -12,10 +12,9 @@ back the data value in the correct response format.
 /* Declarations and Constants */
 // Declare some string variables
 String packet;
-String cmdID;
-String dataValue;
+String responseString;
 
-bool DEBUG = false; // If not debugging, set this to false to suppress debug messages
+bool DEBUG = true; // If not debugging, set this to false to suppress debug messages
 char FRAMESTART = '[';
 char FRAMEEND = ']';
 int TIMEOUT = 250; // Serial timeout in milliseconds
@@ -114,6 +113,23 @@ String packetize(String msg) {
   return FRAMESTART + msg + FRAMEEND;
 }
 
+/* Handle the received packet */
+String parsePacket(String pkt) {
+  // Loop through the received string, splitting any commands by the ',' character and parsing each
+  int cmdStartIndex = 0;
+  String responseString = "";
+  for (int ct = 0; ct < pkt.length(); ct++) {
+    if (packet[ct] == ',') {
+      responseString += parseCmd(pkt.substring(cmdStartIndex, ct)) + ',';
+      cmdStartIndex = ct + 1;
+    }
+  }
+  // For the last command (or if there were no ',' characters), parse it as well
+  responseString += parseCmd(pkt.substring(cmdStartIndex));
+  debugMessage("Response String is: " + responseString);
+  return responseString;
+}
+
 /* Handle the received commands (in this case just sending back the command and the data + DIFFERENCE)*/
 String parseCmd(String cmdString) {
   String cmdID = "";
@@ -166,20 +182,8 @@ void loop() {
   }
 
   // Parse a correctly formatted command string
-  if (packet.length() >= 2 && packet.length() <= MAX_PACKET_LENGTH)
-  {
-    // Loop through the received string, splitting any commands by the ',' character and parsing each
-    int cmdStartIndex = 0;
-    String responseString = String();
-    for (int ct = 0; ct < packet.length(); ct++) {
-      if (packet[ct] == ',') {
-        responseString += parseCmd(packet.substring(cmdStartIndex, ct)) + ',';
-        cmdStartIndex = ct + 1;
-      }
-    }
-    // For the last command (or if there were no ',' characters), parse it as well
-    responseString += parseCmd(packet.substring(cmdStartIndex));
-    debugMessage("Response String is: " + responseString);
+  if (packet.length() >= 2 && packet.length() <= MAX_PACKET_LENGTH) {
+    responseString = parsePacket(packet);
 
     // Packetize and send the response string
     Serial.print(packetize(responseString));

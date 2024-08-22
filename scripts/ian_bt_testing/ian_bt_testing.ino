@@ -33,6 +33,7 @@ SoftwareSerial SerialBT(4, 3); // (rx, tx)
 int SWTIMEOUT = 500; // Software Serial timeout
 int ATCHARTIMEOUT = 10; // Time to wait for an AT command character before considering message complete
 int SWBAUDRATE = 9600; // For HC-05 AT Commands, this should be 38400
+String SWLINEEND = "";  // Depending on your BT module, you may need to change this to "\n" or "\r\n"
 
 /* Create a debug message */
 void debugMessage(String msg) {
@@ -174,7 +175,7 @@ String parseCmd(String cmdString) {
 
     // Send the AT Command
     String ATdata = cmdString.substring(3);
-    SerialBT.print(ATdata);
+    SerialBT.print(ATdata + SWLINEEND); // Append appropriate line end to the data and send it
 
     // Gather the response
     String ATresponse = "";

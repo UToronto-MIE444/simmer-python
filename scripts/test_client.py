@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # If using a bluetooth low-energy module (BT 4.0 or higher) such as the HM-10, the ble-serial
 # package (https://github.com/Jakeler/ble-serial) is necessary to directly create a serial
 # connection between a computer and the device. If using this package, the BAUDRATE constant
-# can be set to any value.
+# should be left as the default 9600 bps.
 
 import socket
 import time

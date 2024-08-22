@@ -1,11 +1,14 @@
 /*
-command_response_test
+ian_bt_testing
 
 This Arduino sketch serves as an example to help students understand command data
 parsing, response construction, and packetization. It will take any command received
 over the serial connection, split out the command ID and data values, and parse the
 data value as a floating point number. It will then respond to the command by echoing
-back the data value in the correct response format.
+back the data value. It can also toggle the built-in LED with a command "ld".
+
+This sketch also shows a proper example of how to use Software Serial to communicate
+with a second serial device, in this case, a bluetooth serial module (HM-10).
 
 */
 

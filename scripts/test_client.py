@@ -17,9 +17,14 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
-# Basic echo client, for testing purposes
-# Code modified from examples on https://realpython.com/python-sockets/
+# Basic client for sending and receiving data to SimMeR or a robot, for testing purposes
+# Some code modified from examples on https://realpython.com/python-sockets/
 # and https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
+
+# If using a bluetooth low-energy module (BT 4.0 or higher) such as the HM-10, the ble-serial
+# package (https://github.com/Jakeler/ble-serial) is necessary to directly create a serial
+# connection between a computer and the device. If using this package, the BAUDRATE constant
+# can be set to any value.
 
 import socket
 import time

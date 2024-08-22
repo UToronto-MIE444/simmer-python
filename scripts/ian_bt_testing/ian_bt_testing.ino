@@ -18,7 +18,9 @@ String responseString;
 bool DEBUG = false; // If not debugging, set this to false to suppress debug messages
 char FRAMESTART = '[';
 char FRAMEEND = ']';
-int TIMEOUT = 250; // Serial timeout in milliseconds
+int TIMEOUT = 250; // Hardware Serial timeout in milliseconds
+int BTTIMEOUT = 500; // Software Serial timeout
+int ATCHARTIMEOUT = 10; // Time to wait for an AT command character before considering message complete
 double DIFFERENCE = 1.2; // value to increment numerical data by before responding
 int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx:#####", with 15 delimiting commas between them
 
@@ -134,19 +136,15 @@ String parsePacket(String pkt) {
   return responseString;
 }
 
-/* Handle the received commands (in this case just sending back the command and the data + DIFFERENCE)*/
+/* Handle the received commands (in this case just sending back the command and the data + DIFFERENCE) */
 String parseCmd(String cmdString) {
-  String cmdID = "";
   double data = 0;
   bool led_state;
-  String ATdata = "";
-  String ATresponse = "";
-
 
   debugMessage("Parsed command: " + cmdString);
 
   // Get the command ID
-  cmdID = cmdString.substring(0, min(2, cmdString.length()));
+  String cmdID = cmdString.substring(0, min(2, cmdString.length()));
 
   // Get the data, if the command is long enough to contain it
   if (cmdString.length() >= 4) {
@@ -166,9 +164,33 @@ String parseCmd(String cmdString) {
   }
 
   if (cmdID == "AT") {
-    ATdata = cmdString.substring(3);
+    while (SerialBT.available()) {
+      debugMessage(String(SerialBT.read())); // Flush any old data out of the buffer
+    }
+
+    // Send the AT Command
+    String ATdata = cmdString.substring(3);
     SerialBT.print(ATdata);
-    ATresponse = SerialBT.readStringUntil("\n");
+
+    // Gather the response
+    String ATresponse = "";
+    char ATchar;
+    unsigned long start_time = millis();
+    while (millis() < start_time + BTTIMEOUT) {
+      if (SerialBT.available()) {
+        unsigned long char_time = millis();
+        while (millis() < char_time + ATCHARTIMEOUT) {
+          if (SerialBT.available()) {
+            ATchar = SerialBT.read();
+            ATresponse += ATchar;
+            char_time = millis();
+          }
+        }
+        break;
+      }
+    }
+
+    // Return the response
     debugMessage("ATdata is: " + ATdata + ", Response is: " + ATresponse);
     return cmdID + ':' + ATresponse;
   }
@@ -193,7 +215,7 @@ void setup() {
   // Set up software serial port for BT module communication
   SerialBT.begin(9600);
   // SerialBT.begin(38400); // For AT Commands
-  SerialBT.setTimeout(4*TIMEOUT);
+  SerialBT.setTimeout(BTTIMEOUT);
 
   debugMessage("Arduino is ready");
 }

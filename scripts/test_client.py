@@ -75,6 +75,7 @@ def receive_tcp():
 # Serial communication functions
 def transmit_serial(data):
     '''Transmit a command over a serial connection.'''
+    clear_serial()
     SER.write(data.encode('ascii'))
 
 def receive_serial():
@@ -99,10 +100,11 @@ def receive_serial():
     else:
         return [[False], datetime.now().strftime("%H:%M:%S")]
 
-def clear_serial(delay_time):
+def clear_serial(delay_time: float = 0):
     '''Wait some time (delay_time) and then clear the serial buffer.'''
-    time.sleep(delay_time)
-    print(f'Clearing Serial... Dumped: {SER.read(SER.in_waiting)}')
+    if SER.in_waiting:
+        time.sleep(delay_time)
+        print(f'Clearing Serial... Dumped: {SER.read(SER.in_waiting)}')
 
 # Packetization and validation functions
 def depacketize(data_raw: str):
@@ -117,7 +119,7 @@ def depacketize(data_raw: str):
     # Check that the start and end framing characters are present, then return commands as a list
     if (start >= 0 and end >= start):
         data = data_raw[start+1:end].replace(f'{FRAMEEND}{FRAMESTART}', ',').split(',')
-        cmd_list = [item.split(':') for item in data]
+        cmd_list = [item.split(':', 1) for item in data]
 
         # Make sure this list is formatted in the expected manner
         for cmd_single in cmd_list:
@@ -199,7 +201,7 @@ PORT_RX = 61201         # The port used by the *CLIENT* to send data
 ### Serial Setup ###
 BAUDRATE = 9600         # Baudrate in bps
 PORT_SERIAL = 'COM3'    # COM port identification
-TIMEOUT_SERIAL = 0.5    # Serial port timeout, in seconds
+TIMEOUT_SERIAL = 1      # Serial port timeout, in seconds
 
 ### Packet Framing values ###
 FRAMESTART = '['

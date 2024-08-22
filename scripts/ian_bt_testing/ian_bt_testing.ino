@@ -21,7 +21,7 @@ char FRAMEEND = ']';
 int TIMEOUT = 250; // Hardware Serial timeout in milliseconds
 int BTTIMEOUT = 500; // Software Serial timeout
 int ATCHARTIMEOUT = 10; // Time to wait for an AT command character before considering message complete
-double DIFFERENCE = 1.2; // value to increment numerical data by before responding
+double DIFFERENCE = 0; // value to increment numerical data by before responding
 int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx:#####", with 15 delimiting commas between them
 
 // Software Serial Definition

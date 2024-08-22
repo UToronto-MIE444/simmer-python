@@ -18,7 +18,7 @@ bool DEBUG = false; // If not debugging, set this to false to suppress debug mes
 char FRAMESTART = '[';
 char FRAMEEND = ']';
 int TIMEOUT = 250; // Serial timeout in milliseconds
-double DIFFERENCE = 1.2;
+double DIFFERENCE = 0;
 int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx:#####", with 15 delimiting commas between them
 
 /* Create a debug message */

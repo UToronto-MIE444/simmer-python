@@ -15,17 +15,21 @@ back the data value in the correct response format.
 /* Declarations and Constants */
 String packet;
 String responseString;
+double DIFFERENCE = 0; // value to increment numerical data by before responding
 bool DEBUG = false; // If not debugging, set this to false to suppress debug messages
+
+// Hardware Serial Definitions
 char FRAMESTART = '[';
 char FRAMEEND = ']';
-int TIMEOUT = 250; // Hardware Serial timeout in milliseconds
-int BTTIMEOUT = 500; // Software Serial timeout
-int ATCHARTIMEOUT = 10; // Time to wait for an AT command character before considering message complete
-double DIFFERENCE = 0; // value to increment numerical data by before responding
 int MAX_PACKET_LENGTH = 143; // equivalent to 16 8-byte commands of format "xx:#####", with 15 delimiting commas between them
+int HWTIMEOUT = 250; // Hardware Serial timeout in milliseconds
+int HWBAUDRATE = 9600;
 
 // Software Serial Definition
 SoftwareSerial SerialBT(4, 3); // (rx, tx)
+int SWTIMEOUT = 500; // Software Serial timeout
+int ATCHARTIMEOUT = 10; // Time to wait for an AT command character before considering message complete
+int SWBAUDRATE = 9600; // For HC-05 AT Commands, this should be 38400
 
 /* Create a debug message */
 void debugMessage(String msg) {
@@ -51,7 +55,7 @@ String receiveSerial() {
     // Read characters until the FRAMESTART character is found, dumping them all into frontmatter
     // frontmatter is only stored for debugging purposes
     start_time = millis();
-    while (millis() < start_time + TIMEOUT) {
+    while (millis() < start_time + HWTIMEOUT) {
       if (Serial.available()) {
         front_char = Serial.read();
         if (front_char == FRAMESTART) {
@@ -67,7 +71,7 @@ String receiveSerial() {
     }
 
     // Read more serial characters into msg until the FRAMEEND character is reached
-    while (millis() < start_time + TIMEOUT) {
+    while (millis() < start_time + HWTIMEOUT) {
       if (Serial.available()) {
         msg_char = Serial.read();
 
@@ -138,15 +142,12 @@ String parsePacket(String pkt) {
 
 /* Handle the received commands (in this case just sending back the command and the data + DIFFERENCE) */
 String parseCmd(String cmdString) {
-  double data = 0;
-  bool led_state;
-
-  debugMessage("Parsed command: " + cmdString);
-
+  debugMessage("Parsing command: " + cmdString);
   // Get the command ID
   String cmdID = cmdString.substring(0, min(2, cmdString.length()));
 
   // Get the data, if the command is long enough to contain it
+  double data = 0;
   if (cmdString.length() >= 4) {
     data = cmdString.substring(3).toDouble();
   }
@@ -157,7 +158,7 @@ String parseCmd(String cmdString) {
 
   // Toggle the built-in LED if the ld command is received
   if (cmdID == "ld") {
-    led_state = digitalRead(LED_BUILTIN);
+    bool led_state = digitalRead(LED_BUILTIN);
     digitalWrite(LED_BUILTIN, !led_state);
     digitalWrite(2, !led_state);
     return cmdID + ':' + (!led_state ? "True" : "False");
@@ -176,7 +177,7 @@ String parseCmd(String cmdString) {
     String ATresponse = "";
     char ATchar;
     unsigned long start_time = millis();
-    while (millis() < start_time + BTTIMEOUT) {
+    while (millis() < start_time + SWTIMEOUT) {
       if (SerialBT.available()) {
         unsigned long char_time = millis();
         while (millis() < char_time + ATCHARTIMEOUT) {
@@ -209,13 +210,12 @@ void setup() {
   pinMode(2, OUTPUT);
 
   // Set serial parameters
-  Serial.begin(9600);
-  Serial.setTimeout(TIMEOUT);
+  Serial.begin(HWBAUDRATE);
+  Serial.setTimeout(HWTIMEOUT);
 
   // Set up software serial port for BT module communication
-  SerialBT.begin(9600);
-  // SerialBT.begin(38400); // For AT Commands
-  SerialBT.setTimeout(BTTIMEOUT);
+  SerialBT.begin(SWBAUDRATE);
+  SerialBT.setTimeout(SWTIMEOUT);
 
   debugMessage("Arduino is ready");
 }
